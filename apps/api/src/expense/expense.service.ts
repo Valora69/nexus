@@ -3,6 +3,7 @@ import {
   HttpException,
   HttpStatus,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { CreateExpenseDto } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
@@ -11,10 +12,14 @@ import { PrismaService } from 'src/prisma/prisma.service';
 @Injectable()
 export class ExpenseService {
   constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(ExpenseService.name, {
+    timestamp: true,
+  });
 
   async create(createExpenseDto: CreateExpenseDto) {
     const { groupId, userId, ...rest } = createExpenseDto;
     try {
+      this.logger.log('Creating Expense...');
       const createdExpense = await this.prisma.expense.create({
         data: {
           user: {
@@ -32,6 +37,7 @@ export class ExpenseService {
       });
       return createdExpense;
     } catch (error) {
+      this.logger.error('Error creating expense');
       throw new InternalServerErrorException('Failed to create expense', {
         cause: error,
         description: 'An unexpected error occurred',
@@ -40,14 +46,21 @@ export class ExpenseService {
   }
 
   async findAll() {
+    this.logger.log('Getting Expenses...');
     try {
-      return await this.prisma.expense.findMany({
+      const expenses = await this.prisma.expense.findMany({
         include: {
           group: true,
           user: true,
         },
       });
+
+      if (expenses) {
+        this.logger.log('Successfully retrieved expenses');
+        return expenses;
+      }
     } catch {
+      this.logger.error('Error getting expenses');
       throw new InternalServerErrorException('Failed to fetch expenses');
     }
   }
