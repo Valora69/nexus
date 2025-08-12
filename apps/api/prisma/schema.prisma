@@ -9,15 +9,13 @@ datasource db {
   url      = env("DATABASE_URL")
   directUrl = env("DIRECT_URL") 
 }
-
 model User {
   id              String            @id @default(uuid())
   name            String
   email           String            @unique
   password        String
-  groupMembers    GroupMember[]     
-  paidExpenses    Expense[]         @relation("PaidExpenses") 
-  participants    Participant[]   
+  groups          GroupMember[]     
+  expenses        Expense[]         
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
 }
@@ -44,38 +42,25 @@ model GroupMember {
 }
 
 model Expense {
-  id           String        @id @default(uuid())
+  id String  @unique       @default(uuid())
   name         String        
   totalAmount  Float
   group        Group         @relation(fields: [groupId], references: [id])
-  groupId      String       
-  paidBy       User          @relation("PaidExpenses", fields: [paidById], references: [id])
-  paidById     String       
+  groupId      String
   date         DateTime
-  notes        String?
-  participants Participant[] 
+  notes       String?
+  user       User          @relation(fields: [userId], references: [id])
+  userId     String   
   createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  updatedAt    DateTime      @updatedAt     
+  payment      Payment?      @relation(fields: [paymentId], references: [id])
+  paymentId    String?       @unique
 }
-
-model Participant {
-  id          String    @id @default(uuid())
-  expense     Expense   @relation(fields: [expenseId], references: [id], onDelete: Cascade)
-  expenseId   String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId      String
-  shareAmount Float
-  isSettled   Boolean   @default(false)
-  settledAt   DateTime?
-  payments    Payment[]
-
-  @@unique([expenseId, userId]) 
-}
-
 model Payment {
   id            String      @id @default(uuid())
-  participant   Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
-  participantId String
   amountPaid    Float
+  paymentProof  String?
   paidAt        DateTime    @default(now())
+  expense       Expense?
+  expenseId     String?
 }

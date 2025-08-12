@@ -13,9 +13,22 @@ export class ExpenseService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createExpenseDto: CreateExpenseDto) {
+    const { groupId, userId, ...rest } = createExpenseDto;
     try {
       const createdExpense = await this.prisma.expense.create({
-        data: createExpenseDto,
+        data: {
+          user: {
+            connect: {
+              id: userId,
+            },
+          },
+          group: {
+            connect: {
+              id: groupId,
+            },
+          },
+          ...rest,
+        },
       });
       return createdExpense;
     } catch (error) {
@@ -30,12 +43,8 @@ export class ExpenseService {
     try {
       return await this.prisma.expense.findMany({
         include: {
-          paidBy: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
+          group: true,
+          user: true,
         },
       });
     } catch {

@@ -24,7 +24,7 @@ export class CreateExpenseDto {
 
   @IsNotEmpty()
   @IsUUID()
-  paidById: string;
+  userId: string;
 
   @IsNotEmpty()
   @IsDateString()
