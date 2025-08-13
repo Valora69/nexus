@@ -50,6 +50,8 @@
     "typescript": "5.5.4"
   },
   "prisma": {
-    "schema": "ts-node prisma/seed.ts"
+    "schema": "ts-node prisma/seed.ts",
+    "seed": "bun prisma/seed.ts"
+
   }
 }
