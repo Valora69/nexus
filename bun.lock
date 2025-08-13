@@ -3,6 +3,9 @@
   "workspaces": {
     "": {
       "name": "my-turborepo",
+      "dependencies": {
+        "bcrypt": "^6.0.0",
+      },
       "devDependencies": {
         "@repo/eslint-config": "*",
         "@repo/typescript-config": "*",
