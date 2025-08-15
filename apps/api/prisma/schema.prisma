@@ -15,7 +15,8 @@ model User {
   email           String            @unique
   password        String
   groups          GroupMember[]     
-  expenses        Expense[]         
+  expenses        Expense[]     
+  createdGroups   Group[]    
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
 }
@@ -25,7 +26,9 @@ model Group {
   name        String        @unique
   description String?       
   members     GroupMember[] 
-  expenses    Expense[]     
+  expenses    Expense[]
+  createdBy   User          @relation(fields: [createdByUserId], references: [id]) 
+  createdByUserId  String  
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 }
