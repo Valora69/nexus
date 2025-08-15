@@ -11,16 +11,17 @@ datasource db {
 }
 
 model User {
-  id            String        @id @default(uuid())
-  name          String
-  email         String        @unique
-  password      String
-  groups        GroupMember[]
-  expenses      Expense[]
-  createdGroups Group[]
-  activities    Activity[]
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id             String        @id @default(uuid())
+  name           String
+  email          String        @unique
+  password       String
+  groups         GroupMember[]
+  lendedExpenses Expense[]     @relation("ExpensePayee")
+  owedExpenses   Expense[]     @relation("ExpensePayer")
+  createdGroups  Group[]
+  activities     Activity[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 }
 
 model Group {
@@ -55,8 +56,10 @@ model Expense {
   groupId     String
   date        DateTime
   notes       String?
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId      String
+  payer       User     @relation("ExpensePayer", fields: [payerId], references: [id], onDelete: Cascade)
+  payerId     String
+  payee       User     @relation("ExpensePayee", fields: [payeeId], references: [id], onDelete: Cascade)
+  payeeId     String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   payment     Payment? @relation(fields: [paymentId], references: [id])
