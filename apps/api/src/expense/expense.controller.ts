@@ -10,8 +10,9 @@ import {
 import { ExpenseService } from './expense.service';
 import { CreateExpenseDto } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
+import { AssignExpenseDto } from './dto/assign-expense.dto';
 
-@Controller('expense')
+@Controller('expenses')
 export class ExpenseController {
   constructor(private readonly expenseService: ExpenseService) {}
 
@@ -38,5 +39,21 @@ export class ExpenseController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.expenseService.remove(id);
+  }
+
+  @Patch(':id/assign')
+  assignExpense(
+    @Param('id') id: string,
+    @Body() assignExpenseDto: AssignExpenseDto,
+  ) {
+    return this.expenseService.assignExpense(id, assignExpenseDto.userId);
+  }
+
+  @Patch(':id/reassign')
+  reassignExpense(
+    @Param('id') id: string,
+    @Body() assignExpenseDto: AssignExpenseDto,
+  ) {
+    return this.expenseService.reassignExpense(id, assignExpenseDto.userId);
   }
 }

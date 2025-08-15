@@ -22,11 +22,13 @@ export class ExpenseService {
       this.logger.log('Creating Expense...');
       const createdExpense = await this.prisma.expense.create({
         data: {
-          user: {
-            connect: {
-              id: userId,
+          ...(userId && {
+            user: {
+              connect: {
+                id: userId,
+              },
             },
-          },
+          }),
           group: {
             connect: {
               id: groupId,
@@ -46,7 +48,7 @@ export class ExpenseService {
   }
 
   async findAll() {
-    this.logger.log('Getting Expenses...');
+    this.logger.log('Retrieving Expenses...');
     try {
       const expenses = await this.prisma.expense.findMany({
         include: {
@@ -54,11 +56,7 @@ export class ExpenseService {
           user: true,
         },
       });
-
-      if (expenses) {
-        this.logger.log('Successfully retrieved expenses');
-        return expenses;
-      }
+      return expenses;
     } catch {
       this.logger.error('Error getting expenses');
       throw new InternalServerErrorException('Failed to fetch expenses');
@@ -66,24 +64,21 @@ export class ExpenseService {
   }
 
   async findOne(id: string) {
+    this.logger.log('Retrieving Expense...');
     try {
       const expense = await this.prisma.expense.findUnique({
         where: { id },
       });
-      if (!expense) {
-        throw new HttpException('Expense not found', HttpStatus.NOT_FOUND);
-      }
       return expense;
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
-      throw new InternalServerErrorException('Failed to fetch expense');
+      this.logger.error('Failed to retrieve expense');
+      throw new InternalServerErrorException('Failed to retrieve expense');
     }
   }
 
   async update(id: string, updateExpenseDto: UpdateExpenseDto) {
     await this.findOne(id);
+    this.logger.log('Updating expense...');
     try {
       const updatedExpense = await this.prisma.expense.update({
         where: { id },
@@ -91,6 +86,7 @@ export class ExpenseService {
       });
       return updatedExpense;
     } catch (error) {
+      this.logger.error('Failed to update expense');
       throw new InternalServerErrorException('Failed to update expense', {
         cause: error,
         description: 'An unexpected error occurred',
@@ -99,6 +95,7 @@ export class ExpenseService {
   }
 
   async remove(id: string) {
+    this.logger.log('Removing expense...');
     await this.findOne(id);
     try {
       const deletedExpense = await this.prisma.expense.delete({
@@ -106,7 +103,66 @@ export class ExpenseService {
       });
       return deletedExpense;
     } catch (error) {
+      this.logger.log('Failed to delete expense');
       throw new InternalServerErrorException('Failed to delete expense', {
+        cause: error,
+        description: 'An unexpected error occurred',
+      });
+    }
+  }
+
+  async assignExpense(expenseId: string, userId: string) {
+    this.logger.log('Assigning expense to user...');
+    await this.findOne(expenseId);
+
+    try {
+      const updatedExpense = await this.prisma.expense.update({
+        where: { id: expenseId },
+        data: {
+          user: {
+            connect: { id: userId },
+          },
+        },
+        include: {
+          user: true,
+          group: true,
+        },
+      });
+
+      this.logger.log(`Expense ${expenseId} assigned to user ${userId}`);
+      return updatedExpense;
+    } catch (error) {
+      this.logger.error('Failed to assign expense');
+      throw new InternalServerErrorException('Failed to assign expense', {
+        cause: error,
+        description: 'An unexpected error occurred',
+      });
+    }
+  }
+
+  async reassignExpense(expenseId: string, newUserId: string) {
+    this.logger.log('Reassigning expense to new user...');
+    await this.findOne(expenseId);
+
+    try {
+      const updatedExpense = await this.prisma.expense.update({
+        where: { id: expenseId },
+        data: {
+          user: {
+            connect: { id: newUserId },
+          },
+        },
+        include: {
+          user: true,
+          group: true,
+        },
+      });
+
+      this.logger.log(`Expense ${expenseId} reassigned to user ${newUserId}`);
+      return updatedExpense;
+    } catch (error) {
+      this.logger.error('Failed to reassign expense');
+      throw new InternalServerErrorException('Failed to reassign expense', {
         cause: error,
         description: 'An unexpected error occurred',
       });

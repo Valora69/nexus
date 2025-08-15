@@ -22,9 +22,9 @@ export class CreateExpenseDto {
   @IsUUID()
   groupId: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsUUID()
-  userId: string;
+  userId?: string;
 
   @IsNotEmpty()
   @IsDateString()
