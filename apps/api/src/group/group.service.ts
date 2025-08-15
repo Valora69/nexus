@@ -51,10 +51,32 @@ export class GroupService {
     }
   }
 
-  async findAll() {
+  async findAll(userId: string) {
+    this.logger.log('Retrieving groups for user...');
     try {
-      return await this.prisma.group.findMany();
+      const groups = await this.prisma.group.findMany({
+        where: {
+          members: {
+            some: {
+              userId: userId,
+            },
+          },
+        },
+        include: {
+          createdBy: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+      });
+
+      this.logger.log(`Found ${groups.length} groups for user ${userId}`);
+      return groups;
     } catch (error) {
+      this.logger.error('Error fetching groups for user');
       throw new InternalServerErrorException('Failed to fetch groups', {
         cause: error,
         description: 'An unexpected error occurred',

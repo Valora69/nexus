@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Req,
 } from '@nestjs/common';
 import { ExpenseService } from './expense.service';
 import {
@@ -30,8 +31,8 @@ export class ExpenseController {
   }
 
   @Get()
-  findAll() {
-    return this.expenseService.findAll();
+  findAll(@Req() req) {
+    return this.expenseService.findAll(req.user.sub);
   }
 
   @Get(':id')
@@ -55,13 +56,5 @@ export class ExpenseController {
     @Body() assignExpenseDto: AssignExpenseDto,
   ) {
     return this.expenseService.assignExpense(id, assignExpenseDto.userId);
-  }
-
-  @Patch(':id/reassign')
-  reassignExpense(
-    @Param('id') id: string,
-    @Body() assignExpenseDto: AssignExpenseDto,
-  ) {
-    return this.expenseService.reassignExpense(id, assignExpenseDto.userId);
   }
 }

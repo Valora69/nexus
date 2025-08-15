@@ -22,8 +22,8 @@ export class GroupController {
   }
 
   @Get()
-  findAll() {
-    return this.groupService.findAll();
+  findAll(@Req() req) {
+    return this.groupService.findAll(req.user.sub);
   }
 
   @Get(':id')

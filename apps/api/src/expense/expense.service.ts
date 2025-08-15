@@ -74,6 +74,9 @@ export class ExpenseService {
     this.logger.log('Retrieving Expenses...');
     try {
       const expenses = await this.prisma.expense.findMany({
+        where: {
+          userId: id,
+        },
         include: {
           group: true,
           user: true,
@@ -157,35 +160,6 @@ export class ExpenseService {
     } catch (error) {
       this.logger.error('Failed to assign expense');
       throw new InternalServerErrorException('Failed to assign expense', {
-        cause: error,
-        description: 'An unexpected error occurred',
-      });
-    }
-  }
-
-  async reassignExpense(expenseId: string, newUserId: string) {
-    this.logger.log('Reassigning expense to new user...');
-    await this.findOne(expenseId);
-
-    try {
-      const updatedExpense = await this.prisma.expense.update({
-        where: { id: expenseId },
-        data: {
-          user: {
-            connect: { id: newUserId },
-          },
-        },
-        include: {
-          user: true,
-          group: true,
-        },
-      });
-
-      this.logger.log(`Expense ${expenseId} reassigned to user ${newUserId}`);
-      return updatedExpense;
-    } catch (error) {
-      this.logger.error('Failed to reassign expense');
-      throw new InternalServerErrorException('Failed to reassign expense', {
         cause: error,
         description: 'An unexpected error occurred',
       });
