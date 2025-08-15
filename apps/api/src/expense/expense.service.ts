@@ -47,10 +47,13 @@ export class ExpenseService {
     }
   }
 
-  async findAll() {
+  async findAll(id: string) {
     this.logger.log('Retrieving Expenses...');
     try {
       const expenses = await this.prisma.expense.findMany({
+        where: {
+          userId: id,
+        },
         include: {
           group: true,
           user: true,
