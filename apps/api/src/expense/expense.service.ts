@@ -139,33 +139,4 @@ export class ExpenseService {
       });
     }
   }
-
-  async reassignExpense(expenseId: string, newUserId: string) {
-    this.logger.log('Reassigning expense to new user...');
-    await this.findOne(expenseId);
-
-    try {
-      const updatedExpense = await this.prisma.expense.update({
-        where: { id: expenseId },
-        data: {
-          user: {
-            connect: { id: newUserId },
-          },
-        },
-        include: {
-          user: true,
-          group: true,
-        },
-      });
-
-      this.logger.log(`Expense ${expenseId} reassigned to user ${newUserId}`);
-      return updatedExpense;
-    } catch (error) {
-      this.logger.error('Failed to reassign expense');
-      throw new InternalServerErrorException('Failed to reassign expense', {
-        cause: error,
-        description: 'An unexpected error occurred',
-      });
-    }
-  }
 }

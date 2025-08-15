@@ -48,12 +48,4 @@ export class ExpenseController {
   ) {
     return this.expenseService.assignExpense(id, assignExpenseDto.userId);
   }
-
-  @Patch(':id/reassign')
-  reassignExpense(
-    @Param('id') id: string,
-    @Body() assignExpenseDto: AssignExpenseDto,
-  ) {
-    return this.expenseService.reassignExpense(id, assignExpenseDto.userId);
-  }
 }
