@@ -48,9 +48,9 @@ model Expense {
   group        Group         @relation(fields: [groupId], references: [id])
   groupId      String
   date         DateTime
-  notes       String?
-  user       User          @relation(fields: [userId], references: [id])
-  userId     String   
+  notes        String?
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String   
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt     
   payment      Payment?      @relation(fields: [paymentId], references: [id])
