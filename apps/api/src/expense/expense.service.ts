@@ -5,7 +5,10 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
-import { CreateExpenseDto } from './dto/create-expense.dto';
+import {
+  CreateExpenseDto,
+  CreateManyExpensesDto,
+} from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 
@@ -41,6 +44,26 @@ export class ExpenseService {
     } catch (error) {
       this.logger.error('Error creating expense');
       throw new InternalServerErrorException('Failed to create expense', {
+        cause: error,
+        description: 'An unexpected error occurred',
+      });
+    }
+  }
+
+  async createMany(createManyExpensesDto: CreateManyExpensesDto) {
+    this.logger.log('Creating multiple expenses...');
+    const { expenses } = createManyExpensesDto;
+    try {
+      const createdExpenses = await Promise.all(
+        expenses.map((expenseDto) => this.create(expenseDto)),
+      );
+      this.logger.log(
+        `Created ${createdExpenses.length} expenses successfully`,
+      );
+      return createdExpenses;
+    } catch (error) {
+      this.logger.error('Error creating multiple expenses', error);
+      throw new InternalServerErrorException('Failed to create expenses', {
         cause: error,
         description: 'An unexpected error occurred',
       });
