@@ -9,7 +9,10 @@ import {
   Req,
 } from '@nestjs/common';
 import { ExpenseService } from './expense.service';
-import { CreateExpenseDto } from './dto/create-expense.dto';
+import {
+  CreateExpenseDto,
+  CreateManyExpensesDto,
+} from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { AssignExpenseDto } from './dto/assign-expense.dto';
 
@@ -20,6 +23,11 @@ export class ExpenseController {
   @Post()
   create(@Body() createExpenseDto: CreateExpenseDto) {
     return this.expenseService.create(createExpenseDto);
+  }
+
+  @Post('create-many')
+  createMany(@Body() createManyExpensesDto: CreateManyExpensesDto) {
+    return this.expenseService.createMany(createManyExpensesDto);
   }
 
   @Get()
