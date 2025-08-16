@@ -25,9 +25,13 @@ export class CreateExpenseDto {
   @IsUUID()
   groupId: string;
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsUUID()
-  userId?: string;
+  payeeId?: string;
+
+  @IsNotEmpty()
+  @IsUUID()
+  payerId?: string;
 
   @IsNotEmpty()
   @IsDateString()
