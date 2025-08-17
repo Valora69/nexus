@@ -17,9 +17,10 @@ enum ActivityNameEnum {
 }
 
 enum ActivityOnEnum {
-  PROJECT_DETAILS
-  PAYMENT
+  GROUP_DETAILS  
   EXPENSE
+  PAYMENT
+  GROUP_MEMBER   //to track member additions/removals
 }
 
 
@@ -94,4 +95,6 @@ model Activity {
   group           Group  @relation(fields: [groupId], references: [id])
   createdByUserId String
   createdBy       User   @relation(fields: [createdByUserId], references: [id])
+  activityName    ActivityNameEnum
+  activityOn     ActivityOnEnum
 }
