@@ -51,13 +51,13 @@ export class ExpenseController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateExpenseDto: UpdateExpenseDto) {
-    return this.expenseService.update(id, updateExpenseDto);
+  update(@Param('id') id: string, @Body() updateExpenseDto: UpdateExpenseDto,  @Req() req) {
+    return this.expenseService.update(id, updateExpenseDto, req.user.sub);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.expenseService.remove(id);
+  remove(@Param('id') id: string,  @Req() req) {
+    return this.expenseService.remove(id, req.user.sub);
   }
 
   @Patch(':id/assign-payee')

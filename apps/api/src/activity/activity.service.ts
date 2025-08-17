@@ -5,7 +5,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
-export class ActivitiesService {
+export class ActivityService {
   constructor(
     private readonly prismaService: PrismaService,
     

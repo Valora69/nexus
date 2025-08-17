@@ -1,23 +1,26 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
-import { ActivitiesService } from './activity.service';
+import { Controller, Get, Post, Body, Param, Req } from '@nestjs/common';
+import { ActivityService } from './activity.service';
 import { CreateActivityDto } from './dto/create-activity.dto';
 
 @Controller('activity')
 export class ActivityController {
-  constructor(private readonly activitiesService: ActivitiesService) {}
+  constructor(private readonly activityService: ActivityService) {}
 
   @Post()
-  create(@Body() createActivityDto: CreateActivityDto) {
-    return this.activitiesService.create(createActivityDto);
+  create(@Body() createActivityDto: CreateActivityDto, @Req() req) {
+    return this.activityService.create({
+      ...createActivityDto,
+      createdByUserId: req.user.sub
+     });
   }
 
   @Get()
-  findAll() {
-    return this.activitiesService.findAll();
+  findAll(@Req() req) {
+    return this.activityService.findAll();
   }
 
   @Get(':id')
-  findAllByGroup(@Param('id') id: string) {
-    return this.activitiesService.findAllByGroup(id);
+  findAllByGroup(@Param('id') id: string, @Req() req) {
+    return this.activityService.findAllByGroup(id);
   }
 }
