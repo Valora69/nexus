@@ -8,6 +8,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { GroupModule } from './group/group.module';
 import { GroupMemberModule } from './group-member/group-member.module';
+import { ActivityModule } from './activity/activity.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { GroupMemberModule } from './group-member/group-member.module';
     AuthModule,
     GroupModule,
     GroupMemberModule,
+    ActivityModule,
   ],
   controllers: [AppController],
   providers: [AppService],
