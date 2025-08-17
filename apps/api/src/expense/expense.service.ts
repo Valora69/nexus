@@ -377,8 +377,9 @@ export class ExpenseService {
     }
   }
 
-  async assignPayee(expenseId: string, newUserId: string) {
+  async assignPayee(expenseId: string, newUserId: string, userId: string) {
     this.logger.log('Reassigning expense payee to new user...');
+    const currentUserId = userId;
     await this.findOne(expenseId);
 
     try {
@@ -390,6 +391,15 @@ export class ExpenseService {
           },
         },
       });
+
+      if(updatedExpense){
+        this.eventEmitter.emit('activity.updated', {
+          groupId: updatedExpense.groupId,
+          activityName: ActivityNameEnum.UPDATED,
+          activityOn: ActivityOnEnum.EXPENSE_PAYEE,
+          createdByUserId: currentUserId,
+        });
+      }
 
       this.logger.log(
         `Expense Payee ${expenseId} reassigned to user ${newUserId}`,
@@ -407,8 +417,9 @@ export class ExpenseService {
     }
   }
 
-  async assignPayer(expenseId: string, newUserId: string) {
+  async assignPayer(expenseId: string, newUserId: string, userId: string) {
     this.logger.log('Reassigning expense payer to new user...');
+    const currentUserId = userId;
     await this.findOne(expenseId);
 
     try {
@@ -420,6 +431,15 @@ export class ExpenseService {
           },
         },
       });
+
+      if(updatedExpense){
+        this.eventEmitter.emit('activity.updated', {
+          groupId: updatedExpense.groupId,
+          activityName: ActivityNameEnum.UPDATED,
+          activityOn: ActivityOnEnum.EXPENSE_PAYER,
+          createdByUserId: currentUserId,
+        });
+      }
 
       this.logger.log(
         `Expense ${expenseId} payer reassigned to user ${newUserId}`,

@@ -64,15 +64,17 @@ export class ExpenseController {
   assignPayee(
     @Param('id') id: string,
     @Body() assignExpenseDto: AssignExpenseDto,
+    @Req() req
   ) {
-    return this.expenseService.assignPayee(id, assignExpenseDto.userId);
+    return this.expenseService.assignPayee(id, assignExpenseDto.userId, req.user.sub);
   }
 
   @Patch(':id/assign-payer')
   assignPayer(
     @Param('id') id: string,
     @Body() assignExpenseDto: AssignExpenseDto,
+    @Req() req
   ) {
-    return this.expenseService.assignPayer(id, assignExpenseDto.userId);
+    return this.expenseService.assignPayer(id, assignExpenseDto.userId, req.user.sub);
   }
 }
