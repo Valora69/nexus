@@ -1,73 +1,90 @@
 import { PrismaClient } from "@prisma/client";
-import {hash} from "bcrypt"
+import { hash } from "bcrypt";
+
 const prisma = new PrismaClient();
 
 async function main() {
   try {
     console.log('Starting seed process...');
 
+    // Create users
     const user1 = await prisma.user.create({
       data: {
-          name: "James Manon-og",
-          email: "james@example.com",
-          password: await hash ('password321', 10)
+        name: "James Manon-og",
+        email: "james@example.com",
+        password: await hash('password321', 10)
       }
     });
     console.log('Created user1:', user1.name);
 
     const user2 = await prisma.user.create({
       data: {
-          name: "Adolfo Cedric Sarillo",
-          email: "adolfo@example.com",
-          password: await hash ('password123', 10)
+        name: "Adolfo Cedric Sarillo",
+        email: "adolfo@example.com",
+        password: await hash('password123', 10)
       }
     });
     console.log('Created user2:', user2.name);
 
-    const group = await prisma.group.create({
+    // Create first group
+    const group1 = await prisma.group.create({
       data: {
-          name: "Palawan",
-          description: "2 weeks trip"
+        name: "Palawan Trip",
+        description: "2 weeks summer vacation",
+        createdByUserId: user1.id
       }
     });
-    console.log('Created group:', group.name);
+    console.log('Created group1:', group1.name);
 
-    const member1 = await prisma.groupMember.create({
+    // Add members to first group one by one
+    await prisma.groupMember.create({
       data: {
-        groupId: group.id,
-        userId: user1.id,
+        groupId: group1.id,
+        userId: user1.id
       }
     });
-    console.log('Added member1 to group');
+    console.log('Added user1 to group1');
 
-    const member2 = await prisma.groupMember.create({
+    await prisma.groupMember.create({
       data: {
-        groupId: group.id,
-        userId: user2.id,
+        groupId: group1.id,
+        userId: user2.id
       }
     });
-    console.log('Added member2 to group');
+    console.log('Added user2 to group1');
 
-    const payment = await prisma.payment.create({
+    // Create payment
+    const payment1 = await prisma.payment.create({
       data: {
-        amountPaid: 100.00,
-        paymentProof: "receipt.jpg",
-      },
+        amountPaid: 1500.00,
+        paymentProof: "palawan_hotel_receipt.jpg",
+      }
     });
     console.log('Created payment record');
 
-    const expense = await prisma.expense.create({
+    // Create expense
+    const expense1 = await prisma.expense.create({
       data: {
-        name: "Dinner",
-        totalAmount: 100.00,
-        groupId: group.id,
-        userId: user1.id,
+        name: "Hotel Booking",
+        totalAmount: 1500.00,
+        groupId: group1.id,
+        payerId: user1.id,
+        payeeId: user2.id,
         date: new Date(),
-        notes: "Group dinner at mountain resort",
-        paymentId: payment.id,
-      },
+        notes: "3 nights hotel accommodation",
+        paymentId: payment1.id,
+      }
     });
-    console.log('Created expense record:', expense.name);
+    console.log('Created expense record:', expense1.name);
+
+    // Create activity
+    // await prisma.activity.create({
+    //   data: {
+    //     groupId: group1.id,
+    //     createdByUserId: user1.id,
+    //   }
+    // });
+    console.log('Created activity record');
 
     console.log('✅ Seed data created successfully!');
   } catch (error) {
