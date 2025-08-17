@@ -6,23 +6,43 @@ import {
   Patch,
   Param,
   Delete,
+  Req,
 } from '@nestjs/common';
 import { ExpenseService } from './expense.service';
-import { CreateExpenseDto } from './dto/create-expense.dto';
+import {
+  CreateExpenseDto,
+  CreateManyExpensesDto,
+} from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
+import { AssignExpenseDto } from './dto/assign-expense.dto';
 
-@Controller('expense')
+@Controller('expenses')
 export class ExpenseController {
   constructor(private readonly expenseService: ExpenseService) {}
 
   @Post()
-  create(@Body() createExpenseDto: CreateExpenseDto) {
-    return this.expenseService.create(createExpenseDto);
+  create(@Body() createExpenseDto: CreateExpenseDto, @Req() req) {
+    return this.expenseService.create(createExpenseDto, req.user.sub);
+  }
+
+  @Post('create-many')
+  createMany(@Body() createManyExpensesDto: CreateManyExpensesDto, @Req() req) {
+    return this.expenseService.createMany(createManyExpensesDto, req.user.sub);
   }
 
   @Get()
-  findAll() {
-    return this.expenseService.findAll();
+  findAll(@Req() req) {
+    return this.expenseService.findAll(req.user.sub);
+  }
+
+  @Get('payables')
+  findAllPayables(@Req() req) {
+    return this.expenseService.findAllPayables(req.user.sub);
+  }
+
+  @Get('receivables')
+  findAllReceivables(@Req() req) {
+    return this.expenseService.findAllReceivables(req.user.sub);
   }
 
   @Get(':id')
@@ -38,5 +58,21 @@ export class ExpenseController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.expenseService.remove(id);
+  }
+
+  @Patch(':id/assign-payee')
+  assignPayee(
+    @Param('id') id: string,
+    @Body() assignExpenseDto: AssignExpenseDto,
+  ) {
+    return this.expenseService.assignPayee(id, assignExpenseDto.userId);
+  }
+
+  @Patch(':id/assign-payer')
+  assignPayer(
+    @Param('id') id: string,
+    @Body() assignExpenseDto: AssignExpenseDto,
+  ) {
+    return this.expenseService.assignPayer(id, assignExpenseDto.userId);
   }
 }

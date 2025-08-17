@@ -5,62 +5,80 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL") 
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
+
 model User {
-  id              String            @id @default(uuid())
-  name            String
-  email           String            @unique
-  password        String
-  groups          GroupMember[]     
-  expenses        Expense[]         
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
+  id             String        @id @default(uuid())
+  name           String
+  email          String        @unique
+  password       String
+  groups         GroupMember[]
+  lendedExpenses Expense[]     @relation("ExpensePayee")
+  owedExpenses   Expense[]     @relation("ExpensePayer")
+  createdGroups  Group[]
+  activities     Activity[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 }
 
 model Group {
-  id          String        @id @default(uuid())
-  name        String        @unique
-  description String?       
-  members     GroupMember[] 
-  expenses    Expense[]     
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id              String        @id @default(uuid())
+  name            String        @unique
+  description     String?
+  members         GroupMember[]
+  expenses        Expense[]
+  activities      Activity[]
+  createdBy       User          @relation(fields: [createdByUserId], references: [id])
+  createdByUserId String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 }
 
 model GroupMember {
-  id        String   @id @default(uuid())
-  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  groupId   String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String
-  joinedAt  DateTime @default(now())
+  id       String   @id @default(uuid())
+  group    Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupId  String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   String
+  joinedAt DateTime @default(now())
 
-  @@unique([groupId, userId], name: "GroupMemberUnique") 
+  @@unique([groupId, userId], name: "GroupMemberUnique")
 }
 
 model Expense {
-  id String  @unique       @default(uuid())
-  name         String        
-  totalAmount  Float
-  group        Group         @relation(fields: [groupId], references: [id])
-  groupId      String
-  date         DateTime
+  id          String   @unique @default(uuid())
+  name        String
+  totalAmount Float
+  group       Group    @relation(fields: [groupId], references: [id])
+  groupId     String
+  date        DateTime
   notes       String?
-  user       User          @relation(fields: [userId], references: [id])
-  userId     String   
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt     
-  payment      Payment?      @relation(fields: [paymentId], references: [id])
-  paymentId    String?       @unique
+  payer       User     @relation("ExpensePayer", fields: [payerId], references: [id], onDelete: Cascade)
+  payerId     String
+  payee       User     @relation("ExpensePayee", fields: [payeeId], references: [id], onDelete: Cascade)
+  payeeId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  payment     Payment? @relation(fields: [paymentId], references: [id])
+  paymentId   String?  @unique
 }
+
 model Payment {
-  id            String      @id @default(uuid())
-  amountPaid    Float
-  paymentProof  String?
-  paidAt        DateTime    @default(now())
-  expense       Expense?
-  expenseId     String?
+  id           String   @id @default(uuid())
+  amountPaid   Float
+  paymentProof String?
+  paidAt       DateTime @default(now())
+  expense      Expense?
+  expenseId    String?
+}
+
+model Activity {
+  id              String @id @default(uuid())
+  groupId         String
+  group           Group  @relation(fields: [groupId], references: [id])
+  createdByUserId String
+  createdBy       User   @relation(fields: [createdByUserId], references: [id])
 }

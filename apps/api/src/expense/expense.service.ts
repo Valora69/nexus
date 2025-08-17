@@ -5,7 +5,10 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
-import { CreateExpenseDto } from './dto/create-expense.dto';
+import {
+  CreateExpenseDto,
+  CreateManyExpensesDto,
+} from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 
@@ -16,15 +19,78 @@ export class ExpenseService {
     timestamp: true,
   });
 
-  async create(createExpenseDto: CreateExpenseDto) {
-    const { groupId, userId, ...rest } = createExpenseDto;
+  // @TODO: Move to separate class
+  private async validateGroupExists(groupId: string) {
+    this.logger.log('Validating Group...');
     try {
-      this.logger.log('Creating Expense...');
+      const group = await this.prisma.group.findUnique({
+        where: { id: groupId },
+      });
+      return group;
+    } catch (error) {
+      this.logger.error(`Failed to validate group existence`);
+      throw new InternalServerErrorException('Failed to validate group');
+    }
+  }
+
+  // @TODO: Move to separate class
+  private async validateUserExists(userId: string) {
+    this.logger.log('Validating User...');
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+      });
+      return user;
+    } catch (error) {
+      this.logger.error(`Failed to validate user`);
+      throw new InternalServerErrorException('Failed to validate user');
+    }
+  }
+
+  // @TODO: Move to separate class
+  private async validateGroupMembership(userId: string, groupId: string) {
+    this.logger.log('Validating Group Membership...');
+    try {
+      const member = await this.prisma.groupMember.findUnique({
+        where: {
+          GroupMemberUnique: {
+            userId,
+            groupId,
+          },
+        },
+      });
+      return member;
+    } catch (error) {
+      this.logger.error(`Failed to validate group membership`);
+      throw new InternalServerErrorException(
+        'Failed to validate group membership',
+      );
+    }
+  }
+
+  async create(createExpenseDto: CreateExpenseDto, userId: string) {
+    const { groupId, payeeId, payerId, ...rest } = createExpenseDto;
+    this.logger.log('Creating expense...');
+
+    try {
+      await this.validateGroupExists(groupId);
+      if (userId) {
+        await Promise.all([
+          this.validateUserExists(userId),
+          this.validateGroupMembership(userId, groupId),
+        ]);
+      }
+
       const createdExpense = await this.prisma.expense.create({
         data: {
-          user: {
+          payee: {
             connect: {
-              id: userId,
+              id: payeeId,
+            },
+          },
+          payer: {
+            connect: {
+              id: payerId,
             },
           },
           group: {
@@ -35,9 +101,13 @@ export class ExpenseService {
           ...rest,
         },
       });
+
+      this.logger.log(
+        `Expense created successfully with id: ${createdExpense.id}`,
+      );
       return createdExpense;
     } catch (error) {
-      this.logger.error('Error creating expense');
+      this.logger.error('Error creating expense', error);
       throw new InternalServerErrorException('Failed to create expense', {
         cause: error,
         description: 'An unexpected error occurred',
@@ -45,45 +115,186 @@ export class ExpenseService {
     }
   }
 
-  async findAll() {
-    this.logger.log('Getting Expenses...');
+  async createMany(
+    createManyExpensesDto: CreateManyExpensesDto,
+    userId: string,
+  ) {
+    this.logger.log('Creating multiple expenses...');
+    const { expenses } = createManyExpensesDto;
+    try {
+      const createdExpenses = await Promise.all(
+        expenses.map((expenseDto) => this.create(expenseDto, userId)),
+      );
+      this.logger.log(
+        `Created ${createdExpenses.length} expenses successfully`,
+      );
+      return createdExpenses;
+    } catch (error) {
+      this.logger.error('Error creating multiple expenses', error);
+      throw new InternalServerErrorException('Failed to create expenses', {
+        cause: error,
+        description: 'An unexpected error occurred',
+      });
+    }
+  }
+
+  async findAll(userId?: string) {
+    this.logger.log('Retrieving Expenses...');
     try {
       const expenses = await this.prisma.expense.findMany({
+        ...(userId && {
+          where: {
+            OR: [{ payeeId: userId }, { payerId: userId }],
+          },
+        }),
         include: {
           group: true,
-          user: true,
+          payee: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          payer: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
         },
       });
-
-      if (expenses) {
-        this.logger.log('Successfully retrieved expenses');
-        return expenses;
-      }
-    } catch {
+      return expenses;
+    } catch (error) {
       this.logger.error('Error getting expenses');
       throw new InternalServerErrorException('Failed to fetch expenses');
     }
   }
 
+  async findAllPayables(userId: string) {
+    this.logger.log(`Retrieving payable expenses for user ${userId}...`);
+    try {
+      const payableExpenses = await this.prisma.expense.findMany({
+        where: {
+          payerId: userId,
+        },
+        include: {
+          group: true,
+          payee: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          payer: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+
+      this.logger.log(
+        `Found ${payableExpenses.length} payable expenses for user ${userId}`,
+      );
+      return payableExpenses;
+    } catch (error) {
+      this.logger.error('Error getting payable expenses');
+      throw new InternalServerErrorException(
+        'Failed to fetch payable expenses',
+        {
+          cause: error,
+          description: 'An unexpected error occurred',
+        },
+      );
+    }
+  }
+
+  async findAllReceivables(userId: string) {
+    this.logger.log(`Retrieving receivable expenses for user ${userId}...`);
+    try {
+      const receivableExpenses = await this.prisma.expense.findMany({
+        where: {
+          payeeId: userId,
+        },
+        include: {
+          group: true,
+          payee: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          payer: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+
+      this.logger.log(
+        `Found ${receivableExpenses.length} receivable expenses for user ${userId}`,
+      );
+      return receivableExpenses;
+    } catch (error) {
+      this.logger.error('Error getting receivable expenses');
+      throw new InternalServerErrorException(
+        'Failed to fetch receivable expenses',
+        {
+          cause: error,
+          description: 'An unexpected error occurred',
+        },
+      );
+    }
+  }
+
   async findOne(id: string) {
+    this.logger.log('Retrieving Expense...');
     try {
       const expense = await this.prisma.expense.findUnique({
         where: { id },
+        include: {
+          group: true,
+          payee: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          payer: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
       });
-      if (!expense) {
-        throw new HttpException('Expense not found', HttpStatus.NOT_FOUND);
-      }
       return expense;
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
-      throw new InternalServerErrorException('Failed to fetch expense');
+      this.logger.error('Failed to retrieve expense');
+      throw new InternalServerErrorException('Failed to retrieve expense');
     }
   }
 
   async update(id: string, updateExpenseDto: UpdateExpenseDto) {
     await this.findOne(id);
+    this.logger.log('Updating expense...');
     try {
       const updatedExpense = await this.prisma.expense.update({
         where: { id },
@@ -91,6 +302,7 @@ export class ExpenseService {
       });
       return updatedExpense;
     } catch (error) {
+      this.logger.error('Failed to update expense');
       throw new InternalServerErrorException('Failed to update expense', {
         cause: error,
         description: 'An unexpected error occurred',
@@ -99,6 +311,7 @@ export class ExpenseService {
   }
 
   async remove(id: string) {
+    this.logger.log('Removing expense...');
     await this.findOne(id);
     try {
       const deletedExpense = await this.prisma.expense.delete({
@@ -106,10 +319,71 @@ export class ExpenseService {
       });
       return deletedExpense;
     } catch (error) {
+      this.logger.log('Failed to delete expense');
       throw new InternalServerErrorException('Failed to delete expense', {
         cause: error,
         description: 'An unexpected error occurred',
       });
+    }
+  }
+
+  async assignPayee(expenseId: string, newUserId: string) {
+    this.logger.log('Reassigning expense payee to new user...');
+    await this.findOne(expenseId);
+
+    try {
+      const updatedExpense = await this.prisma.expense.update({
+        where: { id: expenseId },
+        data: {
+          payee: {
+            connect: { id: newUserId },
+          },
+        },
+      });
+
+      this.logger.log(
+        `Expense Payee ${expenseId} reassigned to user ${newUserId}`,
+      );
+      return updatedExpense;
+    } catch (error) {
+      this.logger.error('Failed to reassign expense payee');
+      throw new InternalServerErrorException(
+        'Failed to reassign expense payee',
+        {
+          cause: error,
+          description: 'An unexpected error occurred',
+        },
+      );
+    }
+  }
+
+  async assignPayer(expenseId: string, newUserId: string) {
+    this.logger.log('Reassigning expense payer to new user...');
+    await this.findOne(expenseId);
+
+    try {
+      const updatedExpense = await this.prisma.expense.update({
+        where: { id: expenseId },
+        data: {
+          payer: {
+            connect: { id: newUserId },
+          },
+        },
+      });
+
+      this.logger.log(
+        `Expense ${expenseId} payer reassigned to user ${newUserId}`,
+      );
+      return updatedExpense;
+    } catch (error) {
+      this.logger.error('Failed to reassign expense payer');
+      throw new InternalServerErrorException(
+        'Failed to reassign expense payer',
+        {
+          cause: error,
+          description: 'An unexpected error occurred',
+        },
+      );
     }
   }
 }

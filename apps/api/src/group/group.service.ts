@@ -3,6 +3,7 @@ import {
   HttpStatus,
   Injectable,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
@@ -11,34 +12,71 @@ import { PrismaService } from 'src/prisma/prisma.service';
 @Injectable()
 export class GroupService {
   constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(GroupService.name, {
+    timestamp: true,
+  });
 
-  async create(createGroupDto: CreateGroupDto) {
+  async create(createGroupDto: CreateGroupDto, userId: string) {
+    this.logger.log('Creating group...');
     try {
-      const existingGroup = await this.prisma.group.findUnique({
-        where: { name: createGroupDto.name },
-      });
-      if (existingGroup) {
-        throw new HttpException('Group already exists', HttpStatus.CONFLICT);
-      }
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed to check group existence',
-        {
-          cause: error,
-          description: 'An unexpected error occurred',
-        },
-      );
-    }
+      const createdGroup = await this.prisma.$transaction(async (prisma) => {
+        const group = await prisma.group.create({
+          data: {
+            createdBy: {
+              connect: {
+                id: userId,
+              },
+            },
+            ...createGroupDto,
+          },
+        });
 
-    return this.prisma.group.create({
-      data: createGroupDto,
-    });
+        await prisma.groupMember.create({
+          data: {
+            groupId: group.id,
+            userId: userId,
+          },
+        });
+
+        return group;
+      });
+
+      this.logger.log(`Group created successfully with id: ${createdGroup.id}`);
+    } catch (error) {
+      this.logger.error('Error creating group', error);
+      throw new InternalServerErrorException('Failed to create group', {
+        cause: error,
+        description: 'An unexpected error occurred',
+      });
+    }
   }
 
-  async findAll() {
+  async findAll(userId: string) {
+    this.logger.log('Retrieving groups for user...');
     try {
-      return await this.prisma.group.findMany();
+      const groups = await this.prisma.group.findMany({
+        where: {
+          members: {
+            some: {
+              userId: userId,
+            },
+          },
+        },
+        include: {
+          createdBy: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+      });
+
+      this.logger.log(`Found ${groups.length} groups for user ${userId}`);
+      return groups;
     } catch (error) {
+      this.logger.error('Error fetching groups for user');
       throw new InternalServerErrorException('Failed to fetch groups', {
         cause: error,
         description: 'An unexpected error occurred',
