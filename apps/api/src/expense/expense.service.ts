@@ -22,8 +22,6 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 export class ExpenseService {
   constructor(private readonly prisma: PrismaService,
     private readonly eventEmitter: EventEmitter2,
-    private readonly activityService: ActivityService,
-
   ) {}
   private readonly logger = new Logger(ExpenseService.name, {
     timestamp: true,
