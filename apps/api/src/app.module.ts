@@ -9,6 +9,8 @@ import { AuthModule } from './auth/auth.module';
 import { GroupModule } from './group/group.module';
 import { GroupMemberModule } from './group-member/group-member.module';
 import { ActivityModule } from './activity/activity.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+
 
 @Module({
   imports: [
@@ -20,6 +22,7 @@ import { ActivityModule } from './activity/activity.module';
     GroupModule,
     GroupMemberModule,
     ActivityModule,
+    EventEmitterModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],
