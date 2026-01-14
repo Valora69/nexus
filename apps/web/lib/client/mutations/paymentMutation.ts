@@ -1,18 +1,18 @@
-import { useMutation, UseMutationOptions } from "@tanstack/react-query";
+import { useMutation, UseMutationOptions } from '@tanstack/react-query';
 
 import {
   createPayment,
   updatePayment,
   removePayment,
-} from "../services/paymentService";
-import { CreatePaymentData, UpdatePaymentData } from "@/lib/types/model";
+} from '../services/paymentService';
+import { CreatePaymentData, UpdatePaymentData } from '../../types/model';
 
 export const useCreatePayment = (
   mutationOptions: UseMutationOptions<
     unknown,
     Error,
     { paymentData: CreatePaymentData }
-  >
+  >,
 ) =>
   useMutation({
     mutationFn: ({ paymentData }) => createPayment(paymentData),
@@ -24,7 +24,7 @@ export const useUpdatePayment = (
     unknown,
     Error,
     { id: string; paymentData: UpdatePaymentData }
-  >
+  >,
 ) =>
   useMutation({
     mutationFn: ({ id, paymentData }) => updatePayment(id, paymentData),
@@ -32,7 +32,7 @@ export const useUpdatePayment = (
   });
 
 export const useRemovePayment = (
-  mutationOptions: UseMutationOptions<unknown, Error, { id: string }>
+  mutationOptions: UseMutationOptions<unknown, Error, { id: string }>,
 ) =>
   useMutation({
     mutationFn: ({ id }) => removePayment(id),

@@ -1,11 +1,11 @@
-import { useMutation, UseMutationOptions } from "@tanstack/react-query";
+import { useMutation, UseMutationOptions } from '@tanstack/react-query';
 import {
   LoginResponse,
   loginUser,
   LogoutResponse,
   logoutUser,
-} from "../services/loginService";
-import { LoginDTO } from "../zod-schemas/loginSchema";
+} from '../services/loginService';
+import { LoginDTO } from '../zod-schemas/loginSchema';
 
 interface LoginError {
   message: string;
@@ -18,7 +18,7 @@ interface LogoutError {
 }
 
 export const useLoginUser = (
-  mutationOptions?: UseMutationOptions<LoginResponse, LoginError, LoginDTO>
+  mutationOptions?: UseMutationOptions<LoginResponse, LoginError, LoginDTO>,
 ) =>
   useMutation({
     mutationFn: (credentials) => loginUser(credentials),
@@ -26,7 +26,7 @@ export const useLoginUser = (
   });
 
 export const useLogoutUser = (
-  mutationOptions?: UseMutationOptions<LogoutResponse, LogoutError, void>
+  mutationOptions?: UseMutationOptions<LogoutResponse, LogoutError, void>,
 ) =>
   useMutation({
     mutationFn: () => logoutUser(),

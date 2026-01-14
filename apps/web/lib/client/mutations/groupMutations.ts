@@ -1,17 +1,17 @@
-import { useMutation, UseMutationOptions } from "@tanstack/react-query";
+import { useMutation, UseMutationOptions } from '@tanstack/react-query';
 import {
   createGroup,
   updateGroup,
   removeGroup,
-} from "../services/groupService";
-import { CreateGroupData, UpdateGroupData } from "@/lib/types/model";
+} from '../services/groupService';
+import { CreateGroupData, UpdateGroupData } from '../../types/model';
 
 export const useCreateGroup = (
   mutationOptions: UseMutationOptions<
     unknown,
     Error,
     { groupData: CreateGroupData }
-  >
+  >,
 ) =>
   useMutation({
     mutationFn: ({ groupData }) => createGroup(groupData),
@@ -23,7 +23,7 @@ export const useUpdateGroup = (
     unknown,
     Error,
     { id: string; groupData: UpdateGroupData }
-  >
+  >,
 ) =>
   useMutation({
     mutationFn: ({ id, groupData }) => updateGroup(id, groupData),
@@ -31,7 +31,7 @@ export const useUpdateGroup = (
   });
 
 export const useRemoveGroup = (
-  mutationOptions: UseMutationOptions<unknown, Error, { id: string }>
+  mutationOptions: UseMutationOptions<unknown, Error, { id: string }>,
 ) =>
   useMutation({
     mutationFn: ({ id }) => removeGroup(id),

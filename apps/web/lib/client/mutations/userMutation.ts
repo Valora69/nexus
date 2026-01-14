@@ -1,14 +1,14 @@
-import { useMutation, UseMutationOptions } from "@tanstack/react-query";
+import { useMutation, UseMutationOptions } from '@tanstack/react-query';
 
-import { createUser, removeUser, updateUser } from "../services/userService";
-import { CreateUserData, UpdateUserData } from "@/lib/types/model";
+import { createUser, removeUser, updateUser } from '../services/userService';
+import { CreateUserData, UpdateUserData } from '../../types/model';
 
 export const useCreateUser = (
   mutationOptions: UseMutationOptions<
     unknown,
     Error,
     { userData: CreateUserData }
-  >
+  >,
 ) =>
   useMutation({
     mutationFn: ({ userData }) => createUser(userData),
@@ -20,7 +20,7 @@ export const useUpdateUser = (
     unknown,
     Error,
     { id: string; userData: UpdateUserData }
-  >
+  >,
 ) =>
   useMutation({
     mutationFn: ({ id, userData }) => updateUser(id, userData),
@@ -28,7 +28,7 @@ export const useUpdateUser = (
   });
 
 export const useRemoveUser = (
-  mutationOptions: UseMutationOptions<unknown, Error, { id: string }>
+  mutationOptions: UseMutationOptions<unknown, Error, { id: string }>,
 ) =>
   useMutation({
     mutationFn: ({ id }) => removeUser(id),

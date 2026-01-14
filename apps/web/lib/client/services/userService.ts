@@ -1,16 +1,16 @@
-import { BASE_URL } from "../config";
-import { CreateUserData, UpdateUserData, User } from "../../types/model";
+import { BASE_URL } from '../config';
+import { CreateUserData, UpdateUserData, User } from '../../types/model';
 
-const USER_URI = "/user";
-const CURRENT_USER_URI = "/user/currentuser";
+const USER_URI = '/user';
+const CURRENT_USER_URI = '/user/currentuser';
 
 export const getAllUsers = async (): Promise<User[]> => {
   const data = await fetch(`${BASE_URL}${USER_URI}`, {
-    method: "GET",
+    method: 'GET',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
-    credentials: "include",
+    credentials: 'include',
   });
 
   if (!data.ok) {
@@ -23,11 +23,11 @@ export const getAllUsers = async (): Promise<User[]> => {
 
 export const getUserById = async (id: string): Promise<User> => {
   const data = await fetch(`${BASE_URL}${USER_URI}/${id}`, {
-    method: "GET",
+    method: 'GET',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
-    credentials: "include",
+    credentials: 'include',
   });
 
   if (!data.ok) {
@@ -40,11 +40,11 @@ export const getUserById = async (id: string): Promise<User> => {
 
 export const getCurrentUser = async (): Promise<User> => {
   const data = await fetch(`${BASE_URL}${CURRENT_USER_URI}`, {
-    method: "GET",
+    method: 'GET',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
-    credentials: "include",
+    credentials: 'include',
   });
 
   if (!data.ok) {
@@ -57,12 +57,12 @@ export const getCurrentUser = async (): Promise<User> => {
 
 export const createUser = async (userData: CreateUserData): Promise<User> => {
   const data = await fetch(`${BASE_URL}${USER_URI}`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify(userData),
-    credentials: "include",
+    credentials: 'include',
   });
 
   if (!data.ok) {
@@ -75,15 +75,15 @@ export const createUser = async (userData: CreateUserData): Promise<User> => {
 
 export const updateUser = async (
   id: string,
-  userData: UpdateUserData
+  userData: UpdateUserData,
 ): Promise<User> => {
   const data = await fetch(`${BASE_URL}${USER_URI}/${id}`, {
-    method: "PATCH",
+    method: 'PATCH',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify(userData),
-    credentials: "include",
+    credentials: 'include',
   });
 
   if (!data.ok) {
@@ -96,11 +96,11 @@ export const updateUser = async (
 
 export const removeUser = async (id: string): Promise<void> => {
   const data = await fetch(`${BASE_URL}${USER_URI}/${id}`, {
-    method: "DELETE",
+    method: 'DELETE',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
-    credentials: "include",
+    credentials: 'include',
   });
 
   if (!data.ok) {

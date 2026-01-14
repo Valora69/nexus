@@ -1,21 +1,21 @@
-import { useMutation, UseMutationOptions } from "@tanstack/react-query";
+import { useMutation, UseMutationOptions } from '@tanstack/react-query';
 
 import {
   createParticipant,
   updateParticipant,
   removeParticipant,
-} from "../services/participantService";
+} from '../services/participantService';
 import {
   CreateParticipantData,
   UpdateParticipantData,
-} from "@/lib/types/model";
+} from '../../types/model';
 
 export const useCreateParticipant = (
   mutationOptions: UseMutationOptions<
     unknown,
     Error,
     { participantData: CreateParticipantData }
-  >
+  >,
 ) =>
   useMutation({
     mutationFn: ({ participantData }) => createParticipant(participantData),
@@ -27,7 +27,7 @@ export const useUpdateParticipant = (
     unknown,
     Error,
     { id: string; participantData: UpdateParticipantData }
-  >
+  >,
 ) =>
   useMutation({
     mutationFn: ({ id, participantData }) =>
@@ -36,7 +36,7 @@ export const useUpdateParticipant = (
   });
 
 export const useRemoveParticipant = (
-  mutationOptions: UseMutationOptions<unknown, Error, { id: string }>
+  mutationOptions: UseMutationOptions<unknown, Error, { id: string }>,
 ) =>
   useMutation({
     mutationFn: ({ id }) => removeParticipant(id),
