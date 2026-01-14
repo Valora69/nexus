@@ -30,13 +30,13 @@ export class GroupMemberController {
     return this.groupMemberService.findOne(id);
   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateGroupMemberDto: UpdateGroupMemberDto,
-  ) {
-    return this.groupMemberService.update(id, updateGroupMemberDto);
-  }
+  // @Patch(':id')
+  // update(
+  //   @Param('id') id: string,
+  //   @Body() updateGroupMemberDto: UpdateGroupMemberDto,
+  // ) {
+  //   return this.groupMemberService.update(id, updateGroupMemberDto);
+  // }
 
   @Delete(':id')
   remove(@Param('id') id: string) {

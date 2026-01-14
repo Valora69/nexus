@@ -26,24 +26,29 @@ export class UserController {
   @Get('/currentuser')
   getCurrentUser(@Req() req) {
     const userId = req.user.sub;
+
     return this.userService.findCurrentUser(userId);
   }
 
+  @Public()
   @Get()
   findAll() {
     return this.userService.findAll();
   }
 
+  @Public()
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.userService.findOne(id);
   }
 
+  @Public()
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(id, updateUserDto);
   }
 
+  @Public()
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.userService.remove(id);
