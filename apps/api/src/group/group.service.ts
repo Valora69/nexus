@@ -22,6 +22,7 @@ export class GroupService {
   async create(createGroupDto: CreateGroupDto, userId: string) {
     this.logger.log('Creating group...');
     const currentUserId = userId;
+    
     try {
       const createdGroup = await this.prisma.$transaction(async (prisma) => {
         const group = await prisma.group.create({
@@ -48,12 +49,13 @@ export class GroupService {
       });
 
       if(createdGroup){
-        this.eventEmitter.emit('activity.created', {
+        const groupData = {
           groupId: createdGroup.id,
           activityName: ActivityNameEnum.CREATED,
           activityOn: ActivityOnEnum.GROUP_DETAILS,
           userId: currentUserId,
-        });
+       };
+        this.eventEmitter.emit('activity.created', groupData);
       }
 
       this.logger.log(`Group created successfully with id: ${createdGroup.id}`);

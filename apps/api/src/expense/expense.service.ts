@@ -26,6 +26,7 @@ export class ExpenseService {
   private readonly logger = new Logger(ExpenseService.name, {
     timestamp: true,
   });
+  
 
   // @TODO: Move to separate class
   private async validateGroupExists(groupId: string) {
@@ -79,7 +80,12 @@ export class ExpenseService {
   async create(createExpenseDto: CreateExpenseDto, userId: string) {
     const { groupId, payeeId, payerId, ...rest } = createExpenseDto;
     this.logger.log('Creating expense...');
-    const currentUserId = userId
+    const expenseData = {
+      createdByUserId: userId,
+      activityName: ActivityNameEnum.CREATED,
+      activityOn: ActivityOnEnum.EXPENSE,
+      groupId: groupId,
+    };
 
     try {
       await this.validateGroupExists(groupId);
@@ -112,17 +118,22 @@ export class ExpenseService {
       });
 
       if(createdExpense){
-          this.eventEmitter.emit('activity.created', {
-          groupId,
-          activityName: ActivityNameEnum.CREATED,
-          activityOn: ActivityOnEnum.EXPENSE,
-          createdByUserId: currentUserId,
-        });      }
+          this.eventEmitter.emit('activity.created', expenseData);
+      }
+
+      // if(createdExpense){
+      //     this.eventEmitter.emit('activity.created', {
+      //     groupId,
+      //     activityName: ActivityNameEnum.CREATED,
+      //     activityOn: ActivityOnEnum.EXPENSE,
+      //     createdByUserId: currentUserId,
+      //   });      }
 
       this.logger.log(
         `Expense created successfully with id: ${createdExpense.id}`,
       );
       return createdExpense;
+      
     } catch (error) {
       this.logger.error('Error creating expense', error);
       throw new InternalServerErrorException('Failed to create expense', {

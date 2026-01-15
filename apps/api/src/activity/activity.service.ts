@@ -13,14 +13,13 @@ export class ActivityService {
   @OnEvent('activity.created')
   async create(createActivityDto: CreateActivityDto) {
     
-    const { activityName, activityOn, groupId, createdByUserId } = createActivityDto;
     try {
       const newActivity = await this.prismaService.activity.create({
         data: {
-          createdByUserId,
-          activityName,
-          activityOn,
-          groupId,
+          createdByUserId: createActivityDto.createdByUserId,
+          activityName: createActivityDto.activityName,
+          activityOn: createActivityDto.activityOn,
+          groupId: createActivityDto.groupId,
         },
       });
 
