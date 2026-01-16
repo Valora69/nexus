@@ -15,12 +15,12 @@ export class ActivityController {
   }
 
   @Get()
-  findAll(@Req() req) {
+  findAll() {
     return this.activityService.findAll();
   }
 
   @Get(':id')
-  findAllByGroup(@Param('id') id: string, @Req() req) {
+  findAllByGroup(@Param('id') id: string) {
     return this.activityService.findAllByGroup(id);
   }
 }

@@ -11,11 +11,8 @@ import {
 } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { ActivityService } from 'src/activity/activity.service';
 import { ActivityNameEnum, ActivityOnEnum } from '@prisma/client';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-// import { REQUEST } from '@nestjs/core';
-// import { RequestContext } from 'src/interfaces/request.context.interface';
 
 
 @Injectable()
@@ -121,14 +118,6 @@ export class ExpenseService {
           this.eventEmitter.emit('activity.created', expenseData);
       }
 
-      // if(createdExpense){
-      //     this.eventEmitter.emit('activity.created', {
-      //     groupId,
-      //     activityName: ActivityNameEnum.CREATED,
-      //     activityOn: ActivityOnEnum.EXPENSE,
-      //     createdByUserId: currentUserId,
-      //   });      }
-
       this.logger.log(
         `Expense created successfully with id: ${createdExpense.id}`,
       );
@@ -149,7 +138,6 @@ export class ExpenseService {
   ) {
     this.logger.log('Creating multiple expenses...');
     const { expenses } = createManyExpensesDto;
-    const currentUserId = userId;
     try {
       const createdExpenses = await Promise.all(
         expenses.map((expenseDto) => this.create(expenseDto, userId)),
@@ -160,7 +148,7 @@ export class ExpenseService {
           groupId: createdExpenses[0].groupId, // Using first expense's groupId
           activityName: ActivityNameEnum.CREATED,
           activityOn: ActivityOnEnum.EXPENSE,
-          createdByUserId: currentUserId,
+          createdByUserId: userId,
         });
       }
 
@@ -334,7 +322,6 @@ export class ExpenseService {
   async update(id: string, updateExpenseDto: UpdateExpenseDto, userId: string) {
     await this.findOne(id);
     this.logger.log('Updating expense...');
-    const currentUserId = userId;
     try {
       const updatedExpense = await this.prisma.expense.update({
         where: { id },
@@ -342,11 +329,11 @@ export class ExpenseService {
       });
 
       if (updatedExpense){
-        this.eventEmitter.emit('activity.updated', {
+        this.eventEmitter.emit('activity.created', {
           groupId: updatedExpense.groupId,
           activityName: ActivityNameEnum.UPDATED,
           activityOn: ActivityOnEnum.EXPENSE,
-          createdByUserId: currentUserId,
+          createdByUserId: userId,
         });
       }
       return updatedExpense;
@@ -361,7 +348,6 @@ export class ExpenseService {
 
   async remove(id: string, userId: string) {
     this.logger.log('Removing expense...');
-    const currentUserId = userId;
     await this.findOne(id);
     try {
       const deletedExpense = await this.prisma.expense.delete({
@@ -369,11 +355,11 @@ export class ExpenseService {
       });
 
       if (deletedExpense) {
-        this.eventEmitter.emit('activity.deleted', {
+        this.eventEmitter.emit('activity.created', {
           groupId: deletedExpense.groupId,
           activityName: ActivityNameEnum.DELETED,
           activityOn: ActivityOnEnum.EXPENSE,
-          createdByUserId: currentUserId,
+          createdByUserId: userId,
         });
       }
       return deletedExpense;
@@ -388,7 +374,6 @@ export class ExpenseService {
 
   async assignPayee(expenseId: string, newUserId: string, userId: string) {
     this.logger.log('Reassigning expense payee to new user...');
-    const currentUserId = userId;
     await this.findOne(expenseId);
 
     try {
@@ -402,11 +387,11 @@ export class ExpenseService {
       });
 
       if(updatedExpense){
-        this.eventEmitter.emit('activity.updated', {
+        this.eventEmitter.emit('activity.created', {
           groupId: updatedExpense.groupId,
           activityName: ActivityNameEnum.UPDATED,
           activityOn: ActivityOnEnum.EXPENSE_PAYEE,
-          createdByUserId: currentUserId,
+          createdByUserId: userId,
         });
       }
 
@@ -428,7 +413,6 @@ export class ExpenseService {
 
   async assignPayer(expenseId: string, newUserId: string, userId: string) {
     this.logger.log('Reassigning expense payer to new user...');
-    const currentUserId = userId;
     await this.findOne(expenseId);
 
     try {
@@ -442,11 +426,11 @@ export class ExpenseService {
       });
 
       if(updatedExpense){
-        this.eventEmitter.emit('activity.updated', {
+        this.eventEmitter.emit('activity.created', {
           groupId: updatedExpense.groupId,
           activityName: ActivityNameEnum.UPDATED,
           activityOn: ActivityOnEnum.EXPENSE_PAYER,
-          createdByUserId: currentUserId,
+          createdByUserId: userId,
         });
       }
 

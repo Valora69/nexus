@@ -38,7 +38,6 @@ export class GroupMemberService {
         );
       }
 
-      const currentUserId = userId
 
       const createdMember = await this.prisma.groupMember.create({
         data: createGroupMemberDto,
@@ -53,7 +52,7 @@ export class GroupMemberService {
           groupId: createdMember.groupId,
           activityName: ActivityNameEnum.CREATED,
           activityOn: ActivityOnEnum.GROUP_MEMBER,
-          createdByUserId: currentUserId,
+          createdByUserId: userId,
         });
       }
 
@@ -134,7 +133,6 @@ export class GroupMemberService {
       }
     }
 
-    const currentUserId = userId
     const updatedMember = await this.prisma.groupMember.update({
       where: { id },
       data: updateGroupMemberDto,
@@ -149,7 +147,7 @@ export class GroupMemberService {
           groupId: updatedMember.groupId,
           activityName: ActivityNameEnum.UPDATED,
           activityOn: ActivityOnEnum.GROUP_MEMBER,
-          createdByUserId: currentUserId,
+          createdByUserId: userId,
         });
       }
 
@@ -176,14 +174,13 @@ export class GroupMemberService {
         where: { id },
       });
 
-      const currentUserId = userId
 
       if(deletedMember){
          this.eventEmitter.emit('activity.created', {
           groupId: deletedMember.groupId,
           activityName: ActivityNameEnum.DELETED,
           activityOn: ActivityOnEnum.GROUP_MEMBER,
-          createdByUserId: currentUserId,
+          createdByUserId: userId,
         });
       }
       return deletedMember;

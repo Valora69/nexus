@@ -9,7 +9,6 @@ import { UpdatePaymentDto } from './dto/update-payment.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ActivityNameEnum, ActivityOnEnum } from '@prisma/client';
-import { ActivityService } from 'src/activity/activity.service';
 
 
 @Injectable()
@@ -17,7 +16,7 @@ export class PaymentService {
   constructor(private readonly prisma: PrismaService, private readonly eventEmitter: EventEmitter2) {}
 
   async create(createPaymentDto: CreatePaymentDto, userId: string) {
-    const currentUserId = userId
+    
     try {
       const createdPayment = await this.prisma.payment.create({
         data: createPaymentDto,
@@ -31,7 +30,7 @@ export class PaymentService {
           groupId: createdPayment.expense.groupId,
           activityName: ActivityNameEnum.CREATED,
           activityOn: ActivityOnEnum.PAYMENT,
-          createdByUserId: currentUserId,
+          createdByUserId: userId,
         });
       }
       return createdPayment;
@@ -70,7 +69,6 @@ export class PaymentService {
 
   async update(id: string, updatePaymentDto: UpdatePaymentDto, userId: string) {
     await this.findOne(id);
-    const currentUserId = userId
     try {
       const updatedPayment = await this.prisma.payment.update({
         where: { id },
@@ -85,7 +83,7 @@ export class PaymentService {
           groupId: updatedPayment.expense.groupId,
           activityName: ActivityNameEnum.UPDATED,
           activityOn: ActivityOnEnum.PAYMENT,
-          createdByUserId: currentUserId,
+          createdByUserId: userId,
         });
       }
       return updatedPayment;
@@ -99,7 +97,6 @@ export class PaymentService {
 
   async remove(id: string, userId: string) {
     await this.findOne(id);
-    const currentUserId = userId
     try {
       const deletedPayment = await this.prisma.payment.delete({
         where: { id },
@@ -112,7 +109,7 @@ export class PaymentService {
           groupId: deletedPayment.expense.groupId,
           activityName: ActivityNameEnum.DELETED,
           activityOn: ActivityOnEnum.PAYMENT,
-          createdByUserId: currentUserId,
+          createdByUserId: userId,
         });
       }
       return deletedPayment;

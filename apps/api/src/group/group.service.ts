@@ -21,7 +21,6 @@ export class GroupService {
 
   async create(createGroupDto: CreateGroupDto, userId: string) {
     this.logger.log('Creating group...');
-    const currentUserId = userId;
     
     try {
       const createdGroup = await this.prisma.$transaction(async (prisma) => {
@@ -53,7 +52,7 @@ export class GroupService {
           groupId: createdGroup.id,
           activityName: ActivityNameEnum.CREATED,
           activityOn: ActivityOnEnum.GROUP_DETAILS,
-          userId: currentUserId,
+          createdByUserId: userId,
        };
         this.eventEmitter.emit('activity.created', groupData);
       }
@@ -136,7 +135,6 @@ export class GroupService {
   }
 
   async update(id: string, updateGroupDto: UpdateGroupDto,userId: string ) {
-    const currentUserId = userId;
     try {
       const updatedGroup = await this.prisma.group.update({
         where: { id },
@@ -148,11 +146,12 @@ export class GroupService {
           groupId: updatedGroup.id,
           activityName: ActivityNameEnum.UPDATED,
           activityOn: ActivityOnEnum.GROUP_DETAILS,
-          userId: currentUserId,
+          createdByUserId: userId,
         });
-
-      return updatedGroup;
       }
+
+    return updatedGroup;
+    
     } catch (error) {
       throw new InternalServerErrorException('Failed to update group', {
         cause: error,
@@ -162,7 +161,6 @@ export class GroupService {
   }
 
   async remove(id: string, userId: string) {
-    const currentUserId = userId;
     try {
        const deletedGroup = await this.prisma.group.delete({
         where: { id },
@@ -173,7 +171,7 @@ export class GroupService {
           groupId: deletedGroup.id,
           activityName: ActivityNameEnum.DELETED,
           activityOn: ActivityOnEnum.GROUP_DETAILS,
-          userId: currentUserId,
+          createdByUserId: userId,
         });
       }
 
