@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Req,
 } from '@nestjs/common';
 import { GroupService } from './group.service';
 import { CreateGroupDto } from './dto/create-group.dto';
@@ -16,13 +17,13 @@ export class GroupController {
   constructor(private readonly groupService: GroupService) {}
 
   @Post()
-  create(@Body() createGroupDto: CreateGroupDto) {
-    return this.groupService.create(createGroupDto);
+  create(@Body() createGroupDto: CreateGroupDto, @Req() req) {
+    return this.groupService.create(createGroupDto, req.user.sub);
   }
 
   @Get()
-  findAll() {
-    return this.groupService.findAll();
+  findAll(@Req() req) {
+    return this.groupService.findAll(req.user.sub);
   }
 
   @Get(':id')
@@ -31,12 +32,12 @@ export class GroupController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateGroupDto: UpdateGroupDto) {
-    return this.groupService.update(id, updateGroupDto);
+  update(@Param('id') id: string, @Body() updateGroupDto: UpdateGroupDto, @Req() req) {
+    return this.groupService.update(id, updateGroupDto, req.user.sub);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.groupService.remove(id);
+  remove(@Param('id') id: string, @Req() req) {
+    return this.groupService.remove(id, req.user.sub);
   }
 }

@@ -1,166 +1,183 @@
 import { PrismaClient } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.DIRECT_URL || process.env.DATABASE_URL,
+    },
+  },
+});
 
 async function main() {
+  console.log('🌱 Starting database seeding...');
+
+  // rest of your seed code...
+  // Clear existing data (optional - be careful in production!)
+  await prisma.activity.deleteMany();
+  await prisma.payment.deleteMany();
+  await prisma.expense.deleteMany();
+  await prisma.groupMember.deleteMany();
+  await prisma.group.deleteMany();
+  await prisma.user.deleteMany();
+
+  console.log('✅ Cleared existing data');
+
+  // Create Users
+  const hashedPassword = await bcrypt.hash('password123', 10);
+
   const user1 = await prisma.user.create({
     data: {
-      id: '3137c81d-bb8b-4a87-bd85-4fd80adafd69',
-      name: 'Sid',
-      email: 'siddigamon@gmail.com',
-      password: '$2b$10$7mz2v7ZhFCauy8NQwzrfb.7l6lWYlxyi9ky.HkYiMQ3aBKp9Ui.Sm',
+      name: 'John Doe',
+      email: 'john@example.com',
+      password: hashedPassword,
     },
   });
 
   const user2 = await prisma.user.create({
     data: {
-      id: '9732538a-3fa9-44d5-a09d-0317495914b2',
-      name: 'Miggy',
-      email: 'miggyalino@gmail.com',
-      password: '$2b$10$7mz2v7ZhFCauy8NQwzrfb.7l6lWYlxyi9ky.HkYiMQ3aBKp9Ui.Sm',
+      name: 'Jane Smith',
+      email: 'jane@example.com',
+      password: hashedPassword,
     },
   });
 
   const user3 = await prisma.user.create({
     data: {
-      id: '597f3baf-47d0-4984-bb0f-4123ffc18d71',
-      name: 'James',
-      email: 'jamesmanonog@gmail.com',
-      password: '$2b$10$7mz2v7ZhFCauy8NQwzrfb.7l6lWYlxyi9ky.HkYiMQ3aBKp9Ui.Sm',
+      name: 'Bob Johnson',
+      email: 'bob@example.com',
+      password: hashedPassword,
     },
   });
 
-  const user4 = await prisma.user.create({
+  console.log('✅ Created users');
+
+  // Create Groups
+  const group1 = await prisma.group.create({
     data: {
-      id: 'a3458cb6-98f7-44e2-8a1a-a02a02e072f2',
-      name: 'Job',
-      email: 'jobmegrino@gmail.com',
-      password: '$2b$10$7mz2v7ZhFCauy8NQwzrfb.7l6lWYlxyi9ky.HkYiMQ3aBKp9Ui.Sm',
+      name: 'Weekend Trip',
+      description: 'Our weekend getaway expenses',
+      createdByUserId: user1.id,
     },
   });
 
-  const user5 = await prisma.user.create({
+  const group2 = await prisma.group.create({
     data: {
-      id: '62a5225e-90c1-4775-9631-e069243f3979',
-      name: 'Ced',
-      email: 'cedsarillo@gmail.com',
-      password: '$2b$10$7mz2v7ZhFCauy8NQwzrfb.7l6lWYlxyi9ky.HkYiMQ3aBKp9Ui.Sm',
+      name: 'Office Lunch',
+      description: 'Team lunch expenses',
+      createdByUserId: user2.id,
     },
   });
 
-  const user6 = await prisma.user.create({
-    data: {
-      id: 'db597c7b-cb1b-4664-a754-8d0f244fb99e',
-      name: 'Glenn',
-      email: 'glennfabul@gmail.com',
-      password: '$2b$10$7mz2v7ZhFCauy8NQwzrfb.7l6lWYlxyi9ky.HkYiMQ3aBKp9Ui.Sm',
-    },
-  });
+  console.log('✅ Created groups');
 
-  const friendsGroup = await prisma.group.create({
-    data: {
-      id: 'f8e9d7c6-b5a4-9382-8172-6a5b4c3d2e1f',
-      name: 'Friends Group',
-      description: 'Main friend group for shared expenses',
-    },
-  });
-
+  // Create Group Members
   await prisma.groupMember.createMany({
     data: [
-      { groupId: friendsGroup.id, userId: user1.id },
-      { groupId: friendsGroup.id, userId: user2.id },
-      { groupId: friendsGroup.id, userId: user3.id },
-      { groupId: friendsGroup.id, userId: user4.id },
-      { groupId: friendsGroup.id, userId: user5.id },
-      { groupId: friendsGroup.id, userId: user6.id },
+      { groupId: group1.id, userId: user1.id },
+      { groupId: group1.id, userId: user2.id },
+      { groupId: group1.id, userId: user3.id },
+      { groupId: group2.id, userId: user1.id },
+      { groupId: group2.id, userId: user2.id },
     ],
   });
 
+  console.log('✅ Created group members');
+
+  // Create Expenses
   const expense1 = await prisma.expense.create({
     data: {
-      id: 'dc471030-9809-486c-8c19-80bc49df88fa',
-      name: 'Bawud',
-      totalAmount: 2155,
-      groupId: friendsGroup.id,
-      paidById: user3.id,
-      date: new Date('2025-07-25T19:30:00.000Z'),
-      notes: 'Good shit',
+      name: 'Hotel Booking',
+      totalAmount: 300.0,
+      groupId: group1.id,
+      payerId: user1.id,
+      payeeId: user2.id,
+      date: new Date('2024-01-15'),
+      notes: 'Split hotel cost',
     },
   });
 
-  const participant4_6 = await prisma.participant.create({
+  const expense2 = await prisma.expense.create({
     data: {
-      id: 'ab59440b-359c-45bb-9c45-2022167adf22',
-      expenseId: expense1.id,
-      userId: user6.id,
-      shareAmount: 359.17,
-      isSettled: false,
+      name: 'Dinner',
+      totalAmount: 150.0,
+      groupId: group1.id,
+      payerId: user2.id,
+      payeeId: user3.id,
+      date: new Date('2024-01-16'),
+      notes: 'Restaurant bill',
     },
   });
 
-  const participant4_1 = await prisma.participant.create({
+  const expense3 = await prisma.expense.create({
     data: {
-      id: 'd4ab3753-8806-4c4f-b4dd-18986582d975',
-      expenseId: expense1.id,
-      userId: user1.id,
-      shareAmount: 359.17,
-      isSettled: false,
+      name: 'Pizza Order',
+      totalAmount: 45.0,
+      groupId: group2.id,
+      payerId: user1.id,
+      payeeId: user2.id,
+      date: new Date('2024-01-20'),
     },
   });
 
-  const participant4_5 = await prisma.participant.create({
-    data: {
-      id: '43623c3e-28b3-4c92-89de-57a1ecff28f8',
-      expenseId: expense1.id,
-      userId: user5.id,
-      shareAmount: 359.17,
-      isSettled: false,
-    },
-  });
+  console.log('✅ Created expenses');
 
-  const participant4_4 = await prisma.participant.create({
+  // Create Payments
+  await prisma.payment.create({
     data: {
-      id: '5e3d2008-f8df-4ece-bd5b-831626b15343',
+      amountPaid: 150.0,
+      paymentProof: 'payment-receipt-001.pdf',
+      paidAt: new Date('2024-01-17'),
       expenseId: expense1.id,
-      userId: user4.id,
-      shareAmount: 359.17,
-      isSettled: false,
-    },
-  });
-
-  const participant4_2 = await prisma.participant.create({
-    data: {
-      id: 'b9bb0904-6dce-4111-a92f-eef96fdf6b84',
-      expenseId: expense1.id,
-      userId: user2.id,
-      shareAmount: 359.15,
-      isSettled: false,
-    },
-  });
-
-  const participant4_3 = await prisma.participant.create({
-    data: {
-      id: '5ba7f117-fc7c-4290-a002-1f6b11c9f1f6',
-      expenseId: expense1.id,
-      userId: user3.id,
-      shareAmount: 359.17,
-      isSettled: true,
-      settledAt: new Date('2025-07-25T22:14:00.000Z'),
     },
   });
 
   await prisma.payment.create({
     data: {
-      participantId: participant4_3.id,
-      amountPaid: 359.17,
-      paidAt: new Date('2025-07-25T22:14:00.000Z'),
+      amountPaid: 75.0,
+      paymentProof: 'payment-receipt-002.pdf',
+      paidAt: new Date('2024-01-18'),
+      expenseId: expense2.id,
     },
   });
+
+  console.log('✅ Created payments');
+
+  // Create Activities
+  await prisma.activity.createMany({
+    data: [
+      {
+        groupId: group1.id,
+        createdByUserId: user1.id,
+      },
+      {
+        groupId: group1.id,
+        createdByUserId: user2.id,
+      },
+      {
+        groupId: group2.id,
+        createdByUserId: user1.id,
+      },
+    ],
+  });
+
+  console.log('✅ Created activities');
+
+  console.log('🎉 Database seeding completed successfully!');
+  console.log(`
+📊 Summary:
+- Users: 3 (john@example.com, jane@example.com, bob@example.com)
+- Password for all users: password123
+- Groups: 2
+- Expenses: 3
+- Payments: 2
+- Activities: 3
+  `);
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Seed failed:', e);
+    console.error('❌ Error during seeding:', e);
     process.exit(1);
   })
   .finally(async () => {

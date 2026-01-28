@@ -35,10 +35,11 @@ export class AuthGuard implements CanActivate {
 
     try {
       const payload = await this.jwtService.verifyAsync(token, {
-        secret: process.env.AUTH_SECRET,
+        secret: process.env.JWT_SECRET,
       });
+
       request['user'] = payload;
-    } catch {
+    } catch (error) {
       throw new UnauthorizedException();
     }
     return true;
@@ -58,12 +59,14 @@ export class AuthGuard implements CanActivate {
 
   private extractTokenFromCookie(request: Request): string | undefined {
     const cookieHeader = request.headers.cookie;
+    // console.log('🍪 Cookie Header:', cookieHeader); // Debug
     if (!cookieHeader) return undefined;
 
     const cookies = cookieHeader.split(';').map((cookie) => cookie.trim());
     for (const cookie of cookies) {
       const [key, value] = cookie.split('=');
       if (key === 'token') {
+        // console.log('🍪 Token from Cookie:', value); // Debug
         return value;
       }
     }

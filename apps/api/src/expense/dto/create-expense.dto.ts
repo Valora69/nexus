@@ -6,7 +6,10 @@ import {
   IsUUID,
   IsOptional,
   IsDateString,
+  ValidateNested,
+  IsArray,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateExpenseDto {
   @IsNotEmpty()
@@ -24,7 +27,11 @@ export class CreateExpenseDto {
 
   @IsNotEmpty()
   @IsUUID()
-  paidById: string;
+  payeeId?: string;
+
+  @IsNotEmpty()
+  @IsUUID()
+  payerId?: string;
 
   @IsNotEmpty()
   @IsDateString()
@@ -33,4 +40,11 @@ export class CreateExpenseDto {
   @IsOptional()
   @IsString()
   notes?: string;
+}
+
+export class CreateManyExpensesDto {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateExpenseDto)
+  expenses: CreateExpenseDto[];
 }
