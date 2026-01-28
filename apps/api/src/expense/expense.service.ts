@@ -11,13 +11,19 @@ import {
 } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { ActivityNameEnum, ActivityOnEnum } from '@prisma/client';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+
 
 @Injectable()
 export class ExpenseService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService,
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
   private readonly logger = new Logger(ExpenseService.name, {
     timestamp: true,
   });
+  
 
   // @TODO: Move to separate class
   private async validateGroupExists(groupId: string) {
@@ -71,6 +77,12 @@ export class ExpenseService {
   async create(createExpenseDto: CreateExpenseDto, userId: string) {
     const { groupId, payeeId, payerId, ...rest } = createExpenseDto;
     this.logger.log('Creating expense...');
+    const expenseData = {
+      createdByUserId: userId,
+      activityName: ActivityNameEnum.CREATED,
+      activityOn: ActivityOnEnum.EXPENSE,
+      groupId: groupId,
+    };
 
     try {
       await this.validateGroupExists(groupId);
@@ -102,10 +114,15 @@ export class ExpenseService {
         },
       });
 
+      if(createdExpense){
+          this.eventEmitter.emit('activity.created', expenseData);
+      }
+
       this.logger.log(
         `Expense created successfully with id: ${createdExpense.id}`,
       );
       return createdExpense;
+      
     } catch (error) {
       this.logger.error('Error creating expense', error);
       throw new InternalServerErrorException('Failed to create expense', {
@@ -125,6 +142,16 @@ export class ExpenseService {
       const createdExpenses = await Promise.all(
         expenses.map((expenseDto) => this.create(expenseDto, userId)),
       );
+
+      if(createdExpenses.length > 0) {
+        this.eventEmitter.emit('activity.created', {
+          groupId: createdExpenses[0].groupId, // Using first expense's groupId
+          activityName: ActivityNameEnum.CREATED,
+          activityOn: ActivityOnEnum.EXPENSE,
+          createdByUserId: userId,
+        });
+      }
+
       this.logger.log(
         `Created ${createdExpenses.length} expenses successfully`,
       );
@@ -292,7 +319,7 @@ export class ExpenseService {
     }
   }
 
-  async update(id: string, updateExpenseDto: UpdateExpenseDto) {
+  async update(id: string, updateExpenseDto: UpdateExpenseDto, userId: string) {
     await this.findOne(id);
     this.logger.log('Updating expense...');
     try {
@@ -300,6 +327,15 @@ export class ExpenseService {
         where: { id },
         data: updateExpenseDto,
       });
+
+      if (updatedExpense){
+        this.eventEmitter.emit('activity.created', {
+          groupId: updatedExpense.groupId,
+          activityName: ActivityNameEnum.UPDATED,
+          activityOn: ActivityOnEnum.EXPENSE,
+          createdByUserId: userId,
+        });
+      }
       return updatedExpense;
     } catch (error) {
       this.logger.error('Failed to update expense');
@@ -310,13 +346,22 @@ export class ExpenseService {
     }
   }
 
-  async remove(id: string) {
+  async remove(id: string, userId: string) {
     this.logger.log('Removing expense...');
     await this.findOne(id);
     try {
       const deletedExpense = await this.prisma.expense.delete({
         where: { id },
       });
+
+      if (deletedExpense) {
+        this.eventEmitter.emit('activity.created', {
+          groupId: deletedExpense.groupId,
+          activityName: ActivityNameEnum.DELETED,
+          activityOn: ActivityOnEnum.EXPENSE,
+          createdByUserId: userId,
+        });
+      }
       return deletedExpense;
     } catch (error) {
       this.logger.log('Failed to delete expense');
@@ -327,7 +372,7 @@ export class ExpenseService {
     }
   }
 
-  async assignPayee(expenseId: string, newUserId: string) {
+  async assignPayee(expenseId: string, newUserId: string, userId: string) {
     this.logger.log('Reassigning expense payee to new user...');
     await this.findOne(expenseId);
 
@@ -340,6 +385,15 @@ export class ExpenseService {
           },
         },
       });
+
+      if(updatedExpense){
+        this.eventEmitter.emit('activity.created', {
+          groupId: updatedExpense.groupId,
+          activityName: ActivityNameEnum.UPDATED,
+          activityOn: ActivityOnEnum.EXPENSE_PAYEE,
+          createdByUserId: userId,
+        });
+      }
 
       this.logger.log(
         `Expense Payee ${expenseId} reassigned to user ${newUserId}`,
@@ -357,7 +411,7 @@ export class ExpenseService {
     }
   }
 
-  async assignPayer(expenseId: string, newUserId: string) {
+  async assignPayer(expenseId: string, newUserId: string, userId: string) {
     this.logger.log('Reassigning expense payer to new user...');
     await this.findOne(expenseId);
 
@@ -370,6 +424,15 @@ export class ExpenseService {
           },
         },
       });
+
+      if(updatedExpense){
+        this.eventEmitter.emit('activity.created', {
+          groupId: updatedExpense.groupId,
+          activityName: ActivityNameEnum.UPDATED,
+          activityOn: ActivityOnEnum.EXPENSE_PAYER,
+          createdByUserId: userId,
+        });
+      }
 
       this.logger.log(
         `Expense ${expenseId} payer reassigned to user ${newUserId}`,

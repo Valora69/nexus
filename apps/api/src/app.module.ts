@@ -8,6 +8,9 @@ import { PrismaModule } from './prisma/prisma.module';
 
 import { GroupModule } from './group/group.module';
 import { GroupMemberModule } from './group-member/group-member.module';
+import { ActivityModule } from './activity/activity.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+
 import { AuthModule } from './auth/auth.module';
 
 @Module({
@@ -19,6 +22,8 @@ import { AuthModule } from './auth/auth.module';
     AuthModule,
     GroupModule,
     GroupMemberModule,
+    ActivityModule,
+    EventEmitterModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],
