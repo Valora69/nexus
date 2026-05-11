@@ -11,11 +11,13 @@ import {
 import { GroupService } from './group.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
+import { ThrottleWrite } from 'src/common/throttle.decorators';
 
 @Controller('group')
 export class GroupController {
   constructor(private readonly groupService: GroupService) {}
 
+  @ThrottleWrite()
   @Post()
   create(@Body() createGroupDto: CreateGroupDto, @Req() req) {
     return this.groupService.create(createGroupDto, req.user.sub);
@@ -31,11 +33,13 @@ export class GroupController {
     return this.groupService.findOne(id);
   }
 
+  @ThrottleWrite()
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateGroupDto: UpdateGroupDto, @Req() req) {
     return this.groupService.update(id, updateGroupDto, req.user.sub);
   }
 
+  @ThrottleWrite()
   @Delete(':id')
   remove(@Param('id') id: string, @Req() req) {
     return this.groupService.remove(id, req.user.sub);

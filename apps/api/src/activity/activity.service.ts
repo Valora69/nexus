@@ -1,20 +1,19 @@
-import { HttpException, HttpStatus,  Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-
 import { OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
 export class ActivityService {
-  constructor(
-    private readonly prismaService: PrismaService,
-    
-  ) {}
+  private readonly logger = new Logger(ActivityService.name, { timestamp: true });
+
+  constructor(private readonly prismaService: PrismaService) {}
+
+  // Fire-and-forget: failures must never propagate to the caller
   @OnEvent('activity.created')
   async create(createActivityDto: CreateActivityDto) {
-    
     try {
-      const newActivity = await this.prismaService.activity.create({
+      await this.prismaService.activity.create({
         data: {
           createdByUserId: createActivityDto.createdByUserId,
           activityName: createActivityDto.activityName,
@@ -22,39 +21,27 @@ export class ActivityService {
           groupId: createActivityDto.groupId,
         },
       });
-
-      if (!newActivity) {
-        throw new HttpException('Activity not created', HttpStatus.BAD_REQUEST);
-      }
-
-      return {
-        status: HttpStatus.CREATED,
-        message: 'Activity created successfully',
-        data: newActivity,
-      };
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'An unknown error occurred';
-      throw new HttpException(message, HttpStatus.INTERNAL_SERVER_ERROR);
+      this.logger.error('Failed to create activity (non-fatal)', error);
     }
   }
 
-  async findAll() {
+  async findAll(skip?: number, take?: number) {
     try {
-      const activities = await this.prismaService.activity.findMany();
-
-      return activities;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'An unknown error occurred';
-      throw new HttpException(message, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-  }
-
-
-  async findAllByGroup(id: string) {
-    try {
-      const group = await this.prismaService.group.findUnique({
-        where: { id },
+      return await this.prismaService.activity.findMany({
+        orderBy: { createdAt: 'desc' },
+        ...(skip !== undefined && { skip }),
+        ...(take !== undefined && { take }),
       });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'An unknown error occurred';
+      throw new HttpException(message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async findAllByGroup(id: string, skip?: number, take?: number) {
+    try {
+      const group = await this.prismaService.group.findUnique({ where: { id } });
 
       if (!group) {
         throw new HttpException('Group not found', HttpStatus.NOT_FOUND);
@@ -62,8 +49,12 @@ export class ActivityService {
 
       return await this.prismaService.activity.findMany({
         where: { groupId: id },
+        orderBy: { createdAt: 'desc' },
+        ...(skip !== undefined && { skip }),
+        ...(take !== undefined && { take }),
       });
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       const message = error instanceof Error ? error.message : 'An unknown error occurred';
       throw new HttpException(message, HttpStatus.INTERNAL_SERVER_ERROR);
     }

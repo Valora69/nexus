@@ -60,6 +60,7 @@ export class GroupMemberService {
       return createdMember;
     } catch (error) {
       this.logger.error('Error creating group member');
+      if (error instanceof HttpException) throw error;
       throw new InternalServerErrorException('Failed to create group member', {
         cause: error,
         description: 'An unexpected error occurred',

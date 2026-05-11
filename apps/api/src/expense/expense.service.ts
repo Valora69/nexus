@@ -3,6 +3,7 @@ import {
   HttpException,
   HttpStatus,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import {
   CreateExpenseDto,
@@ -10,8 +11,29 @@ import {
 } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { ActivityNameEnum, ActivityOnEnum } from '@prisma/client';
+import { ActivityNameEnum, ActivityOnEnum, PersonalTransactionType } from '@prisma/client';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+
+// Shared select for user fields to avoid duplication
+const USER_SELECT = {
+  id: true,
+  name: true,
+  email: true,
+  picture: true,
+  gcashNumber: true,
+} as const;
+
+// Shared include for expense relations
+const EXPENSE_INCLUDE = {
+  group: true,
+  payer: { select: USER_SELECT },
+  payee: { select: USER_SELECT },
+  splits: {
+    include: {
+      user: { select: USER_SELECT },
+    },
+  },
+} as const;
 
 @Injectable()
 export class ExpenseService {
@@ -73,14 +95,8 @@ export class ExpenseService {
   }
 
   async create(createExpenseDto: CreateExpenseDto, userId: string) {
-    const { groupId, payeeId, payerId, ...rest } = createExpenseDto;
+    const { groupId, payeeId, payerId, splits, ...rest } = createExpenseDto;
     this.logger.log('Creating expense...');
-    const expenseData = {
-      createdByUserId: userId,
-      activityName: ActivityNameEnum.CREATED,
-      activityOn: ActivityOnEnum.EXPENSE,
-      groupId: groupId,
-    };
 
     try {
       await this.validateGroupExists(groupId);
@@ -91,37 +107,85 @@ export class ExpenseService {
         ]);
       }
 
-      const createdExpense = await this.prisma.expense.create({
-        data: {
-          payee: {
-            connect: {
-              id: payeeId,
-            },
+      // Validate splits if provided
+      if (splits && splits.length > 0) {
+        const totalSplitAmount = splits.reduce(
+          (sum, split) => sum + split.amount,
+          0,
+        );
+        if (Math.abs(totalSplitAmount - rest.totalAmount) > 0.01) {
+          throw new HttpException(
+            'Split amounts must equal total expense amount',
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+
+        // Validate all split users are group members
+        await Promise.all(
+          splits.map((split) =>
+            this.validateGroupMembership(split.userId, groupId),
+          ),
+        );
+      }
+
+      const createdExpense = await this.prisma.$transaction(async (tx) => {
+        const expense = await tx.expense.create({
+          data: {
+            payer: { connect: { id: payerId } },
+            ...(payeeId && { payee: { connect: { id: payeeId } } }),
+            group: { connect: { id: groupId } },
+            ...(splits &&
+              splits.length > 0 && {
+                splits: {
+                  create: splits.map((split) => ({
+                    user: { connect: { id: split.userId } },
+                    amount: split.amount,
+                    isPaid: split.isPaid || false,
+                  })),
+                },
+              }),
+            ...rest,
           },
-          payer: {
-            connect: {
-              id: payerId,
-            },
-          },
-          group: {
-            connect: {
-              id: groupId,
-            },
-          },
-          ...rest,
-        },
+          include: EXPENSE_INCLUDE,
+        });
+
+        // Auto-create a PersonalTransaction ledger entry for each split participant
+        if (expense.splits && expense.splits.length > 0) {
+          await tx.personalTransaction.createMany({
+            data: expense.splits.map((split) => ({
+              userId: split.userId,
+              type: PersonalTransactionType.EXPENSE,
+              amount: split.amount,
+              description: expense.name,
+              category: expense.group.name,
+              isFromGroup: true,
+              expenseSplitId: split.id,
+              date: expense.date,
+            })),
+          });
+        }
+
+        return expense;
       });
 
       if (createdExpense) {
-        this.eventEmitter.emit('activity.created', expenseData);
+        this.eventEmitter.emit('activity.created', {
+          createdByUserId: userId,
+          activityName: ActivityNameEnum.CREATED,
+          activityOn: ActivityOnEnum.EXPENSE,
+          groupId: groupId,
+        });
       }
 
       this.logger.log(
-        `Expense created successfully with id: ${createdExpense.id}`,
+        `Expense created successfully with id: ${createdExpense.id}${splits ? ` and ${splits.length} splits` : ''}`,
       );
       return createdExpense;
     } catch (error) {
       this.logger.error('Error creating expense', error);
+      if (error instanceof HttpException) {
+        throw error;
+      }
       throw new InternalServerErrorException('Failed to create expense', {
         cause: error,
         description: 'An unexpected error occurred',
@@ -136,18 +200,11 @@ export class ExpenseService {
     this.logger.log('Creating multiple expenses...');
     const { expenses } = createManyExpensesDto;
     try {
+      // Each create() call already emits its own activity event,
+      // so we don't emit an additional one here.
       const createdExpenses = await Promise.all(
         expenses.map((expenseDto) => this.create(expenseDto, userId)),
       );
-
-      if (createdExpenses.length > 0) {
-        this.eventEmitter.emit('activity.created', {
-          groupId: createdExpenses[0].groupId, // Using first expense's groupId
-          activityName: ActivityNameEnum.CREATED,
-          activityOn: ActivityOnEnum.EXPENSE,
-          createdByUserId: userId,
-        });
-      }
 
       this.logger.log(
         `Created ${createdExpenses.length} expenses successfully`,
@@ -162,32 +219,41 @@ export class ExpenseService {
     }
   }
 
-  async findAll(userId?: string) {
+  async findAll(userId?: string, type?: 'payable' | 'receivable', groupId?: string, skip?: number, take?: number) {
     this.logger.log('Retrieving Expenses...');
     try {
+      let whereClause: Record<string, unknown> = {};
+
+      if (userId) {
+        switch (type) {
+          case 'payable':
+            whereClause = { payerId: userId };
+            break;
+          case 'receivable':
+            whereClause = { payeeId: userId };
+            break;
+          default:
+            whereClause = {
+              OR: [
+                { payeeId: userId },
+                { payerId: userId },
+                { splits: { some: { userId } } },
+              ],
+            };
+            break;
+        }
+      }
+
+      if (groupId) {
+        whereClause = { ...whereClause, groupId };
+      }
+
       const expenses = await this.prisma.expense.findMany({
-        ...(userId && {
-          where: {
-            OR: [{ payeeId: userId }, { payerId: userId }],
-          },
-        }),
-        include: {
-          group: true,
-          payee: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
-          payer: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
-        },
+        where: whereClause,
+        include: EXPENSE_INCLUDE,
+        orderBy: { createdAt: 'desc' },
+        ...(skip !== undefined && { skip }),
+        ...(take !== undefined && { take }),
       });
       return expenses;
     } catch (error) {
@@ -196,118 +262,12 @@ export class ExpenseService {
     }
   }
 
-  async findAllPayables(userId: string) {
-    this.logger.log(`Retrieving payable expenses for user ${userId}...`);
-    try {
-      const payableExpenses = await this.prisma.expense.findMany({
-        where: {
-          payerId: userId,
-        },
-        include: {
-          group: true,
-          payee: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
-          payer: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
-        },
-        orderBy: {
-          createdAt: 'desc',
-        },
-      });
-
-      this.logger.log(
-        `Found ${payableExpenses.length} payable expenses for user ${userId}`,
-      );
-      return payableExpenses;
-    } catch (error) {
-      this.logger.error('Error getting payable expenses');
-      throw new InternalServerErrorException(
-        'Failed to fetch payable expenses',
-        {
-          cause: error,
-          description: 'An unexpected error occurred',
-        },
-      );
-    }
-  }
-
-  async findAllReceivables(userId: string) {
-    this.logger.log(`Retrieving receivable expenses for user ${userId}...`);
-    try {
-      const receivableExpenses = await this.prisma.expense.findMany({
-        where: {
-          payeeId: userId,
-        },
-        include: {
-          group: true,
-          payee: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
-          payer: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
-        },
-        orderBy: {
-          createdAt: 'desc',
-        },
-      });
-
-      this.logger.log(
-        `Found ${receivableExpenses.length} receivable expenses for user ${userId}`,
-      );
-      return receivableExpenses;
-    } catch (error) {
-      this.logger.error('Error getting receivable expenses');
-      throw new InternalServerErrorException(
-        'Failed to fetch receivable expenses',
-        {
-          cause: error,
-          description: 'An unexpected error occurred',
-        },
-      );
-    }
-  }
-
   async findOne(id: string) {
     this.logger.log('Retrieving Expense...');
     try {
       const expense = await this.prisma.expense.findUnique({
         where: { id },
-        include: {
-          group: true,
-          payee: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
-          payer: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
-        },
+        include: EXPENSE_INCLUDE,
       });
       return expense;
     } catch (error) {
@@ -320,16 +280,46 @@ export class ExpenseService {
     await this.findOne(id);
     this.logger.log('Updating expense...');
     try {
+      const { splits: _splits, payeeId, payerId, groupId, ...expenseData } =
+        updateExpenseDto;
+
+      // Build the update data with proper relation handling
+      const updateData: any = { ...expenseData };
+
+      // Handle payer relation change
+      if (payerId) {
+        updateData.payer = { connect: { id: payerId } };
+      }
+
+      // Handle payee relation change
+      if (payeeId) {
+        updateData.payee = { connect: { id: payeeId } };
+      }
+
+      // Handle group relation change
+      if (groupId) {
+        updateData.group = { connect: { id: groupId } };
+      }
+
       const updatedExpense = await this.prisma.expense.update({
         where: { id },
-        data: updateExpenseDto,
+        data: updateData,
+        include: EXPENSE_INCLUDE,
       });
 
       if (updatedExpense) {
+        // Determine the most specific activity type
+        let activityOn: ActivityOnEnum = ActivityOnEnum.EXPENSE;
+        if (payeeId && !payerId) {
+          activityOn = ActivityOnEnum.EXPENSE_PAYEE;
+        } else if (payerId && !payeeId) {
+          activityOn = ActivityOnEnum.EXPENSE_PAYER;
+        }
+
         this.eventEmitter.emit('activity.created', {
           groupId: updatedExpense.groupId,
           activityName: ActivityNameEnum.UPDATED,
-          activityOn: ActivityOnEnum.EXPENSE,
+          activityOn,
           createdByUserId: userId,
         });
       }
@@ -366,84 +356,6 @@ export class ExpenseService {
         cause: error,
         description: 'An unexpected error occurred',
       });
-    }
-  }
-
-  async assignPayee(expenseId: string, newUserId: string, userId: string) {
-    this.logger.log('Reassigning expense payee to new user...');
-    await this.findOne(expenseId);
-
-    try {
-      const updatedExpense = await this.prisma.expense.update({
-        where: { id: expenseId },
-        data: {
-          payee: {
-            connect: { id: newUserId },
-          },
-        },
-      });
-
-      if (updatedExpense) {
-        this.eventEmitter.emit('activity.created', {
-          groupId: updatedExpense.groupId,
-          activityName: ActivityNameEnum.UPDATED,
-          activityOn: ActivityOnEnum.EXPENSE_PAYEE,
-          createdByUserId: userId,
-        });
-      }
-
-      this.logger.log(
-        `Expense Payee ${expenseId} reassigned to user ${newUserId}`,
-      );
-      return updatedExpense;
-    } catch (error) {
-      this.logger.error('Failed to reassign expense payee');
-      throw new InternalServerErrorException(
-        'Failed to reassign expense payee',
-        {
-          cause: error,
-          description: 'An unexpected error occurred',
-        },
-      );
-    }
-  }
-
-  async assignPayer(expenseId: string, newUserId: string, userId: string) {
-    this.logger.log('Reassigning expense payer to new user...');
-    await this.findOne(expenseId);
-
-    try {
-      const updatedExpense = await this.prisma.expense.update({
-        where: { id: expenseId },
-        data: {
-          payer: {
-            connect: { id: newUserId },
-          },
-        },
-      });
-
-      if (updatedExpense) {
-        this.eventEmitter.emit('activity.created', {
-          groupId: updatedExpense.groupId,
-          activityName: ActivityNameEnum.UPDATED,
-          activityOn: ActivityOnEnum.EXPENSE_PAYER,
-          createdByUserId: userId,
-        });
-      }
-
-      this.logger.log(
-        `Expense ${expenseId} payer reassigned to user ${newUserId}`,
-      );
-      return updatedExpense;
-    } catch (error) {
-      this.logger.error('Failed to reassign expense payer');
-      throw new InternalServerErrorException(
-        'Failed to reassign expense payer',
-        {
-          cause: error,
-          description: 'An unexpected error occurred',
-        },
-      );
     }
   }
 }

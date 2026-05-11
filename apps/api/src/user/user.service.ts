@@ -7,7 +7,6 @@ import {
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -15,17 +14,15 @@ export class UserService {
 
   async create(createUserDto: CreateUserDto) {
     try {
-      const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
-
       const createdUser = await this.prisma.user.create({
         data: {
           name: createUserDto.name,
           email: createUserDto.email,
-          password: hashedPassword,
+          googleId: createUserDto.googleId,
+          picture: createUserDto.picture,
         },
       });
-      const { password: _, ...userWithoutPassword } = createdUser;
-      return userWithoutPassword;
+      return createdUser;
     } catch (error) {
       throw new InternalServerErrorException('Failed to create user', {
         cause: error,
@@ -34,9 +31,24 @@ export class UserService {
     }
   }
 
-  async findAll() {
+  async findAll(currentUserId?: string) {
     try {
-      return await this.prisma.user.findMany();
+      if (!currentUserId) {
+        return await this.prisma.user.findMany();
+      }
+      return await this.prisma.user.findMany({
+        where: {
+          groups: {
+            some: {
+              group: {
+                members: {
+                  some: { userId: currentUserId },
+                },
+              },
+            },
+          },
+        },
+      });
     } catch {
       throw new InternalServerErrorException('Failed to fetch users');
     }
@@ -67,6 +79,9 @@ export class UserService {
           id: true,
           name: true,
           email: true,
+          picture: true,
+          googleId: true,
+          gcashNumber: true,
           createdAt: true,
           updatedAt: true,
         },

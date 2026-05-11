@@ -5,12 +5,16 @@ import {
   IsPositive,
   IsOptional,
   IsDateString,
+  IsEnum,
+  IsBoolean,
+  IsString,
 } from 'class-validator';
+import { PaymentMethod } from '@prisma/client';
 
 export class CreatePaymentDto {
   @IsNotEmpty()
   @IsUUID()
-  participantId: string;
+  expenseSplitId: string;
 
   @IsNotEmpty()
   @IsNumber()
@@ -20,4 +24,16 @@ export class CreatePaymentDto {
   @IsOptional()
   @IsDateString()
   paidAt?: string;
+
+  @IsOptional()
+  @IsEnum(PaymentMethod)
+  paymentMethod?: PaymentMethod;
+
+  @IsOptional()
+  @IsString()
+  paymentProof?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isVerified?: boolean;
 }

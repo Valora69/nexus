@@ -30,10 +30,9 @@ export class UserController {
     return this.userService.findCurrentUser(userId);
   }
 
-  @Public()
   @Get()
-  findAll() {
-    return this.userService.findAll();
+  findAll(@Req() req) {
+    return this.userService.findAll(req.user.sub);
   }
 
   @Public()

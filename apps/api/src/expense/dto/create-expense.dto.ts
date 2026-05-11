@@ -8,8 +8,25 @@ import {
   IsDateString,
   ValidateNested,
   IsArray,
+  ArrayMinSize,
+  IsBoolean,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+
+export class ExpenseSplitDto {
+  @IsNotEmpty()
+  @IsUUID()
+  userId: string;
+
+  @IsNotEmpty()
+  @IsNumber()
+  @IsPositive()
+  amount: number;
+
+  @IsOptional()
+  @IsBoolean()
+  isPaid?: boolean;
+}
 
 export class CreateExpenseDto {
   @IsNotEmpty()
@@ -25,13 +42,13 @@ export class CreateExpenseDto {
   @IsUUID()
   groupId: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsUUID()
   payeeId?: string;
 
   @IsNotEmpty()
   @IsUUID()
-  payerId?: string;
+  payerId: string;
 
   @IsNotEmpty()
   @IsDateString()
@@ -40,6 +57,13 @@ export class CreateExpenseDto {
   @IsOptional()
   @IsString()
   notes?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => ExpenseSplitDto)
+  splits?: ExpenseSplitDto[];
 }
 
 export class CreateManyExpensesDto {
