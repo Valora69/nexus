@@ -1,5 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import { PrismaClient, ActivityNameEnum, ActivityOnEnum } from '@prisma/client';
 
 const prisma = new PrismaClient({
   datasources: {
@@ -23,14 +22,13 @@ async function main() {
 
   console.log('✅ Cleared existing data');
 
-  // Create Users
-  const hashedPassword = await bcrypt.hash('password123', 10);
-
+  // Create Users with Google OAuth data
   const user1 = await prisma.user.create({
     data: {
       name: 'John Doe',
       email: 'john@example.com',
-      password: hashedPassword,
+      googleId: '1234567890',
+      picture: 'https://lh3.googleusercontent.com/a/default-user',
     },
   });
 
@@ -38,7 +36,8 @@ async function main() {
     data: {
       name: 'Jane Smith',
       email: 'jane@example.com',
-      password: hashedPassword,
+      googleId: '0987654321',
+      picture: 'https://lh3.googleusercontent.com/a/default-user',
     },
   });
 
@@ -46,7 +45,8 @@ async function main() {
     data: {
       name: 'Bob Johnson',
       email: 'bob@example.com',
-      password: hashedPassword,
+      googleId: '1122334455',
+      picture: 'https://lh3.googleusercontent.com/a/default-user',
     },
   });
 
@@ -122,13 +122,34 @@ async function main() {
 
   console.log('✅ Created expenses');
 
+  // Create Expense Splits
+  const split1 = await prisma.expenseSplit.create({
+    data: {
+      expenseId: expense1.id,
+      userId: user2.id,
+      amount: 150.0,
+      isPaid: false,
+    },
+  });
+
+  const split2 = await prisma.expenseSplit.create({
+    data: {
+      expenseId: expense2.id,
+      userId: user3.id,
+      amount: 75.0,
+      isPaid: false,
+    },
+  });
+
+  console.log('✅ Created expense splits');
+
   // Create Payments
   await prisma.payment.create({
     data: {
       amountPaid: 150.0,
       paymentProof: 'payment-receipt-001.pdf',
       paidAt: new Date('2024-01-17'),
-      expenseId: expense1.id,
+      expenseSplitId: split1.id,
     },
   });
 
@@ -137,7 +158,7 @@ async function main() {
       amountPaid: 75.0,
       paymentProof: 'payment-receipt-002.pdf',
       paidAt: new Date('2024-01-18'),
-      expenseId: expense2.id,
+      expenseSplitId: split2.id,
     },
   });
 
@@ -149,14 +170,20 @@ async function main() {
       {
         groupId: group1.id,
         createdByUserId: user1.id,
+        activityName: ActivityNameEnum.CREATED,
+        activityOn: ActivityOnEnum.GROUP_DETAILS, // group1 created
       },
       {
         groupId: group1.id,
         createdByUserId: user2.id,
+        activityName: ActivityNameEnum.CREATED,
+        activityOn: ActivityOnEnum.EXPENSE, // e.g. expense1 created in group1
       },
       {
         groupId: group2.id,
         createdByUserId: user1.id,
+        activityName: ActivityNameEnum.CREATED,
+        activityOn: ActivityOnEnum.PAYMENT, // e.g. payment on expense2 in group2
       },
     ],
   });
@@ -167,7 +194,7 @@ async function main() {
   console.log(`
 📊 Summary:
 - Users: 3 (john@example.com, jane@example.com, bob@example.com)
-- Password for all users: password123
+- Authentication: Google OAuth only
 - Groups: 2
 - Expenses: 3
 - Payments: 2

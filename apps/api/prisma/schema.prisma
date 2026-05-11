@@ -26,25 +26,31 @@ enum ActivityOnEnum {
   EXPENSE_PAYER  
 }
 
-
-
 model User {
-  id             String        @id @default(uuid())
-  name           String
-  email          String        @unique
-  password       String
-  groups         GroupMember[]
-  lendedExpenses Expense[]     @relation("ExpensePayee")
-  owedExpenses   Expense[]     @relation("ExpensePayer")
-  createdGroups  Group[]
-  activities     Activity[]
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  id                     String          @id @default(uuid())
+  name                   String
+  email                  String          @unique
+  googleId               String          @unique
+  picture                String?
+  gcashNumber            String?
+  groups                 GroupMember[]
+  lendedExpenses         Expense[]       @relation("ExpensePayee")
+  owedExpenses           Expense[]       @relation("ExpensePayer")
+  expenseSplits          ExpenseSplit[]
+  createdGroups          Group[]
+  activities             Activity[]
+  personalTransactions   PersonalTransaction[]
+  sentFriendRequests     FriendRequest[] @relation("SentFriendRequests")
+  receivedFriendRequests FriendRequest[] @relation("ReceivedFriendRequests")
+  friends                Friendship[]    @relation("UserFriends")
+  friendOf               Friendship[]    @relation("FriendOf")
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
 }
 
 model Group {
   id              String        @id @default(uuid())
-  name            String        @unique
+  name            String
   description     String?
   members         GroupMember[]
   expenses        Expense[]
@@ -67,38 +73,137 @@ model GroupMember {
 }
 
 model Expense {
-  id          String   @unique @default(uuid())
+  id          String         @id @default(uuid())
   name        String
   totalAmount Float
-  group       Group    @relation(fields: [groupId], references: [id])
+  group       Group          @relation(fields: [groupId], references: [id])
   groupId     String
   date        DateTime
   notes       String?
-  payer       User     @relation("ExpensePayer", fields: [payerId], references: [id], onDelete: Cascade)
+  payer       User           @relation("ExpensePayer", fields: [payerId], references: [id], onDelete: Cascade)
   payerId     String
-  payee       User     @relation("ExpensePayee", fields: [payeeId], references: [id], onDelete: Cascade)
-  payeeId     String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  payment     Payment? @relation(fields: [paymentId], references: [id])
-  paymentId   String?  @unique
+  payee       User?          @relation("ExpensePayee", fields: [payeeId], references: [id], onDelete: Cascade)
+  payeeId     String?
+  splits      ExpenseSplit[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([groupId])
+  @@index([payerId])
+  @@index([payeeId])
+}
+
+enum PaymentMethod {
+  GCASH
+  CASH
 }
 
 model Payment {
-  id           String   @id @default(uuid())
-  amountPaid   Float
-  paymentProof String?
-  paidAt       DateTime @default(now())
-  expense      Expense?
-  expenseId    String?
+  id             String        @id @default(uuid())
+  amountPaid     Float
+  paymentMethod  PaymentMethod @default(CASH)
+  paymentProof   String?
+  isVerified     Boolean       @default(false)
+  verifiedAt     DateTime?
+  paidAt         DateTime      @default(now())
+  expenseSplit   ExpenseSplit  @relation(fields: [expenseSplitId], references: [id], onDelete: Cascade)
+  expenseSplitId String
+
+  @@index([expenseSplitId])
+}
+
+model ExpenseSplit {
+  id                  String               @id @default(uuid())
+  expense             Expense              @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  expenseId           String
+  user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId              String
+  amount              Float
+  /// @deprecated Use Payment.isVerified instead; this field is never updated after creation
+  isPaid              Boolean              @default(false)
+  /// @deprecated Use Payment.verifiedAt instead; this field is never updated after creation
+  paidAt              DateTime?
+  payments            Payment[]
+  personalTransaction PersonalTransaction?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  @@unique([expenseId, userId])
+  @@index([expenseId])
+  @@index([userId])
 }
 
 model Activity {
-  id              String @id @default(uuid())
+  id              String           @id @default(uuid())
   groupId         String
-  group           Group  @relation(fields: [groupId], references: [id])
+  group           Group            @relation(fields: [groupId], references: [id])
   createdByUserId String
-  createdBy       User   @relation(fields: [createdByUserId], references: [id])
+  createdBy       User             @relation(fields: [createdByUserId], references: [id])
   activityName    ActivityNameEnum
-  activityOn     ActivityOnEnum
+  activityOn      ActivityOnEnum
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([groupId])
+  @@index([createdByUserId])
+}
+
+// Personal Transactions (quick-capture and auto-created from group splits)
+enum PersonalTransactionType {
+  EXPENSE
+  CREDIT
+}
+
+model PersonalTransaction {
+  id             String                  @id @default(uuid())
+  userId         String
+  user           User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type           PersonalTransactionType
+  amount         Float
+  description    String?
+  category       String?
+  source         String?
+  isFromGroup    Boolean                 @default(false)
+  expenseSplitId String?                 @unique
+  expenseSplit   ExpenseSplit?           @relation(fields: [expenseSplitId], references: [id], onDelete: SetNull)
+  date           DateTime                @default(now())
+  createdAt      DateTime                @default(now())
+  updatedAt      DateTime                @updatedAt
+
+  @@index([userId])
+  @@index([userId, type])
+  @@index([userId, isFromGroup])
+}
+
+// Friend System
+enum FriendRequestStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+model FriendRequest {
+  id             String              @id @default(uuid())
+  senderId       String
+  sender         User                @relation("SentFriendRequests", fields: [senderId], references: [id], onDelete: Cascade)
+  recipientEmail String
+  recipientId    String?
+  recipient      User?               @relation("ReceivedFriendRequests", fields: [recipientId], references: [id], onDelete: Cascade)
+  status         FriendRequestStatus @default(PENDING)
+  token          String              @unique @default(uuid())
+  createdAt      DateTime            @default(now())
+  expiresAt      DateTime
+
+  @@unique([senderId, recipientEmail])
+}
+
+model Friendship {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation("UserFriends", fields: [userId], references: [id], onDelete: Cascade)
+  friendId  String
+  friend    User     @relation("FriendOf", fields: [friendId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, friendId])
 }
