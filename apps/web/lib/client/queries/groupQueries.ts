@@ -1,18 +1,20 @@
-"use client";
-import { useQuery } from "@tanstack/react-query";
+'use client';
+import { useQuery } from '@tanstack/react-query';
 
-import { getAllGroups, getGroupById } from "../services/groupService";
+import { getAllGroups, getGroupById } from '../services/groupService';
 
 export const useGetAllGroups = () => {
   return useQuery({
-    queryKey: ["groups"],
+    queryKey: ['groups'],
     queryFn: () => getAllGroups(),
+    staleTime: 5 * 60 * 1000, // ⏰ Cache for 5 minutes
   });
 };
 
 export const useGetGroupById = (id: string) => {
   return useQuery({
-    queryKey: ["groups", id],
+    queryKey: ['groups', id],
     queryFn: () => getGroupById(id),
+    staleTime: 5 * 60 * 1000, // ⏰ Cache for 5 minutes
   });
 };

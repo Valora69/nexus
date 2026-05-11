@@ -1,4 +1,8 @@
-import { useMutation, UseMutationOptions } from '@tanstack/react-query';
+import {
+  useMutation,
+  UseMutationOptions,
+  useQueryClient,
+} from '@tanstack/react-query';
 import {
   createGroupMember,
   updateGroupMember,
@@ -7,37 +11,61 @@ import {
 import {
   CreateGroupMemberData,
   UpdateGroupMemberData,
-} from '../../types/model';
+} from '../../types/request';
 
 export const useCreateGroupMember = (
-  mutationOptions: UseMutationOptions<
+  mutationOptions?: UseMutationOptions<
     unknown,
     Error,
     { groupMemberData: CreateGroupMemberData }
   >,
-) =>
-  useMutation({
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
     mutationFn: ({ groupMemberData }) => createGroupMember(groupMemberData),
+    onSuccess: (...args) => {
+      // 🔄 Invalidate related queries
+      queryClient.invalidateQueries({ queryKey: ['groupMembers'] });
+      mutationOptions?.onSuccess?.(...args);
+    },
     ...mutationOptions,
   });
+};
 
 export const useUpdateGroupMember = (
-  mutationOptions: UseMutationOptions<
+  mutationOptions?: UseMutationOptions<
     unknown,
     Error,
     { id: string; groupMemberData: UpdateGroupMemberData }
   >,
-) =>
-  useMutation({
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
     mutationFn: ({ id, groupMemberData }) =>
       updateGroupMember(id, groupMemberData),
+    onSuccess: (...args) => {
+      // 🔄 Invalidate related queries
+      queryClient.invalidateQueries({ queryKey: ['groupMembers'] });
+      mutationOptions?.onSuccess?.(...args);
+    },
     ...mutationOptions,
   });
+};
 
 export const useRemoveGroupMember = (
-  mutationOptions: UseMutationOptions<unknown, Error, { id: string }>,
-) =>
-  useMutation({
+  mutationOptions?: UseMutationOptions<unknown, Error, { id: string }>,
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
     mutationFn: ({ id }) => removeGroupMember(id),
+    onSuccess: (...args) => {
+      // 🔄 Invalidate related queries
+      queryClient.invalidateQueries({ queryKey: ['groupMembers'] });
+      mutationOptions?.onSuccess?.(...args);
+    },
     ...mutationOptions,
   });
+};

@@ -1,15 +1,18 @@
-import { BASE_URL } from "../config";
-import { CreateExpenseData, UpdateExpenseData } from "../../types/model";
+import { BASE_URL } from '../config';
+import {
+  CreateExpenseData,
+  UpdateExpenseData,
+} from '../../types/request';
 
-const EXPENSE_URI = "/expense";
+const EXPENSE_URI = '/expenses';
 
 export const createExpense = async (expenseData: CreateExpenseData) => {
   const data = await fetch(`${BASE_URL}${EXPENSE_URI}`, {
-    method: "POST",
+    method: 'POST',
     body: JSON.stringify(expenseData),
-    credentials: "include",
+    credentials: 'include',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
   });
 
@@ -21,12 +24,16 @@ export const createExpense = async (expenseData: CreateExpenseData) => {
   return response;
 };
 
-export const getAllExpenses = async () => {
-  const data = await fetch(`${BASE_URL}${EXPENSE_URI}`, {
-    method: "GET",
-    credentials: "include",
+export const getAllExpenses = async (type?: 'payable' | 'receivable', groupId?: string) => {
+  const query = new URLSearchParams();
+  if (type) query.set('type', type);
+  if (groupId) query.set('groupId', groupId);
+  const params = query.size ? `?${query.toString()}` : '';
+  const data = await fetch(`${BASE_URL}${EXPENSE_URI}${params}`, {
+    method: 'GET',
+    credentials: 'include',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
   });
 
@@ -40,10 +47,10 @@ export const getAllExpenses = async () => {
 
 export const getExpenseById = async (id: string) => {
   const data = await fetch(`${BASE_URL}${EXPENSE_URI}/${id}`, {
-    method: "GET",
-    credentials: "include",
+    method: 'GET',
+    credentials: 'include',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
   });
 
@@ -57,14 +64,14 @@ export const getExpenseById = async (id: string) => {
 
 export const updateExpense = async (
   id: string,
-  expenseData: UpdateExpenseData
+  expenseData: UpdateExpenseData,
 ) => {
   const data = await fetch(`${BASE_URL}${EXPENSE_URI}/${id}`, {
-    method: "PATCH",
+    method: 'PATCH',
     body: JSON.stringify(expenseData),
-    credentials: "include",
+    credentials: 'include',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
   });
 
@@ -78,10 +85,10 @@ export const updateExpense = async (
 
 export const removeExpense = async (id: string) => {
   const data = await fetch(`${BASE_URL}${EXPENSE_URI}/${id}`, {
-    method: "DELETE",
-    credentials: "include",
+    method: 'DELETE',
+    credentials: 'include',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
   });
 

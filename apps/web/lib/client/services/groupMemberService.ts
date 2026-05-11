@@ -1,20 +1,20 @@
-import { BASE_URL } from "../config";
+import { BASE_URL } from '../config';
 import {
   CreateGroupMemberData,
   UpdateGroupMemberData,
-} from "../../types/model";
+} from '../../types/request';
 
-const GROUP_URI = "/group-member";
+const GROUP_URI = '/group-member';
 
 export const createGroupMember = async (
-  groupMemberData: CreateGroupMemberData
+  groupMemberData: CreateGroupMemberData,
 ) => {
   const data = await fetch(`${BASE_URL}${GROUP_URI}`, {
-    method: "POST",
+    method: 'POST',
     body: JSON.stringify(groupMemberData),
-    credentials: "include",
+    credentials: 'include',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
   });
 
@@ -27,10 +27,10 @@ export const createGroupMember = async (
 };
 export const getAllGroupMembers = async () => {
   const data = await fetch(`${BASE_URL}${GROUP_URI}`, {
-    method: "GET",
-    credentials: "include",
+    method: 'GET',
+    credentials: 'include',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
   });
 
@@ -44,10 +44,10 @@ export const getAllGroupMembers = async () => {
 
 export const getGroupMemberById = async (id: string) => {
   const data = await fetch(`${BASE_URL}${GROUP_URI}/${id}`, {
-    method: "GET",
-    credentials: "include",
+    method: 'GET',
+    credentials: 'include',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
   });
 
@@ -61,14 +61,14 @@ export const getGroupMemberById = async (id: string) => {
 
 export const updateGroupMember = async (
   id: string,
-  groupMemberData: UpdateGroupMemberData
+  groupMemberData: UpdateGroupMemberData,
 ) => {
   const data = await fetch(`${BASE_URL}${GROUP_URI}/${id}`, {
-    method: "PATCH",
+    method: 'PATCH',
     body: JSON.stringify(groupMemberData),
-    credentials: "include",
+    credentials: 'include',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
   });
 
@@ -82,10 +82,10 @@ export const updateGroupMember = async (
 
 export const removeGroupMember = async (id: string) => {
   const data = await fetch(`${BASE_URL}${GROUP_URI}/${id}`, {
-    method: "DELETE",
-    credentials: "include",
+    method: 'DELETE',
+    credentials: 'include',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
   });
 

@@ -1,7 +1,11 @@
-import { useMutation, UseMutationOptions } from '@tanstack/react-query';
+import {
+  useMutation,
+  UseMutationOptions,
+  useQueryClient,
+} from '@tanstack/react-query';
 
 import { createUser, removeUser, updateUser } from '../services/userService';
-import { CreateUserData, UpdateUserData } from '../../types/model';
+import { CreateUserData, UpdateUserData } from '../../types/request';
 
 export const useCreateUser = (
   mutationOptions: UseMutationOptions<
@@ -9,11 +13,19 @@ export const useCreateUser = (
     Error,
     { userData: CreateUserData }
   >,
-) =>
-  useMutation({
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
     mutationFn: ({ userData }) => createUser(userData),
+    onSuccess: (...args) => {
+      // 🔄 Invalidate related queries
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      mutationOptions?.onSuccess?.(...args);
+    },
     ...mutationOptions,
   });
+};
 
 export const useUpdateUser = (
   mutationOptions: UseMutationOptions<
@@ -21,16 +33,33 @@ export const useUpdateUser = (
     Error,
     { id: string; userData: UpdateUserData }
   >,
-) =>
-  useMutation({
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
     mutationFn: ({ id, userData }) => updateUser(id, userData),
+    onSuccess: (...args) => {
+      // 🔄 Invalidate related queries
+      queryClient.invalidateQueries({ queryKey: ['currentUsers'] });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      mutationOptions?.onSuccess?.(...args);
+    },
     ...mutationOptions,
   });
+};
 
 export const useRemoveUser = (
   mutationOptions: UseMutationOptions<unknown, Error, { id: string }>,
-) =>
-  useMutation({
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
     mutationFn: ({ id }) => removeUser(id),
+    onSuccess: (...args) => {
+      // 🔄 Invalidate related queries
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      mutationOptions?.onSuccess?.(...args);
+    },
     ...mutationOptions,
   });
+};

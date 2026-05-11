@@ -1,5 +1,6 @@
 import { BASE_URL } from '../config';
-import { CreateUserData, UpdateUserData, User } from '../../types/model';
+import { CreateUserData, UpdateUserData } from '../../types/request';
+import { User } from '@/lib/types/entities';
 
 const USER_URI = '/user';
 const CURRENT_USER_URI = '/user/currentuser';

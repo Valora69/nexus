@@ -1,21 +1,18 @@
-import { BASE_URL } from "../config";
-import {
-  CreatePaymentData,
-  UpdatePaymentData,
-  Payment,
-} from "../../types/model";
+import { BASE_URL } from '../config';
+import { CreatePaymentData, UpdatePaymentData } from '../../types/request';
+import { Payment, PaymentWithRelations } from '@/lib/types/entities';
 
-const PAYMENT_URI = "/payment";
+const PAYMENT_URI = '/payment';
 
 export const createPayment = async (
-  paymentData: CreatePaymentData
+  paymentData: CreatePaymentData,
 ): Promise<Payment> => {
   const data = await fetch(`${BASE_URL}${PAYMENT_URI}`, {
-    method: "POST",
+    method: 'POST',
     body: JSON.stringify(paymentData),
-    credentials: "include",
+    credentials: 'include',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
   });
 
@@ -27,12 +24,12 @@ export const createPayment = async (
   return response;
 };
 
-export const getAllPayments = async (): Promise<Payment[]> => {
+export const getAllPayments = async (): Promise<PaymentWithRelations[]> => {
   const data = await fetch(`${BASE_URL}${PAYMENT_URI}`, {
-    method: "GET",
-    credentials: "include",
+    method: 'GET',
+    credentials: 'include',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
   });
 
@@ -44,12 +41,54 @@ export const getAllPayments = async (): Promise<Payment[]> => {
   return response;
 };
 
+export const getPendingVerification = async (): Promise<
+  PaymentWithRelations[]
+> => {
+  const data = await fetch(`${BASE_URL}${PAYMENT_URI}/pending-verification`, {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!data.ok) {
+    throw new Error(
+      `Failed to fetch pending verification payments: ${data.statusText}`,
+    );
+  }
+
+  const response = await data.json();
+  return response;
+};
+
+export const getPendingConfirmation = async (): Promise<
+  PaymentWithRelations[]
+> => {
+  const data = await fetch(`${BASE_URL}${PAYMENT_URI}/pending-confirmation`, {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!data.ok) {
+    throw new Error(
+      `Failed to fetch pending confirmation payments: ${data.statusText}`,
+    );
+  }
+
+  const response = await data.json();
+  return response;
+};
+
 export const getPaymentById = async (id: string): Promise<Payment> => {
   const data = await fetch(`${BASE_URL}${PAYMENT_URI}/${id}`, {
-    method: "GET",
-    credentials: "include",
+    method: 'GET',
+    credentials: 'include',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
   });
 
@@ -63,15 +102,15 @@ export const getPaymentById = async (id: string): Promise<Payment> => {
 
 export const updatePayment = async (
   id: string,
-  paymentData: UpdatePaymentData
+  paymentData: UpdatePaymentData,
 ): Promise<Payment> => {
   const data = await fetch(`${BASE_URL}${PAYMENT_URI}/${id}`, {
-    method: "PATCH",
+    method: 'PATCH',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify(paymentData),
-    credentials: "include",
+    credentials: 'include',
   });
 
   if (!data.ok) {
@@ -84,11 +123,11 @@ export const updatePayment = async (
 
 export const removePayment = async (id: string): Promise<void> => {
   const data = await fetch(`${BASE_URL}${PAYMENT_URI}/${id}`, {
-    method: "DELETE",
+    method: 'DELETE',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
-    credentials: "include",
+    credentials: 'include',
   });
 
   if (!data.ok) {

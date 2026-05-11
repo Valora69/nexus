@@ -5,7 +5,7 @@ import {
   LogoutResponse,
   logoutUser,
 } from '../services/loginService';
-import { LoginDTO } from '../zod-schemas/loginSchema';
+import { LoginDTO } from '../../zod/loginSchema';
 
 interface LoginError {
   message: string;

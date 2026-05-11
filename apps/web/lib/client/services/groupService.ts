@@ -1,15 +1,15 @@
-import { BASE_URL } from "../config";
-import { CreateGroupData, UpdateGroupData } from "../../types/model";
+import { BASE_URL } from '../config';
+import { CreateGroupData, UpdateGroupData } from '../../types/request';
 
-const GROUP_URI = "/group";
+const GROUP_URI = '/group';
 
 export const createGroup = async (groupData: CreateGroupData) => {
   const data = await fetch(`${BASE_URL}${GROUP_URI}`, {
-    method: "POST",
+    method: 'POST',
     body: JSON.stringify(groupData),
-    credentials: "include",
+    credentials: 'include',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
   });
 
@@ -23,10 +23,10 @@ export const createGroup = async (groupData: CreateGroupData) => {
 
 export const getAllGroups = async () => {
   const data = await fetch(`${BASE_URL}${GROUP_URI}`, {
-    method: "GET",
-    credentials: "include",
+    method: 'GET',
+    credentials: 'include',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
   });
 
@@ -40,10 +40,10 @@ export const getAllGroups = async () => {
 
 export const getGroupById = async (id: string) => {
   const data = await fetch(`${BASE_URL}${GROUP_URI}/${id}`, {
-    method: "GET",
-    credentials: "include",
+    method: 'GET',
+    credentials: 'include',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
   });
 
@@ -57,11 +57,11 @@ export const getGroupById = async (id: string) => {
 
 export const updateGroup = async (id: string, groupData: UpdateGroupData) => {
   const data = await fetch(`${BASE_URL}${GROUP_URI}/${id}`, {
-    method: "PATCH",
+    method: 'PATCH',
     body: JSON.stringify(groupData),
-    credentials: "include",
+    credentials: 'include',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
   });
 
@@ -75,10 +75,10 @@ export const updateGroup = async (id: string, groupData: UpdateGroupData) => {
 
 export const removeGroup = async (id: string) => {
   const data = await fetch(`${BASE_URL}${GROUP_URI}/${id}`, {
-    method: "DELETE",
-    credentials: "include",
+    method: 'DELETE',
+    credentials: 'include',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
   });
 

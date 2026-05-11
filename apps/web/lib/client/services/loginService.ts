@@ -1,31 +1,31 @@
-import { BASE_URL } from "../config";
-import type { LoginDTO } from "../zod-schemas/loginSchema";
+import { BASE_URL } from '../config';
+import type { LoginDTO } from '../../zod/loginSchema';
 
-const AUTH_URI = "/auth";
+const AUTH_URI = '/auth';
 
 export interface LoginResponse {
   access_token: string;
 }
 
 export const loginUser = async (
-  credentials: LoginDTO
+  credentials: LoginDTO,
 ): Promise<LoginResponse> => {
   try {
     const response = await fetch(`${BASE_URL}${AUTH_URI}/login`, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(credentials),
-      credentials: "include",
+      credentials: 'include',
     });
 
     if (!response.ok) {
       const errorData = await response.json();
       if (response.status === 401) {
-        throw new Error("Invalid credentials");
+        throw new Error('Invalid credentials');
       }
-      throw new Error(errorData.message || "Login failed");
+      throw new Error(errorData.message || 'Login failed');
     }
 
     const data = await response.json();
@@ -34,7 +34,7 @@ export const loginUser = async (
     if (error instanceof Error) {
       throw error;
     }
-    throw new Error("An unexpected error occurred");
+    throw new Error('An unexpected error occurred');
   }
 };
 
@@ -45,13 +45,13 @@ export interface LogoutResponse {
 export const logoutUser = async (): Promise<LogoutResponse> => {
   try {
     const response = await fetch(`${BASE_URL}${AUTH_URI}/logout`, {
-      method: "POST",
-      credentials: "include",
+      method: 'POST',
+      credentials: 'include',
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || "Logout failed");
+      throw new Error(errorData.message || 'Logout failed');
     }
 
     const data = await response.json();
@@ -60,6 +60,6 @@ export const logoutUser = async (): Promise<LogoutResponse> => {
     if (error instanceof Error) {
       throw error;
     }
-    throw new Error("An unexpected error occurred during logout");
+    throw new Error('An unexpected error occurred during logout');
   }
 };
