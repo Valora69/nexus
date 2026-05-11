@@ -1,5 +1,4 @@
 import {
-  Body,
   Controller,
   Get,
   HttpCode,
@@ -8,47 +7,57 @@ import {
   Request,
   Res,
   UseGuards,
-  UsePipes,
-  ValidationPipe,
 } from '@nestjs/common';
+import { AuthGuard as PassportAuthGuard } from '@nestjs/passport';
 
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
 import { Public } from './public.decorator';
-import { LoginDto } from './dto/login.dto';
+import { ThrottleAuth } from 'src/common/throttle.decorators';
 
+@ThrottleAuth()
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  // Google OAuth routes
   @Public()
-  @HttpCode(HttpStatus.OK)
-  @Post('login')
-  @UsePipes(new ValidationPipe({ whitelist: true }))
-  async signIn(@Body() loginDto: LoginDto, @Res() res) {
-    const { access_token } = await this.authService.loginUser(loginDto);
+  @Get('google')
+  @UseGuards(PassportAuthGuard('google'))
+  async googleAuth() {
+    // Guard redirects to Google
+  }
 
-    if (!access_token) {
-      return res.status(HttpStatus.UNAUTHORIZED).send({
-        message: 'Invalid credentials',
-      });
-    }
-
-    res.cookie('token', access_token, {
+  @Public()
+  @Get('google/callback')
+  @UseGuards(PassportAuthGuard('google'))
+  async googleAuthRedirect(@Request() req, @Res() res) {
+    const token = await this.authService.googleLogin(req.user);
+    
+    // Set cookie
+    res.cookie('token', token.access_token, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
       path: '/',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    return res.send({ message: 'Login successful', auth_token: access_token });
+    // Redirect to frontend with success
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    return res.redirect(`${frontendUrl}/home?auth=success`);
   }
 
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('logout')
   async signOut(@Res() res) {
-    res.clearCookie('token');
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+    });
     return res.send({ message: 'Logout successful' });
   }
 

@@ -1,14 +1,9 @@
 import {
-  HttpException,
-  HttpStatus,
   Injectable,
-  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
-import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
@@ -17,52 +12,26 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async loginUser(loginDto: LoginDto) {
-    const { password, email } = loginDto;
-    let user;
-
-    try {
-      user = await this.prismaService.user.findUnique({
-        where: {
-          email,
-        },
-      });
-      if (!user) {
-        throw new NotFoundException('User not found');
-      }
-
-      const isPasswordValid = await bcrypt.compare(password, user.password);
-      if (!isPasswordValid) {
-        throw new UnauthorizedException('Invalid credentials');
-      }
-
-      const payload = {
-        email,
-        sub: user.id,
-        name: user.name,
-      };
-      const token = this.jwtService.sign(payload);
-
-      return {
-        access_token: token,
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-        },
-      };
-    } catch (error) {
-      if (
-        error instanceof UnauthorizedException ||
-        error instanceof NotFoundException
-      ) {
-        throw error;
-      }
-      console.error('Unexpected Error during login:', error);
-      throw new HttpException(
-        'Internal server error during login',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+  async googleLogin(user: any) {
+    if (!user) {
+      throw new UnauthorizedException('No user from Google');
     }
+
+    const payload = {
+      email: user.email,
+      sub: user.id,
+      name: user.name,
+      picture: user.picture,
+    };
+
+    return {
+      access_token: this.jwtService.sign(payload),
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        picture: user.picture,
+      },
+    };
   }
 }
