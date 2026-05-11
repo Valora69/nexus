@@ -31,9 +31,12 @@
     "packages/*"
   ],
   "dependencies": {
+    "@nestjs/swagger": "^11.2.5",
     "@radix-ui/react-label": "^2.1.8",
     "@tanstack/react-query": "^5.90.12",
+    "@tanstack/react-table": "^8.21.3",
     "class-variance-authority": "^0.7.1",
-    "react-router-dom": "^7.12.0"
+    "react-router-dom": "^7.12.0",
+    "swagger-ui-express": "^5.0.1"
   }
 }

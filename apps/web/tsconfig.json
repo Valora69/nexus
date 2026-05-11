@@ -19,6 +19,9 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
+       "@/*": [
+        "./*"
+      ],
       "@web/*": [
         "./*"
       ],
