@@ -81,7 +81,7 @@ export function VerifyPaymentModal({
 
             <div className="bg-yellow-500/10 border border-yellow-500/20 p-3 rounded-lg">
               <p className="text-xs text-yellow-700 dark:text-yellow-400">
-                ⚠️ Only confirm if you have verified the payment in your{' '}
+                Only confirm if you have verified the payment in your{' '}
                 {payment.paymentMethod === 'GCASH'
                   ? 'GCash app'
                   : 'received the cash'}

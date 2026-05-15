@@ -27,7 +27,8 @@ export function SplitFilterTabs({
         onClick={() => onFilterChange('payable')}
         className="gap-2"
       >
-        <ArrowDownRight className="h-4 w-4" />I Owe
+        <ArrowDownRight className="h-4 w-4" />
+        Payables
       </Button>
       <Button
         variant={filter === 'receivable' ? 'default' : 'ghost'}
@@ -36,7 +37,7 @@ export function SplitFilterTabs({
         className="gap-2"
       >
         <ArrowUpRight className="h-4 w-4" />
-        Owed to Me
+        Recievables
       </Button>
     </div>
   );

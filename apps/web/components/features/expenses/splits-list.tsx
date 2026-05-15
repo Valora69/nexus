@@ -26,9 +26,9 @@ export function SplitsList({
   const getFilterTitle = () => {
     switch (filter) {
       case 'payable':
-        return 'What I Owe';
+        return 'Payables';
       case 'receivable':
-        return 'Owed to Me';
+        return 'Recievables';
       default:
         return 'All Splits';
     }
