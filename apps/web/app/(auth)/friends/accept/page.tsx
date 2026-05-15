@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@web/components/ui/card';
 import { Button } from '@web/components/ui/button';
 import { Loader2, UserPlus, CheckCircle, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAcceptFriendRequestByToken } from '@web/lib/client/mutations/friendMutations';
+import { AuthBackground } from '@web/components/auth/auth-background';
 
 type Status = 'loading' | 'login-required' | 'accepting' | 'success' | 'error';
 
@@ -16,6 +17,7 @@ export default function AcceptFriendPage() {
   const token = searchParams?.get('token');
   const [status, setStatus] = useState<Status>('loading');
   const [errorMessage, setErrorMessage] = useState<string>('');
+  const hasFiredRef = useRef(false);
 
   const acceptMutation = useAcceptFriendRequestByToken({
     onSuccess: () => {
@@ -32,11 +34,12 @@ export default function AcceptFriendPage() {
   useEffect(() => {
     if (!token) {
       setStatus('error');
-      setErrorMessage('Invalid invite link - no token provided');
+      setErrorMessage('Invalid invite link — no token provided.');
       return;
     }
 
-    // Check if user is logged in by making a request to /auth/profile
+    if (hasFiredRef.current) return;
+
     const checkAuth = async () => {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
@@ -45,11 +48,11 @@ export default function AcceptFriendPage() {
         });
 
         if (res.ok) {
-          // User is logged in, accept the request
+          if (hasFiredRef.current) return;
+          hasFiredRef.current = true;
           setStatus('accepting');
           acceptMutation.mutate({ data: { token } });
         } else {
-          // Need to login first
           setStatus('login-required');
         }
       } catch {
@@ -62,47 +65,52 @@ export default function AcceptFriendPage() {
   }, [token]);
 
   const handleLogin = () => {
-    // Store token in sessionStorage to retrieve after login
     if (token) {
       sessionStorage.setItem('friendRequestToken', token);
     }
-    
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
     const returnUrl = encodeURIComponent(`/friends/accept?token=${token}`);
     window.location.href = `${apiUrl}/api/auth/google?redirect=${returnUrl}`;
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      {/* Background grid effect */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,65,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,65,0.03)_1px,transparent_1px)] bg-[size:50px_50px]" />
-
-      <Card className="w-full max-w-md bg-card/50 backdrop-blur-sm border-border/50 relative z-10">
+    <AuthBackground>
+      <Card
+        className="w-full max-w-md bg-card/60 backdrop-blur-xl border border-primary/20 rounded-2xl shadow-2xl relative z-10 animate-auth-fade-in-up hover:shadow-[0_20px_40px_rgba(0,255,65,0.1)] transition-shadow duration-300"
+        style={{ willChange: 'transform' }}
+      >
         <CardHeader className="text-center space-y-4 pb-2">
           <div className="flex items-center justify-center gap-3">
             <div className="p-2 rounded-lg bg-primary/10 border border-primary/30">
               <UserPlus className="h-8 w-8 text-primary" />
             </div>
           </div>
-          <CardTitle className="text-xl">Friend Request</CardTitle>
+          <CardTitle className="text-xl font-light tracking-wide">
+            Friend Request
+          </CardTitle>
         </CardHeader>
 
         <CardContent className="pt-4">
           {status === 'loading' && (
             <div className="flex flex-col items-center gap-4 py-8">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="text-muted-foreground">Checking authentication...</p>
+              <p className="text-muted-foreground text-sm font-light">
+                Checking authentication...
+              </p>
             </div>
           )}
 
           {status === 'login-required' && (
             <div className="flex flex-col items-center gap-4 py-4">
-              <p className="text-center text-muted-foreground">
+              <p className="text-center text-muted-foreground text-sm font-light">
                 Sign in with Google to accept this friend request
               </p>
-              <Button onClick={handleLogin} className="w-full">
+              <Button
+                onClick={handleLogin}
+                className="w-full bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 font-light flex items-center justify-center gap-3 h-12"
+              >
                 <svg
-                  className="w-5 h-5 mr-2"
+                  className="w-5 h-5"
                   viewBox="0 0 24 24"
                   xmlns="http://www.w3.org/2000/svg"
                 >
@@ -131,18 +139,20 @@ export default function AcceptFriendPage() {
           {status === 'accepting' && (
             <div className="flex flex-col items-center gap-4 py-8">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="text-muted-foreground">Accepting friend request...</p>
+              <p className="text-muted-foreground text-sm font-light">
+                Accepting friend request...
+              </p>
             </div>
           )}
 
           {status === 'success' && (
             <div className="flex flex-col items-center gap-4 py-8">
               <CheckCircle className="h-12 w-12 text-primary" />
-              <div className="text-center">
-                <p className="text-lg font-medium text-foreground">
-                  Friend Added!
+              <div className="text-center space-y-1">
+                <p className="text-lg font-light text-foreground">
+                  Friend Added
                 </p>
-                <p className="text-muted-foreground mt-1">
+                <p className="text-muted-foreground text-sm font-light">
                   Redirecting to your friends list...
                 </p>
               </div>
@@ -152,19 +162,25 @@ export default function AcceptFriendPage() {
           {status === 'error' && (
             <div className="flex flex-col items-center gap-4 py-8">
               <XCircle className="h-12 w-12 text-destructive" />
-              <div className="text-center">
-                <p className="text-lg font-medium text-foreground">
-                  Something went wrong
+              <div className="text-center space-y-1">
+                <p className="text-lg font-light text-foreground">
+                  Unable to accept
                 </p>
-                <p className="text-muted-foreground mt-1">{errorMessage}</p>
+                <p className="text-muted-foreground text-sm font-light">
+                  {errorMessage}
+                </p>
               </div>
-              <Button variant="outline" onClick={() => router.push('/friends')}>
+              <Button
+                variant="outline"
+                className="font-light"
+                onClick={() => router.push('/friends')}
+              >
                 Go to Friends
               </Button>
             </div>
           )}
         </CardContent>
       </Card>
-    </div>
+    </AuthBackground>
   );
 }

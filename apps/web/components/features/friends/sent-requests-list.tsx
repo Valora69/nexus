@@ -18,8 +18,8 @@ export function SentRequestsList({ requests }: SentRequestsListProps) {
         <Card className="border-border">
           <CardContent className="py-12 text-center text-muted-foreground">
             <Send className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p className="text-lg font-medium">No sent requests</p>
-            <p className="text-sm mt-1">
+            <p className="text-lg font-normal">No sent requests</p>
+            <p className="text-sm font-light mt-1">
               Requests you've sent will appear here until they're accepted.
             </p>
           </CardContent>
@@ -39,10 +39,10 @@ export function SentRequestsList({ requests }: SentRequestsListProps) {
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="font-medium">
+                      <p className="font-normal">
                         {request.recipient?.name || request.recipientEmail}
                       </p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-muted-foreground font-light">
                         {request.recipientEmail}
                       </p>
                     </div>

@@ -8,7 +8,6 @@ import {
   FriendsTabs,
   FriendsList,
   PendingRequestsList,
-  SentRequestsList,
   AddFriendModal,
   RemoveFriendModal,
 } from '@web/components/features/friends';
@@ -17,7 +16,6 @@ import { FriendModals } from '@web/lib/constants/modals';
 import {
   useGetAllFriends,
   useGetPendingRequests,
-  useGetSentRequests,
 } from '@web/lib/client/queries/friendQueries';
 import {
   useSendFriendRequest,
@@ -38,10 +36,8 @@ export default function FriendsPage() {
     useGetAllFriends();
   const { data: pendingRequests = [], isLoading: isLoadingPending } =
     useGetPendingRequests();
-  const { data: sentRequests = [], isLoading: isLoadingSent } =
-    useGetSentRequests();
 
-  const isLoading = isLoadingFriends || isLoadingPending || isLoadingSent;
+  const isLoading = isLoadingFriends || isLoadingPending;
 
   // Mutations
   const sendRequestMutation = useSendFriendRequest({
@@ -164,7 +160,7 @@ export default function FriendsPage() {
       <FriendsTabs
         friendsCount={friends.length}
         pendingCount={pendingRequests.length}
-        sentCount={sentRequests.length}
+        onAddFriend={onAddFriend}
       >
         <FriendsList
           friends={friends}
@@ -178,7 +174,6 @@ export default function FriendsPage() {
           isAccepting={acceptMutation.isPending}
           isDeclining={declineMutation.isPending}
         />
-        <SentRequestsList requests={sentRequests} />
       </FriendsTabs>
 
       {activeModal && modals[activeModal]}

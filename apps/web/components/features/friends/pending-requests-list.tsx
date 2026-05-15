@@ -28,8 +28,8 @@ export function PendingRequestsList({
         <Card className="border-border">
           <CardContent className="py-12 text-center text-muted-foreground">
             <Mail className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p className="text-lg font-medium">No pending requests</p>
-            <p className="text-sm mt-1">
+            <p className="text-lg font-normal">No pending requests</p>
+            <p className="text-sm font-light mt-1">
               When someone sends you a friend request, it will appear here.
             </p>
           </CardContent>
@@ -48,8 +48,8 @@ export function PendingRequestsList({
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="font-medium">{request.sender.name}</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="font-normal">{request.sender.name}</p>
+                      <p className="text-sm text-muted-foreground font-light">
                         {request.sender.email}
                       </p>
                     </div>

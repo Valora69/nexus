@@ -7,86 +7,139 @@ import { toast } from 'sonner';
 import {
   ProfileHeader,
   ProfileCard,
-  UsersList,
   EditProfileModal,
-  BrowseUsersModal,
-  ViewUserModal,
 } from '@web/components/features/profile';
-import { ProfileModals } from '@web/lib/constants/modals';
-
 import {
-  useCurrentUser,
-  useGetAllUsers,
-} from '@web/lib/client/queries/userQueries';
-import { useUpdateUser } from '@web/lib/client/mutations/userMutation';
-import type { User } from '@web/lib/types/entities';
+  FriendsTabs,
+  FriendsList,
+  PendingRequestsList,
+  AddFriendModal,
+  RemoveFriendModal,
+} from '@web/components/features/friends';
+import { Card, CardContent } from '@web/components/ui/card';
 
-export default function ProfilePage() {
+import { useCurrentUser } from '@web/lib/client/queries/userQueries';
+import {
+  useGetAllFriends,
+  useGetPendingRequests,
+} from '@web/lib/client/queries/friendQueries';
+import { useGetAllGroups } from '@web/lib/client/queries/groupQueries';
+import { useUpdateUser } from '@web/lib/client/mutations/userMutation';
+import {
+  useSendFriendRequest,
+  useAcceptFriendRequest,
+  useDeclineFriendRequest,
+  useRemoveFriend,
+} from '@web/lib/client/mutations/friendMutations';
+import type { Friend } from '@web/lib/types/entities';
+
+function AccountStats({
+  friendsCount,
+  groupsCount,
+  memberSince,
+}: {
+  friendsCount: number;
+  groupsCount: number;
+  memberSince: string;
+}) {
+  const since = new Date(memberSince).toLocaleDateString('en-US', {
+    month: 'short',
+    year: 'numeric',
+  });
+
+  return (
+    <Card>
+      <CardContent className="p-4">
+        <div className="grid grid-cols-3 divide-x divide-border text-center">
+          <div className="px-3 py-1">
+            <p className="text-xl font-mono font-light">{friendsCount}</p>
+            <p className="text-xs text-muted-foreground font-light mt-0.5">
+              Friends
+            </p>
+          </div>
+          <div className="px-3 py-1">
+            <p className="text-xl font-mono font-light">{groupsCount}</p>
+            <p className="text-xs text-muted-foreground font-light mt-0.5">
+              Groups
+            </p>
+          </div>
+          <div className="px-3 py-1">
+            <p className="text-sm font-light tracking-wide leading-6">{since}</p>
+            <p className="text-xs text-muted-foreground font-light mt-0.5">
+              Member since
+            </p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function AccountPage() {
   const router = useRouter();
 
-  // Modal state
-  const [activeModal, setActiveModal] = useState<ProfileModals | null>(null);
-  const [viewUser, setViewUser] = useState<User | null>(null);
-
-  // Edit profile form state
+  // Profile modal state
+  const [editOpen, setEditOpen] = useState(false);
   const [editName, setEditName] = useState('');
-  const [editEmail, setEditEmail] = useState('');
   const [editGcashNumber, setEditGcashNumber] = useState('');
-  const [browseSearch, setBrowseSearch] = useState('');
+
+  // Friend modal state
+  const [addFriendOpen, setAddFriendOpen] = useState(false);
+  const [removeFriendOpen, setRemoveFriendOpen] = useState(false);
+  const [friendToRemove, setFriendToRemove] = useState<Friend | null>(null);
+  const [friendEmail, setFriendEmail] = useState('');
 
   // Data queries
-  const { data: currentUser, isLoading } = useCurrentUser();
-  const { data: allUsers = [] } = useGetAllUsers();
+  const { data: currentUser, isLoading: userLoading } = useCurrentUser();
+  const { data: friends = [], isLoading: friendsLoading } = useGetAllFriends();
+  const { data: pendingRequests = [], isLoading: pendingLoading } =
+    useGetPendingRequests();
+  const { data: groups = [] } = useGetAllGroups();
 
-  // Mutation
+  const isLoading = userLoading || friendsLoading || pendingLoading;
+
+  // Mutations
   const updateUserMutation = useUpdateUser({
     onSuccess: () => {
       toast.success('Profile updated');
-      closeModal();
+      setEditOpen(false);
     },
   });
 
-  // Modal handlers
-  const closeModal = () => {
-    setActiveModal(null);
-  };
+  const sendRequestMutation = useSendFriendRequest({
+    onSuccess: () => {
+      toast.success('Friend request sent!');
+      setFriendEmail('');
+      setAddFriendOpen(false);
+    },
+    onError: (error) => toast.error(error.message),
+  });
 
+  const acceptMutation = useAcceptFriendRequest({
+    onSuccess: () => toast.success('Friend request accepted!'),
+    onError: (error) => toast.error(error.message),
+  });
+
+  const declineMutation = useDeclineFriendRequest({
+    onSuccess: () => toast.success('Friend request declined'),
+    onError: (error) => toast.error(error.message),
+  });
+
+  const removeMutation = useRemoveFriend({
+    onSuccess: () => {
+      toast.success('Friend removed');
+      setRemoveFriendOpen(false);
+      setFriendToRemove(null);
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  // Profile handlers
   const onEditProfile = () => {
     if (!currentUser) return;
     setEditName(currentUser.name);
-    setEditEmail(currentUser.email);
     setEditGcashNumber(currentUser.gcashNumber || '');
-    setActiveModal(ProfileModals.EditProfile);
-  };
-
-  const onBrowseUsers = () => {
-    setBrowseSearch('');
-    setActiveModal(ProfileModals.BrowseUsers);
-  };
-
-  const onViewUser = (user: User) => {
-    setViewUser(user);
-    setActiveModal(ProfileModals.ViewUser);
-  };
-
-  const closeViewUser = () => {
-    setViewUser(null);
-    setActiveModal(null);
-  };
-
-  // Action handlers
-  const handleLogout = async () => {
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
-      await fetch(`${apiUrl}/api/auth/logout`, {
-        method: 'POST',
-        credentials: 'include',
-      });
-      toast.success('Logged out successfully');
-      router.push('/login');
-    } catch {
-      router.push('/login');
-    }
+    setEditOpen(true);
   };
 
   const handleSaveProfile = async () => {
@@ -104,73 +157,126 @@ export default function ProfilePage() {
     }
   };
 
-  // Filter users for browse modal (exclude current user)
-  const usersForBrowse = allUsers.filter((u) => u.id !== currentUser?.id);
+  const handleLogout = async () => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+      await fetch(`${apiUrl}/api/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } finally {
+      router.push('/login');
+    }
+  };
 
-  // Modals mapping
-  const modals = {
-    [ProfileModals.EditProfile]: (
+  // Friend handlers
+  const onAddFriend = () => setAddFriendOpen(true);
+
+  const onRemoveFriend = (friend: Friend) => {
+    setFriendToRemove(friend);
+    setRemoveFriendOpen(true);
+  };
+
+  const handleSendRequest = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!friendEmail.trim()) return;
+    sendRequestMutation.mutate({ data: { email: friendEmail.trim() } });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <div className="h-9 w-28 bg-muted/30 rounded animate-pulse" />
+            <div className="h-4 w-44 bg-muted/30 rounded animate-pulse" />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-[2fr_3fr] gap-6">
+          <div className="space-y-4">
+            <div className="h-40 bg-muted/30 rounded-lg animate-pulse" />
+            <div className="h-16 bg-muted/30 rounded-lg animate-pulse" />
+          </div>
+          <div className="h-64 bg-muted/30 rounded-lg animate-pulse" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentUser) return null;
+
+  return (
+    <div className="p-6 space-y-6">
+      <ProfileHeader onLogout={handleLogout} />
+
+      <div className="grid grid-cols-1 lg:grid-cols-[2fr_3fr] gap-6 items-start">
+        {/* Left column — identity */}
+        <div className="space-y-4">
+          <ProfileCard user={currentUser} onEdit={onEditProfile} />
+          <AccountStats
+            friendsCount={friends.length}
+            groupsCount={groups.length}
+            memberSince={currentUser.createdAt}
+          />
+        </div>
+
+        {/* Right column — social */}
+        <FriendsTabs
+          friendsCount={friends.length}
+          pendingCount={pendingRequests.length}
+          onAddFriend={onAddFriend}
+        >
+          <FriendsList
+            friends={friends}
+            onAddFriend={onAddFriend}
+            onRemoveFriend={onRemoveFriend}
+          />
+          <PendingRequestsList
+            requests={pendingRequests}
+            onAccept={(id) => acceptMutation.mutate({ requestId: id })}
+            onDecline={(id) => declineMutation.mutate({ requestId: id })}
+            isAccepting={acceptMutation.isPending}
+            isDeclining={declineMutation.isPending}
+          />
+        </FriendsTabs>
+      </div>
+
       <EditProfileModal
-        isOpen={activeModal === ProfileModals.EditProfile}
-        onClose={closeModal}
+        isOpen={editOpen}
+        onClose={() => setEditOpen(false)}
         name={editName}
-        email={editEmail}
+        email={currentUser.email}
         gcashNumber={editGcashNumber}
         onNameChange={setEditName}
         onGcashNumberChange={setEditGcashNumber}
         onSave={handleSaveProfile}
         isPending={updateUserMutation.isPending}
       />
-    ),
-    [ProfileModals.BrowseUsers]: (
-      <BrowseUsersModal
-        isOpen={activeModal === ProfileModals.BrowseUsers}
-        onClose={closeModal}
-        users={usersForBrowse}
-        searchQuery={browseSearch}
-        onSearchChange={setBrowseSearch}
-        onViewUser={(user) => {
-          closeModal();
-          onViewUser(user);
+
+      <AddFriendModal
+        isOpen={addFriendOpen}
+        onClose={() => {
+          setAddFriendOpen(false);
+          setFriendEmail('');
         }}
-      />
-    ),
-    [ProfileModals.ViewUser]: (
-      <ViewUserModal user={viewUser} onClose={closeViewUser} />
-    ),
-  };
-
-  if (isLoading) {
-    return (
-      <div className="p-6 space-y-6 max-w-2xl">
-        <ProfileHeader onLogout={handleLogout} />
-        <div className="h-64 bg-muted/30 rounded-lg animate-pulse" />
-      </div>
-    );
-  }
-
-  if (!currentUser) {
-    return (
-      <div className="p-6 space-y-6 max-w-2xl">
-        <p className="text-destructive">Please log in to view your profile</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="p-6 space-y-6 max-w-2xl">
-      <ProfileHeader onLogout={handleLogout} />
-
-      <ProfileCard user={currentUser} onEdit={onEditProfile} />
-
-      <UsersList
-        users={allUsers}
-        currentUserId={currentUser.id}
-        onBrowse={onBrowseUsers}
-        onViewUser={onViewUser}
+        email={friendEmail}
+        onEmailChange={setFriendEmail}
+        onSubmit={handleSendRequest}
+        isPending={sendRequestMutation.isPending}
       />
 
-      {activeModal && modals[activeModal]}
+      <RemoveFriendModal
+        isOpen={removeFriendOpen}
+        onClose={() => {
+          setRemoveFriendOpen(false);
+          setFriendToRemove(null);
+        }}
+        friend={friendToRemove}
+        onConfirm={() =>
+          friendToRemove && removeMutation.mutate({ friendId: friendToRemove.id })
+        }
+        isPending={removeMutation.isPending}
+      />
     </div>
   );
 }

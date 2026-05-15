@@ -24,8 +24,8 @@ export function FriendsList({
         <Card className="border-border">
           <CardContent className="py-12 text-center text-muted-foreground">
             <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p className="text-lg font-medium">No friends yet</p>
-            <p className="text-sm mt-1">
+            <p className="text-lg font-normal">No friends yet</p>
+            <p className="text-sm font-light mt-1">
               Add friends to start splitting expenses together.
             </p>
             <Button onClick={onAddFriend} className="mt-4" size="sm">
@@ -50,8 +50,8 @@ export function FriendsList({
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="font-medium">{friend.name}</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="font-normal">{friend.name}</p>
+                      <p className="text-sm text-muted-foreground font-light">
                         {friend.email}
                       </p>
                     </div>
