@@ -54,6 +54,7 @@ export class PaymentService {
         include: {
           expense: true,
           user: true,
+          payments: { select: { amountPaid: true } },
         },
       });
 
@@ -68,6 +69,15 @@ export class PaymentService {
         throw new HttpException(
           'You can only create payments for your own splits',
           HttpStatus.FORBIDDEN,
+        );
+      }
+
+      const claimed = split.payments.reduce((s, p) => s + p.amountPaid, 0);
+      const remaining = split.amount - claimed;
+      if (createPaymentDto.amountPaid > remaining + 0.01) {
+        throw new HttpException(
+          `Payment exceeds remaining balance of ${remaining.toFixed(2)}`,
+          HttpStatus.BAD_REQUEST,
         );
       }
 

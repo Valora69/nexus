@@ -7,12 +7,34 @@ import {
   Param,
   Delete,
   Req,
-  Query,
 } from '@nestjs/common';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsPositive,
+  IsString,
+} from 'class-validator';
 import { ExpenseSplitService } from './expense-split.service';
 import { CreateExpenseSplitDto } from './dto/create-expense-split.dto';
 import { UpdateExpenseSplitDto } from './dto/update-expense-split.dto';
 import { PaymentMethod } from '@prisma/client';
+
+class MarkAsPaidDto {
+  @IsNotEmpty()
+  @IsEnum(PaymentMethod)
+  paymentMethod: PaymentMethod;
+
+  @IsNotEmpty()
+  @IsNumber()
+  @IsPositive()
+  amountPaid: number;
+
+  @IsOptional()
+  @IsString()
+  paymentProof?: string;
+}
 
 @Controller('expense-splits')
 export class ExpenseSplitController {
@@ -64,17 +86,15 @@ export class ExpenseSplitController {
   @Post(':id/mark-paid')
   markAsPaid(
     @Param('id') id: string,
-    @Query('paymentMethod') paymentMethod: PaymentMethod,
-    @Query('paymentProof') paymentProof?: string,
-    @Req() req?,
+    @Body() body: MarkAsPaidDto,
+    @Req() req,
   ) {
-    console.log('Marking as paid with method:', paymentMethod);
-    console.log('Payment proof:', paymentProof);
     return this.expenseSplitService.markAsPaid(
       id,
       req.user.sub,
-      paymentMethod,
-      paymentProof,
+      body.paymentMethod,
+      body.amountPaid,
+      body.paymentProof,
     );
   }
 

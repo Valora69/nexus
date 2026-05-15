@@ -28,7 +28,23 @@ const EXPENSE_SPLIT_INCLUDE = {
       payee: { select: USER_SELECT },
     },
   },
+  payments: true,
 } as const;
+
+// Two views of "settled":
+//  - claimedTotal: sum of ALL payments (verified + pending). Used to decide if
+//    the payer has more to claim — prevents overpayment in the pay modal.
+//  - verifiedTotal: sum of verified payments only. Authoritative balance for
+//    the receiver and the dashboard.
+function sumPayments(
+  payments: Array<{ amountPaid: number; isVerified: boolean }>,
+  verifiedOnly = false,
+): number {
+  return payments.reduce(
+    (acc, p) => acc + (verifiedOnly && !p.isVerified ? 0 : p.amountPaid),
+    0,
+  );
+}
 
 @Injectable()
 export class ExpenseSplitService {
@@ -66,7 +82,9 @@ export class ExpenseSplitService {
   }
 
   /**
-   * Get all splits for the current user (what they owe)
+   * Get all splits the user still owes on. A split disappears once the payer
+   * has claimed payment for the full amount (verified + pending), because no
+   * further payment action is possible from their side.
    */
   async findMyPayables(userId: string) {
     this.logger.log(`Retrieving payable splits for user ${userId}...`);
@@ -74,21 +92,20 @@ export class ExpenseSplitService {
       const splits = await this.prisma.expenseSplit.findMany({
         where: {
           userId,
-          isPaid: false,
-          // Exclude splits where user is the payee (they paid upfront)
           expense: {
-            payeeId: {
-              not: userId,
-            },
+            payeeId: { not: userId },
           },
         },
         include: EXPENSE_SPLIT_INCLUDE,
         orderBy: { createdAt: 'desc' },
       });
-      this.logger.log(
-        `Found ${splits.length} payable splits for user ${userId}`,
+      const active = splits.filter(
+        (s) => s.amount - sumPayments(s.payments, false) > 0.01,
       );
-      return splits;
+      this.logger.log(
+        `Found ${active.length} active payable splits for user ${userId} (of ${splits.length})`,
+      );
+      return active;
     } catch (error) {
       this.logger.error('Failed to fetch payable splits', error);
       throw new InternalServerErrorException('Failed to fetch payable splits');
@@ -96,28 +113,28 @@ export class ExpenseSplitService {
   }
 
   /**
-   * Get all splits where others owe the current user (they are the payee on the expense)
+   * Get all splits where others still owe the current user. Uses verified
+   * totals only (authoritative balance) — pending unverified payments stay
+   * visible here until the receiver verifies them.
    */
   async findMyReceivables(userId: string) {
     this.logger.log(`Retrieving receivable splits for user ${userId}...`);
     try {
       const splits = await this.prisma.expenseSplit.findMany({
         where: {
-          isPaid: false,
-          expense: {
-            payeeId: userId,
-          },
-          userId: {
-            not: userId, // Exclude user's own split
-          },
+          expense: { payeeId: userId },
+          userId: { not: userId },
         },
         include: EXPENSE_SPLIT_INCLUDE,
         orderBy: { createdAt: 'desc' },
       });
-      this.logger.log(
-        `Found ${splits.length} receivable splits for user ${userId}`,
+      const active = splits.filter(
+        (s) => s.amount - sumPayments(s.payments, true) > 0.01,
       );
-      return splits;
+      this.logger.log(
+        `Found ${active.length} active receivable splits for user ${userId} (of ${splits.length})`,
+      );
+      return active;
     } catch (error) {
       this.logger.error('Failed to fetch receivable splits', error);
       throw new InternalServerErrorException(
@@ -199,67 +216,73 @@ export class ExpenseSplitService {
   }
 
   /**
-   * Mark a split as paid and create a Payment record
+   * Record a payment (full or partial) against an expense split.
+   *
+   * The payment row stores the user's claimed amount and starts unverified.
+   * Settlement is determined by Payment.isVerified across all payment rows
+   * for this split — not by ExpenseSplit.isPaid (deprecated).
    */
   async markAsPaid(
     id: string,
     userId: string,
     paymentMethod: PaymentMethod,
+    amountPaid: number,
     paymentProof?: string,
   ) {
-    this.logger.log(`Marking split ${id} as paid by user ${userId}...`);
+    this.logger.log(`Recording payment on split ${id} by user ${userId}...`);
     const split = await this.findOne(id);
 
-    // Verify the user marking as paid is the one who owes
     if (split.userId !== userId) {
       throw new HttpException(
-        'You can only mark your own splits as paid',
+        'You can only record payments on your own splits',
         HttpStatus.FORBIDDEN,
       );
     }
 
-    if (split.isPaid) {
+    if (!isFinite(amountPaid) || amountPaid <= 0) {
       throw new HttpException(
-        'This split is already marked as paid',
+        'Payment amount must be greater than zero',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const claimed = sumPayments(split.payments, false);
+    const remaining = split.amount - claimed;
+    if (remaining <= 0.01) {
+      throw new HttpException(
+        'This split is already fully paid (or has pending payments covering it)',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    if (amountPaid > remaining + 0.01) {
+      throw new HttpException(
+        `Payment exceeds remaining balance of ${remaining.toFixed(2)}`,
         HttpStatus.BAD_REQUEST,
       );
     }
 
     try {
-      // Create payment record and update split in a transaction
-      const result = await this.prisma.$transaction(async (tx) => {
-        // Create the payment
-        const payment = await tx.payment.create({
-          data: {
-            amountPaid: split.amount,
-            paymentMethod,
-            paymentProof,
-            isVerified: false,
-            expenseSplitId: id,
-          },
-        });
-
-        // Update the split
-        const updatedSplit = await tx.expenseSplit.update({
-          where: { id },
-          data: {
-            isPaid: true,
-            paidAt: new Date(),
-          },
-          include: EXPENSE_SPLIT_INCLUDE,
-        });
-
-        return { payment, split: updatedSplit };
+      const payment = await this.prisma.payment.create({
+        data: {
+          amountPaid,
+          paymentMethod,
+          paymentProof,
+          isVerified: false,
+          expenseSplitId: id,
+        },
       });
 
+      // Re-fetch the split with payments to return an up-to-date view.
+      const updatedSplit = await this.findOne(id);
+
       this.logger.log(
-        `Split ${id} marked as paid, payment ${result.payment.id} created`,
+        `Payment ${payment.id} (${amountPaid}) recorded on split ${id}; new claimed=${claimed + amountPaid}/${split.amount}`,
       );
-      return result;
+      return { payment, split: updatedSplit };
     } catch (error) {
       if (error instanceof HttpException) throw error;
-      this.logger.error('Error marking split as paid', error);
-      throw new InternalServerErrorException('Failed to mark split as paid', {
+      this.logger.error('Error recording payment on split', error);
+      throw new InternalServerErrorException('Failed to record payment', {
         cause: error,
         description: 'An unexpected error occurred',
       });
