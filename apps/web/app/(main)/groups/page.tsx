@@ -13,7 +13,7 @@ import {
 import { GroupListModals } from '@web/lib/constants/modals';
 
 import { useGetAllGroups } from '@web/lib/client/queries/groupQueries';
-import { useGetAllUsers, useCurrentUser } from '@web/lib/client/queries/userQueries';
+import { useGetAllFriends } from '@web/lib/client/queries/friendQueries';
 import { useCreateGroup } from '@web/lib/client/mutations/groupMutations';
 
 export default function GroupsPage() {
@@ -29,10 +29,9 @@ export default function GroupsPage() {
 
   // Data queries
   const { data: groups = [], isLoading } = useGetAllGroups();
-  const { data: allUsers = [] } = useGetAllUsers();
-  const { data: currentUser } = useCurrentUser();
+  const { data: friends = [] } = useGetAllFriends();
 
-  const selectableUsers = allUsers.filter((u) => u.id !== currentUser?.id);
+  const selectableUsers = friends;
 
   // Mutations
   const createGroupMutation = useCreateGroup();

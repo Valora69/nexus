@@ -8,8 +8,8 @@ export function EmptyGroups() {
     <Card className="border-border">
       <CardContent className="py-12 text-center text-muted-foreground">
         <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-        <p className="text-lg font-medium">No groups yet</p>
-        <p className="text-sm mt-1">
+        <p className="text-lg font-normal">No groups yet</p>
+        <p className="text-sm font-light mt-1">
           Create your first group to start splitting expenses.
         </p>
       </CardContent>

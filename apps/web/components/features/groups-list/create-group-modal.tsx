@@ -11,7 +11,7 @@ import { Input } from '@web/components/ui/input';
 import { Label } from '@web/components/ui/label';
 import { Button } from '@web/components/ui/button';
 import { Badge } from '@web/components/ui/badge';
-import type { User } from '@web/lib/types/entities';
+import type { Friend } from '@web/lib/types/entities';
 
 interface CreateGroupModalProps {
   isOpen: boolean;
@@ -19,7 +19,7 @@ interface CreateGroupModalProps {
   name: string;
   description: string;
   selectedUserIds: string[];
-  users: User[];
+  users: Friend[];
   onNameChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
   onToggleUser: (userId: string) => void;
@@ -65,20 +65,26 @@ export function CreateGroupModal({
           </div>
           <div className="space-y-2">
             <Label>Add Members</Label>
-            <div className="flex flex-wrap gap-2">
-              {users.map((user) => (
-                <Badge
-                  key={user.id}
-                  variant={
-                    selectedUserIds.includes(user.id) ? 'default' : 'outline'
-                  }
-                  className="cursor-pointer transition-colors"
-                  onClick={() => onToggleUser(user.id)}
-                >
-                  {user.name}
-                </Badge>
-              ))}
-            </div>
+            {users.length === 0 ? (
+              <p className="text-sm text-muted-foreground font-light">
+                Add friends first to include them in a group.
+              </p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {users.map((user) => (
+                  <Badge
+                    key={user.id}
+                    variant={
+                      selectedUserIds.includes(user.id) ? 'default' : 'outline'
+                    }
+                    className="cursor-pointer transition-colors"
+                    onClick={() => onToggleUser(user.id)}
+                  >
+                    {user.name}
+                  </Badge>
+                ))}
+              </div>
+            )}
             {selectedUserIds.length > 0 && (
               <p className="text-xs text-muted-foreground">
                 {selectedUserIds.length} member(s) selected
