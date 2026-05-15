@@ -140,7 +140,6 @@ export class ExpenseService {
                   create: splits.map((split) => ({
                     user: { connect: { id: split.userId } },
                     amount: split.amount,
-                    isPaid: split.isPaid || false,
                   })),
                 },
               }),
@@ -277,29 +276,31 @@ export class ExpenseService {
   }
 
   async update(id: string, updateExpenseDto: UpdateExpenseDto, userId: string) {
-    await this.findOne(id);
     this.logger.log('Updating expense...');
+
+    const existing = await this.prisma.expense.findUnique({
+      where: { id },
+      include: {
+        splits: { include: { payments: true } },
+      },
+    });
+    if (!existing) {
+      throw new HttpException('Expense not found', HttpStatus.NOT_FOUND);
+    }
+
+    const { splits, payeeId, payerId, groupId, ...rest } = updateExpenseDto;
+
+    // If splits are provided, perform a full atomic replace with safety checks.
+    if (splits !== undefined) {
+      return this.updateWithSplits(id, existing, updateExpenseDto, userId);
+    }
+
+    // Metadata-only update (name, totalAmount, date, notes, payer/payee/group relations).
     try {
-      const { splits: _splits, payeeId, payerId, groupId, ...expenseData } =
-        updateExpenseDto;
-
-      // Build the update data with proper relation handling
-      const updateData: any = { ...expenseData };
-
-      // Handle payer relation change
-      if (payerId) {
-        updateData.payer = { connect: { id: payerId } };
-      }
-
-      // Handle payee relation change
-      if (payeeId) {
-        updateData.payee = { connect: { id: payeeId } };
-      }
-
-      // Handle group relation change
-      if (groupId) {
-        updateData.group = { connect: { id: groupId } };
-      }
+      const updateData: any = { ...rest };
+      if (payerId) updateData.payer = { connect: { id: payerId } };
+      if (payeeId) updateData.payee = { connect: { id: payeeId } };
+      if (groupId) updateData.group = { connect: { id: groupId } };
 
       const updatedExpense = await this.prisma.expense.update({
         where: { id },
@@ -307,25 +308,133 @@ export class ExpenseService {
         include: EXPENSE_INCLUDE,
       });
 
-      if (updatedExpense) {
-        // Determine the most specific activity type
-        let activityOn: ActivityOnEnum = ActivityOnEnum.EXPENSE;
-        if (payeeId && !payerId) {
-          activityOn = ActivityOnEnum.EXPENSE_PAYEE;
-        } else if (payerId && !payeeId) {
-          activityOn = ActivityOnEnum.EXPENSE_PAYER;
-        }
+      let activityOn: ActivityOnEnum = ActivityOnEnum.EXPENSE;
+      if (payeeId && !payerId) activityOn = ActivityOnEnum.EXPENSE_PAYEE;
+      else if (payerId && !payeeId) activityOn = ActivityOnEnum.EXPENSE_PAYER;
 
-        this.eventEmitter.emit('activity.created', {
-          groupId: updatedExpense.groupId,
-          activityName: ActivityNameEnum.UPDATED,
-          activityOn,
-          createdByUserId: userId,
-        });
-      }
+      this.eventEmitter.emit('activity.created', {
+        groupId: updatedExpense.groupId,
+        activityName: ActivityNameEnum.UPDATED,
+        activityOn,
+        createdByUserId: userId,
+      });
+
       return updatedExpense;
     } catch (error) {
       this.logger.error('Failed to update expense');
+      if (error instanceof HttpException) throw error;
+      throw new InternalServerErrorException('Failed to update expense', {
+        cause: error,
+        description: 'An unexpected error occurred',
+      });
+    }
+  }
+
+  private async updateWithSplits(
+    id: string,
+    existing: { id: string; totalAmount: number; groupId: string; splits: Array<{ id: string; payments: Array<{ isVerified: boolean }> }> },
+    dto: UpdateExpenseDto,
+    userId: string,
+  ) {
+    const { splits, payeeId, payerId, groupId, ...rest } = dto;
+
+    // Settlement-safety: any verified payment locks the expense from split edits.
+    const hasVerifiedPayments = existing.splits.some((s) =>
+      s.payments.some((p) => p.isVerified),
+    );
+    if (hasVerifiedPayments) {
+      throw new HttpException(
+        'Cannot edit splits: this expense has verified payments. Delete and recreate it instead.',
+        HttpStatus.CONFLICT,
+      );
+    }
+
+    if (!splits || splits.length === 0) {
+      throw new HttpException(
+        'Splits array must be non-empty when editing splits',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const effectiveTotal = rest.totalAmount ?? existing.totalAmount;
+    const totalSplit = splits.reduce((sum, s) => sum + s.amount, 0);
+    if (Math.abs(totalSplit - effectiveTotal) > 0.01) {
+      throw new HttpException(
+        'Split amounts must equal total expense amount',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const effectiveGroupId = groupId ?? existing.groupId;
+    await Promise.all(
+      splits.map((s) => this.validateGroupMembership(s.userId, effectiveGroupId)),
+    );
+
+    try {
+      const updated = await this.prisma.$transaction(async (tx) => {
+        const oldSplitIds = existing.splits.map((s) => s.id);
+
+        // Explicitly delete linked PersonalTransactions first.
+        // The schema sets expenseSplitId to NULL on split delete (SetNull),
+        // which would leave orphaned PT records unlinked. We delete them outright.
+        if (oldSplitIds.length > 0) {
+          await tx.personalTransaction.deleteMany({
+            where: { expenseSplitId: { in: oldSplitIds } },
+          });
+          await tx.expenseSplit.deleteMany({
+            where: { expenseId: id },
+          });
+        }
+
+        const updateData: any = { ...rest };
+        if (payerId) updateData.payer = { connect: { id: payerId } };
+        if (payeeId) updateData.payee = { connect: { id: payeeId } };
+        if (groupId) updateData.group = { connect: { id: groupId } };
+        updateData.splits = {
+          create: splits.map((s) => ({
+            user: { connect: { id: s.userId } },
+            amount: s.amount,
+          })),
+        };
+
+        const expense = await tx.expense.update({
+          where: { id },
+          data: updateData,
+          include: EXPENSE_INCLUDE,
+        });
+
+        if (expense.splits && expense.splits.length > 0) {
+          await tx.personalTransaction.createMany({
+            data: expense.splits.map((s) => ({
+              userId: s.userId,
+              type: PersonalTransactionType.EXPENSE,
+              amount: s.amount,
+              description: expense.name,
+              category: expense.group.name,
+              isFromGroup: true,
+              expenseSplitId: s.id,
+              date: expense.date,
+            })),
+          });
+        }
+
+        return expense;
+      });
+
+      this.eventEmitter.emit('activity.created', {
+        groupId: updated.groupId,
+        activityName: ActivityNameEnum.UPDATED,
+        activityOn: ActivityOnEnum.EXPENSE,
+        createdByUserId: userId,
+      });
+
+      this.logger.log(
+        `Expense ${id} updated with ${splits.length} replacement splits`,
+      );
+      return updated;
+    } catch (error) {
+      this.logger.error('Failed to update expense with splits', error);
+      if (error instanceof HttpException) throw error;
       throw new InternalServerErrorException('Failed to update expense', {
         cause: error,
         description: 'An unexpected error occurred',

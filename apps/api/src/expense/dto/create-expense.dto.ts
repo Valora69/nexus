@@ -23,6 +23,10 @@ export class ExpenseSplitDto {
   @IsPositive()
   amount: number;
 
+  /**
+   * @deprecated Settlement is tracked via Payment.isVerified, not this field.
+   * Kept for DTO-compat with older clients; ignored by the service.
+   */
   @IsOptional()
   @IsBoolean()
   isPaid?: boolean;
