@@ -13,7 +13,7 @@ import { GoogleStrategy } from './google.strategy';
     PrismaModule,
     PassportModule.register({ defaultStrategy: 'google' }),
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'your-secret-key',
+      secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '7d' },
     }),
   ],
