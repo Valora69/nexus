@@ -50,9 +50,10 @@ export class DashboardService {
     const [
       payableSplits,
       receivableSplits,
-      verifiedReceivedAggregate,
       spentAggregate,
       recentFeedRows,
+      allTimeCreditAggregate,
+      allTimeExpenseAggregate,
     ] = await Promise.all([
       // Splits the user owes — participant in the split, payee is someone else
       this.prisma.expenseSplit.findMany({
@@ -99,18 +100,6 @@ export class DashboardService {
         },
       }),
 
-      // Total verified payments the current user has received (as payee)
-      this.prisma.payment.aggregate({
-        where: {
-          isVerified: true,
-          expenseSplit: {
-            expense: { payeeId: userId },
-            userId: { not: userId },
-          },
-        },
-        _sum: { amountPaid: true },
-      }),
-
       // Monthly spent — all PersonalTransaction EXPENSE records in the selected month
       this.prisma.personalTransaction.aggregate({
         where: {
@@ -137,6 +126,18 @@ export class DashboardService {
         },
         orderBy: { date: 'desc' },
         take: 10,
+      }),
+
+      // All-time CREDIT total — drives Net Balance
+      this.prisma.personalTransaction.aggregate({
+        where: { userId, type: PersonalTransactionType.CREDIT },
+        _sum: { amount: true },
+      }),
+
+      // All-time EXPENSE total — drives Net Balance
+      this.prisma.personalTransaction.aggregate({
+        where: { userId, type: PersonalTransactionType.EXPENSE },
+        _sum: { amount: true },
       }),
     ]);
 
@@ -167,8 +168,10 @@ export class DashboardService {
     // Totals derived from the filtered, net-amount lists — consistent with what the UI shows
     const totalPayable = payables.reduce((s, p) => s + p.amount, 0);
     const totalReceivable = receivables.reduce((s, r) => s + r.amount, 0);
-    // Net balance = realized cash received from verified payments (receivables → available)
-    const netBalance = verifiedReceivedAggregate._sum.amountPaid ?? 0;
+    // Net balance = all-time credits minus all-time expenses across personal transactions
+    const netBalance =
+      (allTimeCreditAggregate._sum.amount ?? 0) -
+      (allTimeExpenseAggregate._sum.amount ?? 0);
 
     // ── Recent activity feed ──────────────────────────────────────────────────
     const recentFeed = recentFeedRows.map((tx) => ({
