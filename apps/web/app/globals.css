@@ -61,9 +61,13 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background text-foreground font-sans font-light antialiased;
   }
-  
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-normal tracking-tight;
+  }
+
   /* Terminal-style monospace for numbers */
   .font-mono {
     font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Mono', 'Droid Sans Mono', 'Source Code Pro', monospace;
@@ -71,16 +75,10 @@ All colors MUST be HSL.
 }
 
 @layer utilities {
-  /* Glow effects */
-  .glow-green {
-    text-shadow: 0 0 10px hsl(var(--terminal-green) / 0.5);
-  }
-  
-  .border-glow-green {
-    box-shadow: 0 0 8px hsl(var(--terminal-green) / 0.3);
-  }
-  
-  .border-glow-green-hover:hover {
-    box-shadow: 0 0 12px hsl(var(--terminal-green) / 0.5);
+  /* Deprecated — glow utilities retained as no-ops to avoid breakage if referenced anywhere */
+  .glow-green,
+  .border-glow-green,
+  .border-glow-green-hover {
+    /* intentionally empty */
   }
 }
