@@ -4,56 +4,48 @@ import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@web/components/ui/button';
 import { Card, CardContent, CardHeader } from '@web/components/ui/card';
-import { ArrowUpRight } from 'lucide-react';
 import { toast } from 'sonner';
+import { AuthBackground } from '@web/components/auth/auth-background';
 
 const Login = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    // Check if redirected back with auth success
     const authStatus = searchParams?.get('auth');
     if (authStatus === 'success') {
       toast.success('Successfully signed in with Google!');
-      // Remove the query parameter
       router.replace('/home');
     }
   }, [searchParams, router]);
 
   const handleGoogleLogin = () => {
-    // Redirect to backend Google OAuth endpoint
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
     window.location.href = `${apiUrl}/api/auth/google`;
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      {/* Background grid effect */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,65,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,65,0.03)_1px,transparent_1px)] bg-[size:50px_50px]" />
-
-      <Card className="w-full max-w-md bg-card/50 backdrop-blur-sm border-border/50 relative z-10">
+    <AuthBackground>
+      <Card
+        className="w-full max-w-md bg-card/60 backdrop-blur-xl border border-primary/20 rounded-2xl shadow-2xl relative z-10 animate-auth-fade-in-up hover:shadow-[0_20px_40px_rgba(0,255,65,0.1)] transition-shadow duration-300"
+        style={{ willChange: 'transform' }}
+      >
         <CardHeader className="text-center space-y-4 pb-2">
-          {/* Logo */}
           <div className="flex items-center justify-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10 border border-primary/30">
-              <ArrowUpRight className="h-8 w-8 text-primary" />
-            </div>
-            <span className="text-2xl font-bold text-primary font-mono tracking-tight">
-              MONEY_APP
+            <span className="text-3xl text-primary font-light tracking-wide">
+              MONEY APP
             </span>
           </div>
-          <p className="text-muted-foreground text-sm">
-            Sign in with your Google account
+          <p className="text-muted-foreground text-sm font-light">
+            Ready to take control of your finances?
           </p>
         </CardHeader>
 
         <CardContent className="pt-6">
           <div className="space-y-4">
-            {/* Google Sign In Button */}
             <Button
               onClick={handleGoogleLogin}
-              className="w-full bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 font-semibold flex items-center justify-center gap-3 h-12"
+              className="w-full bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 font-light flex items-center justify-center gap-3 h-12"
             >
               <svg
                 className="w-5 h-5"
@@ -80,20 +72,18 @@ const Login = () => {
               Sign in with Google
             </Button>
 
-            {/* Info message */}
             <div className="mt-6 p-4 rounded-lg bg-primary/5 border border-primary/20">
-              <p className="text-xs text-muted-foreground text-center leading-relaxed">
-                <span className="text-primary font-semibold block mb-2">
+              <p className="text-xs text-muted-foreground text-center font-light leading-relaxed">
+                <span className="text-primary font-light block mb-2">
                   Secure Authentication
                 </span>
-                Sign in instantly with Google for fast, secure access. Your
-                Google credentials stay with Google and are never stored by us.
+                Sign in instantly with Google for fast, secure access!
               </p>
             </div>
           </div>
         </CardContent>
       </Card>
-    </div>
+    </AuthBackground>
   );
 };
 
