@@ -23,7 +23,9 @@ export class EmailService {
     });
   }
 
-  async sendFriendRequestEmail(options: FriendRequestEmailOptions): Promise<void> {
+  async sendFriendRequestEmail(
+    options: FriendRequestEmailOptions,
+  ): Promise<void> {
     const { to, senderName, inviteUrl, isNewUser } = options;
 
     const subject = `${senderName} wants to connect with you on Money App`;
@@ -94,10 +96,10 @@ export class EmailService {
                 <tr>
                   <td style="padding: 32px 40px; background-color: #000000; border-top: 1px solid #1a1a1a;">
                     <p style="color: #71717a; font-size: 13px; margin: 0 0 16px; text-align: center; line-height: 1.5;">
-                      This link expires in 7 days. If you didn't expect this email, you can safely ignore it.
+                      Accept mo na bilis!
                     </p>
                     <p style="color: #71717a; font-size: 11px; margin: 0; text-align: center;">
-                      Money App is regulated by the Financial Technology Association
+                      Money App is regulated by BANSAG
                     </p>
                   </td>
                 </tr>

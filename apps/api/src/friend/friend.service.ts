@@ -1,10 +1,12 @@
 import {
   Injectable,
   BadRequestException,
+  ForbiddenException,
   Logger,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { EmailService } from 'src/email/email.service';
 
@@ -61,6 +63,38 @@ export class FriendService {
     const recipient = await this.prisma.user.findUnique({
       where: { email: recipientEmail },
     });
+
+    // Check for a reverse-direction pending request (recipient already requested sender)
+    if (recipient) {
+      const reverseRequest = await this.prisma.friendRequest.findFirst({
+        where: {
+          senderId: recipient.id,
+          recipientEmail: sender.email,
+          status: 'PENDING',
+        },
+      });
+
+      if (reverseRequest) {
+        // Auto-accept: create friendship from both directions and mark the existing request accepted
+        await this.prisma.$transaction([
+          this.prisma.friendship.createMany({
+            data: [
+              { userId: senderId, friendId: recipient.id },
+              { userId: recipient.id, friendId: senderId },
+            ],
+            skipDuplicates: true,
+          }),
+          this.prisma.friendRequest.update({
+            where: { id: reverseRequest.id },
+            data: { status: 'ACCEPTED' },
+          }),
+        ]);
+        this.logger.log(
+          `Auto-accepted: ${senderId} and ${recipient.id} are now friends`,
+        );
+        return { message: 'You were already requested by this user — you are now friends!' };
+      }
+    }
 
     try {
       // Create friend request
@@ -140,29 +174,49 @@ export class FriendService {
     }
 
     if (request.recipientId !== userId) {
-      throw new BadRequestException('You cannot accept this request');
+      throw new ForbiddenException('You cannot accept this request');
     }
 
-    if (request.status !== 'PENDING') {
-      throw new BadRequestException('This request has already been processed');
+    if (request.senderId === userId) {
+      throw new BadRequestException("You can't accept your own request");
     }
 
     if (request.expiresAt < new Date()) {
       throw new BadRequestException('This request has expired');
     }
 
+    // Idempotent: if already accepted, return success (friendship should already exist)
+    if (request.status === 'ACCEPTED') {
+      this.logger.log(`Request ${requestId} already accepted — returning success`);
+      return { message: 'Friend request already accepted' };
+    }
+
+    if (request.status !== 'PENDING') {
+      throw new BadRequestException('This request has already been processed');
+    }
+
     try {
+      // Use createMany + skipDuplicates so re-entry / race doesn't trip the unique constraint.
+      // We create both directions for easy querying.
+      // Also clean up any reverse-direction pending request between these two users.
       await this.prisma.$transaction([
-        // Create friendship (both directions for easy querying)
-        this.prisma.friendship.create({
-          data: { userId: request.senderId, friendId: userId },
+        this.prisma.friendship.createMany({
+          data: [
+            { userId: request.senderId, friendId: userId },
+            { userId: userId, friendId: request.senderId },
+          ],
+          skipDuplicates: true,
         }),
-        this.prisma.friendship.create({
-          data: { userId: userId, friendId: request.senderId },
-        }),
-        // Update request status
         this.prisma.friendRequest.update({
           where: { id: requestId },
+          data: { status: 'ACCEPTED' },
+        }),
+        this.prisma.friendRequest.updateMany({
+          where: {
+            senderId: userId,
+            recipientEmail: request.sender.email,
+            status: 'PENDING',
+          },
           data: { status: 'ACCEPTED' },
         }),
       ]);
@@ -170,6 +224,20 @@ export class FriendService {
       this.logger.log(`Friend request ${requestId} accepted successfully`);
       return { message: 'Friend request accepted!' };
     } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        // Friendship already existed — treat as success
+        this.logger.warn(
+          `Friendship already existed for request ${requestId}; marking accepted`,
+        );
+        await this.prisma.friendRequest.update({
+          where: { id: requestId },
+          data: { status: 'ACCEPTED' },
+        });
+        return { message: 'Friend request accepted!' };
+      }
       this.logger.error('Error accepting friend request', error);
       throw new InternalServerErrorException('Failed to accept friend request');
     }
@@ -187,17 +255,32 @@ export class FriendService {
       throw new NotFoundException('Invalid or expired invite link');
     }
 
-    // Update the recipientId if it wasn't set (user didn't exist when request was sent)
+    // Verify the logged-in user's email matches the recipient on the invite.
+    // Prevents a different account from claiming someone else's invite.
+    const currentUser = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { email: true },
+    });
+
+    if (!currentUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (
+      request.recipientEmail.toLowerCase() !== currentUser.email.toLowerCase()
+    ) {
+      throw new ForbiddenException(
+        'This invite was sent to a different email address',
+      );
+    }
+
+    // Backfill recipientId if it wasn't set (recipient didn't have an account when invite was sent)
     if (!request.recipientId) {
       await this.prisma.friendRequest.update({
         where: { id: request.id },
         data: { recipientId: userId },
       });
       request.recipientId = userId;
-    }
-
-    if (request.recipientId !== userId) {
-      throw new BadRequestException('This invite is not for you');
     }
 
     return this.acceptRequest(userId, request.id);
