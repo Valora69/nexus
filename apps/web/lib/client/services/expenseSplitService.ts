@@ -123,31 +123,28 @@ export const getExpenseSplitById = async (
 
 export const markSplitAsPaid = async (
   id: string,
-  params?: {
-    paymentMethod?: PaymentMethod;
+  body: {
+    paymentMethod: PaymentMethod;
+    amountPaid: number;
     paymentProof?: string;
   },
 ): Promise<MarkAsPaidResponse> => {
-  const queryParams = new URLSearchParams();
-
-  if (params?.paymentMethod) {
-    queryParams.append('paymentMethod', params.paymentMethod);
-  }
-  if (params?.paymentProof) {
-    queryParams.append('paymentProof', params.paymentProof);
-  }
-
   const response = await fetch(
-    `${BASE_URL}${EXPENSE_SPLIT_URI}/${id}/mark-paid?${queryParams}`,
+    `${BASE_URL}${EXPENSE_SPLIT_URI}/${id}/mark-paid`,
     {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
     },
   );
 
   if (!response.ok) {
-    throw new Error(`Failed to mark split as paid: ${response.statusText}`);
+    const errBody = await response.json().catch(() => null);
+    throw new Error(
+      errBody?.message ??
+        `Failed to mark split as paid: ${response.statusText}`,
+    );
   }
 
   return response.json();

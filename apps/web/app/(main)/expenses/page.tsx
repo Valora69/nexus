@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from 'react';
 import { toast } from 'sonner';
-import { Receipt } from 'lucide-react';
 
 import {
   ExpensesHeader,
@@ -47,8 +46,8 @@ export default function ExpensesPage() {
       toast.success('Payment recorded! Waiting for payee to verify.');
       closeModal();
     },
-    onError: () => {
-      toast.error('Failed to record payment');
+    onError: (err) => {
+      toast.error(err.message || 'Failed to record payment');
     },
   });
 
@@ -94,6 +93,7 @@ export default function ExpensesPage() {
     await markPaidMutation.mutateAsync({
       id: selectedSplit.id,
       paymentMethod: paymentMode.toUpperCase() as PaymentMethod,
+      amountPaid: amount,
     });
   };
 

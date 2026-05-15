@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -9,7 +9,6 @@ import { Button } from '@web/components/ui/button';
 import { Input } from '@web/components/ui/input';
 import { Label } from '@web/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@web/components/ui/radio-group';
-import { Separator } from '@web/components/ui/separator';
 import { Smartphone, Banknote, Copy, Clock, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import type { ExpenseSplitWithRelations } from '@web/lib/types/entities';
@@ -32,14 +31,21 @@ export function PaySplitModal({
   const [paymentMode, setPaymentMode] = useState<'gcash' | 'cash'>('gcash');
   const [payAmount, setPayAmount] = useState('');
 
-  // Reset state when modal opens with new split
-  const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      onClose();
-    } else if (split) {
-      setPayAmount(split.amount.toString());
+  // claimed = sum of every payment row (verified + pending). Once claimed
+  // reaches split.amount, no further payment is allowed.
+  const { claimed, remaining } = useMemo(() => {
+    if (!split) return { claimed: 0, remaining: 0 };
+    const c = (split.payments ?? []).reduce((s, p) => s + p.amountPaid, 0);
+    return { claimed: c, remaining: Math.max(0, split.amount - c) };
+  }, [split]);
+
+  // When the modal opens (or a different split is shown), default the input
+  // to the remaining unclaimed amount.
+  useEffect(() => {
+    if (isOpen && split) {
+      setPayAmount(remaining.toFixed(2));
     }
-  };
+  }, [isOpen, split?.id, remaining]);
 
   if (!split) return null;
 
@@ -54,21 +60,21 @@ export function PaySplitModal({
       toast.error('Please enter a valid amount');
       return;
     }
-    if (amount > split.amount) {
-      toast.error('Amount exceeds your share');
+    if (amount > remaining + 0.01) {
+      toast.error(`Amount exceeds remaining ₱${remaining.toFixed(2)}`);
       return;
     }
-
     if (paymentMode === 'gcash' && !split.expense.payee?.gcashNumber) {
       toast.error('Payee has not set up their GCash number');
       return;
     }
-
     await onPay(paymentMode, amount);
   };
 
+  const hasPartialClaim = claimed > 0.01;
+
   return (
-    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+    <Dialog open={isOpen} onOpenChange={(o) => !o && onClose()}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Choose Payment Method</DialogTitle>
@@ -83,6 +89,18 @@ export function PaySplitModal({
             <p className="text-sm text-muted-foreground mt-1">
               {split.expense.name}
             </p>
+            {hasPartialClaim && (
+              <p className="text-xs text-muted-foreground mt-2 font-light">
+                Already paid{' '}
+                <span className="font-mono font-medium text-foreground">
+                  ₱{claimed.toFixed(2)}
+                </span>{' '}
+                · Remaining{' '}
+                <span className="font-mono font-medium text-foreground">
+                  ₱{remaining.toFixed(2)}
+                </span>
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -92,10 +110,13 @@ export function PaySplitModal({
               type="number"
               value={payAmount}
               onChange={(e) => setPayAmount(e.target.value)}
-              max={split.amount}
+              max={remaining}
               min={0}
               step="0.01"
             />
+            <p className="text-xs text-muted-foreground">
+              Up to ₱{remaining.toFixed(2)} remaining
+            </p>
           </div>
 
           <RadioGroup
@@ -168,23 +189,8 @@ export function PaySplitModal({
                       Copy
                     </Button>
                   </div>
-                  <Separator />
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-muted-foreground">Amount</p>
-                      <p className="font-mono font-bold">₱{payAmount}</p>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => copyToClipboard(payAmount, 'Amount')}
-                    >
-                      <Copy className="h-4 w-4 mr-1" />
-                      Copy
-                    </Button>
-                  </div>
                   <p className="text-xs text-muted-foreground">
-                    Copy the details above, complete payment in GCash, then tap
+                    Copy the number above, complete payment in GCash, then tap
                     &quot;I&apos;ve Paid&quot; below.
                   </p>
                 </div>

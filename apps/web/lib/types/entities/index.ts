@@ -172,6 +172,7 @@ export type ExpenseSplitWithRelations = ExpenseSplit & {
     picture?: string;
     gcashNumber?: string;
   };
+  payments?: Payment[];
   expense: {
     id: string;
     name: string;

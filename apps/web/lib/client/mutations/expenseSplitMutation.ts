@@ -20,7 +20,8 @@ type MarkAsPaidResponse = {
 
 type MarkAsPaidInput = {
   id: string;
-  paymentMethod?: PaymentMethod;
+  paymentMethod: PaymentMethod;
+  amountPaid: number;
   paymentProof?: string;
 };
 
@@ -34,12 +35,14 @@ export const useMarkSplitAsPaid = (
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, paymentMethod, paymentProof }) =>
-      markSplitAsPaid(id, { paymentMethod, paymentProof }),
+    mutationFn: ({ id, paymentMethod, amountPaid, paymentProof }) =>
+      markSplitAsPaid(id, { paymentMethod, amountPaid, paymentProof }),
     onSuccess: (...args) => {
-      // 🔄 Invalidate related queries
+      // 🔄 Invalidate related queries — payments and dashboard are downstream
       queryClient.invalidateQueries({ queryKey: ['expense-splits'] });
       queryClient.invalidateQueries({ queryKey: ['expenses'] });
+      queryClient.invalidateQueries({ queryKey: ['payments'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       mutationOptions?.onSuccess?.(...args);
     },
     ...mutationOptions,
