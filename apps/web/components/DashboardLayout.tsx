@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { SidebarProvider, SidebarTrigger } from '@web/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
 import { QuickCaptureModal } from './QuickCaptureModal';
@@ -15,16 +16,23 @@ import {
   DropdownMenuTrigger,
 } from '@web/components/ui/dropdown-menu';
 import { LogOut, User as UserIcon } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
-  const { data: currentUser } = useCurrentUser();
+  const { data: currentUser, isLoading: userLoading } = useCurrentUser();
   const router = useRouter();
+  const pathname = usePathname();
   const [captureOpen, setCaptureOpen] = useState(false);
+
+  // Detect group context from URL — e.g. /groups/abc123 or /groups/abc123/anything
+  const groupRouteMatch = pathname?.match(/^\/groups\/([^/]+)/);
+  const currentGroupId =
+    groupRouteMatch && groupRouteMatch[1] !== undefined
+      ? groupRouteMatch[1]
+      : undefined;
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -44,6 +52,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  if (userLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <p className="text-muted-foreground text-sm font-light tracking-wide">Loading...</p>
+      </div>
+    );
+  }
 
   const handleLogout = async () => {
     try {
@@ -67,7 +83,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <SidebarProvider defaultOpen>
-      <QuickCaptureModal open={captureOpen} onClose={() => setCaptureOpen(false)} />
+      <QuickCaptureModal
+        open={captureOpen}
+        onClose={() => setCaptureOpen(false)}
+        groupId={currentGroupId}
+      />
       <div className="flex min-h-screen w-full">
         <AppSidebar />
         <div className="flex-1 flex flex-col">
@@ -78,7 +98,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             {currentUser && (
               <DropdownMenu>
                 <DropdownMenuTrigger className="flex items-center gap-2 outline-none">
-                  <span className="text-sm font-medium hidden md:inline">
+                  <span className="text-sm font-light hidden md:inline">
                     {currentUser.name}
                   </span>
                   <Avatar className="h-8 w-8">
@@ -94,10 +114,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>
                     <div className="flex flex-col">
-                      <span className="text-sm font-medium">
+                      <span className="text-sm font-normal">
                         {currentUser.name}
                       </span>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-xs text-muted-foreground font-light">
                         {currentUser.email}
                       </span>
                     </div>
