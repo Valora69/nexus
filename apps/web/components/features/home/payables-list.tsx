@@ -25,11 +25,13 @@ export function PayablesList({ payables }: PayablesListProps) {
         <CardTitle className="text-primary">Payables</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
+        <div className="space-y-3 min-h-[204px]">
           {payables.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              No outstanding payables
-            </p>
+            <div className="flex items-center justify-center h-[204px] w-full">
+              <p className="text-base text-muted-foreground font-extralight">
+                No outstanding payables
+              </p>
+            </div>
           ) : (
             payables.map((payable, index) => (
               <div
@@ -37,8 +39,8 @@ export function PayablesList({ payables }: PayablesListProps) {
                 className="flex justify-between items-center border-b border-border pb-2"
               >
                 <div>
-                  <p className="text-sm font-medium">{payable.to}</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-sm font-normal">{payable.to}</p>
+                  <p className="text-xs text-muted-foreground font-light">
                     {payable.group}
                   </p>
                 </div>

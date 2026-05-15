@@ -15,9 +15,11 @@ export function RecentExpensesList({ feed }: RecentExpensesListProps) {
         <CardTitle>Recent Activity</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-2">
+        <div className="space-y-2 min-h-[282px]">
           {feed.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No activity yet</p>
+            <div className="flex items-center h-[282px]">
+              <p className="text-sm text-muted-foreground font-light">No activity yet</p>
+            </div>
           ) : (
             feed.map((item) => (
               <div
@@ -31,8 +33,8 @@ export function RecentExpensesList({ feed }: RecentExpensesListProps) {
                     <ArrowDownRight className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
                   )}
                   <div className="min-w-0">
-                    <p className="font-medium truncate">{item.label}</p>
-                    <p className="text-xs text-muted-foreground truncate">
+                    <p className="font-normal truncate">{item.label}</p>
+                    <p className="text-xs text-muted-foreground font-light truncate">
                       {item.sublabel
                         ? `${item.sublabel} · `
                         : ''}
