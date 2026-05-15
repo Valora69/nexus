@@ -7,11 +7,19 @@ import {
   getSentRequests,
 } from '../services/friendService';
 
+// Time-sensitive social data — refetch eagerly so new requests / accepts show
+// up without manual refresh. Mirrors the pattern used by expense-split queries.
+const FRIEND_QUERY_OPTIONS = {
+  staleTime: 30 * 1000,
+  refetchOnMount: 'always' as const,
+  refetchOnWindowFocus: true,
+};
+
 export const useGetAllFriends = () => {
   return useQuery({
     queryKey: ['friends'],
     queryFn: () => getAllFriends(),
-    staleTime: 5 * 60 * 1000, // ⏰ Cache for 5 minutes
+    ...FRIEND_QUERY_OPTIONS,
   });
 };
 
@@ -19,7 +27,7 @@ export const useGetPendingRequests = () => {
   return useQuery({
     queryKey: ['friendRequests', 'pending'],
     queryFn: () => getPendingRequests(),
-    staleTime: 5 * 60 * 1000, // ⏰ Cache for 5 minutes
+    ...FRIEND_QUERY_OPTIONS,
   });
 };
 
@@ -27,6 +35,6 @@ export const useGetSentRequests = () => {
   return useQuery({
     queryKey: ['friendRequests', 'sent'],
     queryFn: () => getSentRequests(),
-    staleTime: 5 * 60 * 1000, // ⏰ Cache for 5 minutes
+    ...FRIEND_QUERY_OPTIONS,
   });
 };
