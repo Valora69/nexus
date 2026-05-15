@@ -14,8 +14,8 @@ export function GroupHeader({ name, description, onBack }: GroupHeaderProps) {
         <ArrowLeft className="h-5 w-5" />
       </Button>
       <div>
-        <h1 className="text-3xl font-bold">{name}</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-3xl font-light tracking-wide">{name}</h1>
+        <p className="text-muted-foreground text-sm font-light">
           {description || 'No description'}
         </p>
       </div>

@@ -170,14 +170,7 @@ export function ViewExpenseModal({
             <Button variant="outline" onClick={onClose}>
               Close
             </Button>
-            <Button
-              onClick={() => {
-                onEdit();
-                onClose();
-              }}
-            >
-              Edit Expense
-            </Button>
+            <Button onClick={onEdit}>Edit Expense</Button>
           </div>
         )}
       </DialogContent>

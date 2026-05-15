@@ -80,6 +80,15 @@ export const updateGroupMember = async (
   return response;
 };
 
+export class RemoveMemberConflictError extends Error {
+  blockers: Array<{ type: string; message: string }>;
+  constructor(message: string, blockers: Array<{ type: string; message: string }>) {
+    super(message);
+    this.name = 'RemoveMemberConflictError';
+    this.blockers = blockers;
+  }
+}
+
 export const removeGroupMember = async (id: string) => {
   const data = await fetch(`${BASE_URL}${GROUP_URI}/${id}`, {
     method: 'DELETE',
@@ -90,6 +99,13 @@ export const removeGroupMember = async (id: string) => {
   });
 
   if (!data.ok) {
+    if (data.status === 409) {
+      const body = await data.json().catch(() => null);
+      throw new RemoveMemberConflictError(
+        body?.message ?? 'Cannot remove member',
+        Array.isArray(body?.blockers) ? body.blockers : [],
+      );
+    }
     throw new Error(`Failed to remove group member: ${data.statusText}`);
   }
 };

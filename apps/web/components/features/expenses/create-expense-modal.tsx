@@ -28,8 +28,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@web/components/ui/alert-dialog';
+import type { ExpenseWithRelations } from '@web/lib/types/entities';
 
-/** Member type expected by the modal */
 export interface ExpenseMember {
   userId: string;
   user?: {
@@ -42,13 +42,11 @@ export interface ExpenseMember {
 interface CreateExpenseModalProps {
   isOpen: boolean;
   onClose: () => void;
-  /** The group this expense belongs to */
   groupId: string;
-  /** Members of the group who can be included in splits */
   members: ExpenseMember[];
-  /** ID of the current user (who is creating/paying for the expense) */
   currentUserId: string;
-  /** Called after successful expense creation */
+  /** When provided, modal switches to edit mode and pre-fills from this expense */
+  expense?: ExpenseWithRelations | null;
   onSuccess?: () => void;
 }
 
@@ -58,35 +56,63 @@ export function CreateExpenseModal({
   groupId,
   members,
   currentUserId,
+  expense,
   onSuccess,
 }: CreateExpenseModalProps) {
   const queryClient = useQueryClient();
+  const isEditMode = !!expense;
 
-  // Form state
   const [expenseName, setExpenseName] = useState('');
   const [expenseAmount, setExpenseAmount] = useState('');
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
   const [splitMode, setSplitMode] = useState<'equal' | 'custom'>('equal');
   const [customSplits, setCustomSplits] = useState<Record<string, string>>({});
 
-  // Confirmation dialogs
   const [showCancelDialog, setShowCancelDialog] = useState(false);
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showSubmitDialog, setShowSubmitDialog] = useState(false);
 
-  const { createExpenseWithSplit, isLoading } = useExpenseSplit();
+  const { createExpenseWithSplit, updateExpenseWithSplit, isLoading } =
+    useExpenseSplit();
 
-  // Reset form when modal opens
   useEffect(() => {
-    if (isOpen) {
+    if (!isOpen) return;
+
+    if (expense) {
+      // Edit mode — pre-fill from the existing expense.
+      setExpenseName(expense.name);
+      setExpenseAmount(String(expense.totalAmount));
+      const splitUserIds = (expense.splits ?? []).map((s) => s.userId);
+      setSelectedMembers(splitUserIds);
+
+      const fromNotes = expense.notes?.toLowerCase().includes('custom');
+      const splitAmounts = (expense.splits ?? []).map((s) => s.amount);
+      const isUneven =
+        splitAmounts.length > 1 &&
+        splitAmounts.some(
+          (a) => Math.abs(a - splitAmounts[0]!) > 0.01,
+        );
+      const startInCustom = fromNotes || isUneven;
+      setSplitMode(startInCustom ? 'custom' : 'equal');
+
+      const customMap: Record<string, string> = {};
+      for (const s of expense.splits ?? []) {
+        customMap[s.userId] = String(s.amount);
+      }
+      setCustomSplits(customMap);
+    } else {
+      // Create mode — fresh form.
       setExpenseName('');
       setExpenseAmount('');
       setSelectedMembers(members.map((m) => m.userId));
       setSplitMode('equal');
       setCustomSplits({});
     }
-  }, [isOpen, members]);
+  }, [isOpen, members, expense]);
 
-  const hasUnsavedChanges = expenseName !== '' || expenseAmount !== '';
+  const hasUnsavedChanges = isEditMode
+    ? expenseName !== (expense?.name ?? '') ||
+      expenseAmount !== String(expense?.totalAmount ?? '')
+    : expenseName !== '' || expenseAmount !== '';
 
   const toggleMember = (userId: string) => {
     setSelectedMembers((prev) =>
@@ -101,13 +127,22 @@ export function CreateExpenseModal({
       ? parseFloat(expenseAmount) / selectedMembers.length
       : 0;
 
-  const customTotal = Object.values(customSplits).reduce(
-    (sum, v) => sum + (parseFloat(v) || 0),
+  // Active custom splits — only members with > 0 amounts count.
+  const activeCustomEntries = selectedMembers.filter((id) => {
+    const v = parseFloat(customSplits[id] || '0');
+    return isFinite(v) && v > 0;
+  });
+  const excludedFromCustom = selectedMembers.length - activeCustomEntries.length;
+
+  const customTotal = activeCustomEntries.reduce(
+    (sum, id) => sum + (parseFloat(customSplits[id] || '0') || 0),
     0,
   );
 
   const totalAmount = parseFloat(expenseAmount || '0');
-  const isCustomSplitValid = Math.abs(customTotal - totalAmount) <= 0.01;
+  const isCustomSplitValid =
+    activeCustomEntries.length > 0 &&
+    Math.abs(customTotal - totalAmount) <= 0.01;
 
   const canSubmit =
     expenseName &&
@@ -120,39 +155,48 @@ export function CreateExpenseModal({
       toast.error('Please fill in all required fields');
       return;
     }
-    setShowCreateDialog(true);
+    setShowSubmitDialog(true);
   };
 
-  const handleCreateConfirm = async () => {
+  const handleSubmitConfirm = async () => {
     try {
-      await createExpenseWithSplit({
+      const common = {
         name: expenseName,
         amount: expenseAmount,
         groupId,
-        paidByUserId: currentUserId, // Current user paid, so they're the creditor
+        paidByUserId: currentUserId,
         selectedMembers,
         splitMode,
         customSplits,
-      });
+      };
 
-      // Invalidate queries after successful creation
+      if (isEditMode && expense) {
+        await updateExpenseWithSplit({ ...common, expenseId: expense.id });
+        toast.success('Expense updated');
+      } else {
+        await createExpenseWithSplit(common);
+        toast.success('Expense added');
+      }
+
       queryClient.invalidateQueries({ queryKey: ['expenses'] });
       queryClient.invalidateQueries({ queryKey: ['groups', groupId] });
 
-      toast.success('Expense added successfully');
-      setShowCreateDialog(false);
+      setShowSubmitDialog(false);
       onSuccess?.();
       onClose();
     } catch (error) {
-      setShowCreateDialog(false);
-      // Errors are handled by the hook via toast
-      if (
-        (error as Error).message !== 'Invalid custom splits' &&
-        (error as Error).message !== 'Invalid amount' &&
-        (error as Error).message !== 'No members selected' &&
-        (error as Error).message !== 'Invalid splits'
-      ) {
-        toast.error('Failed to add expense');
+      setShowSubmitDialog(false);
+      const msg = error instanceof Error ? error.message : 'Failed';
+      // Hook already toasts on known validation errors; only surface unknowns.
+      const knownLocalErrors = new Set([
+        'Invalid amount',
+        'No members selected',
+        'Invalid splits',
+        'No participants',
+      ]);
+      if (!knownLocalErrors.has(msg)) {
+        // Server-side conflicts (e.g. verified-payments lock) bubble here.
+        toast.error(msg.includes('verified payments') ? msg : `Failed to ${isEditMode ? 'update' : 'add'} expense`);
       }
     }
   };
@@ -175,10 +219,9 @@ export function CreateExpenseModal({
       <Dialog open={isOpen} onOpenChange={handleCancel}>
         <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Add Expense</DialogTitle>
+            <DialogTitle>{isEditMode ? 'Edit Expense' : 'Add Expense'}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            {/* Expense Name */}
             <div className="space-y-2">
               <Label>Expense Name *</Label>
               <Input
@@ -188,7 +231,6 @@ export function CreateExpenseModal({
               />
             </div>
 
-            {/* Amount */}
             <div className="space-y-2">
               <Label>Amount ($) *</Label>
               <Input
@@ -203,7 +245,6 @@ export function CreateExpenseModal({
 
             <Separator />
 
-            {/* Members Selection */}
             <div className="space-y-2">
               <Label className="flex items-center gap-2">
                 <UserPlus className="h-4 w-4" /> Split with Members
@@ -234,7 +275,6 @@ export function CreateExpenseModal({
 
             <Separator />
 
-            {/* Split Mode */}
             <div className="space-y-3">
               <Label>Split Type</Label>
               <RadioGroup
@@ -256,7 +296,6 @@ export function CreateExpenseModal({
               </RadioGroup>
             </div>
 
-            {/* Split Preview */}
             {selectedMembers.length > 0 && expenseAmount && (
               <div className="space-y-2">
                 <Label>Split Preview</Label>
@@ -264,10 +303,13 @@ export function CreateExpenseModal({
                   {selectedMembers.map((userId) => {
                     const member = members.find((m) => m.userId === userId);
                     const isCurrentUser = userId === currentUserId;
+                    const customVal = parseFloat(customSplits[userId] || '0');
+                    const isZeroCustom =
+                      splitMode === 'custom' && (!isFinite(customVal) || customVal <= 0);
                     return (
                       <div
                         key={userId}
-                        className="flex items-center justify-between gap-3 p-2 rounded bg-muted/30"
+                        className={`flex items-center justify-between gap-3 p-2 rounded ${isZeroCustom ? 'bg-muted/10 opacity-60' : 'bg-muted/30'}`}
                       >
                         <span
                           className={`text-sm flex-1 ${isCurrentUser ? 'text-primary font-medium' : ''}`}
@@ -279,6 +321,14 @@ export function CreateExpenseModal({
                               className="ml-2 text-[10px] border-primary text-primary"
                             >
                               Paid
+                            </Badge>
+                          )}
+                          {isZeroCustom && (
+                            <Badge
+                              variant="outline"
+                              className="ml-2 text-[10px] text-muted-foreground"
+                            >
+                              Excluded
                             </Badge>
                           )}
                         </span>
@@ -307,17 +357,24 @@ export function CreateExpenseModal({
                   })}
                 </div>
                 {splitMode === 'custom' && (
-                  <p
-                    className={`text-xs ${
-                      !isCustomSplitValid
-                        ? 'text-destructive font-medium'
-                        : 'text-muted-foreground'
-                    }`}
-                  >
-                    Total assigned: ${customTotal.toFixed(2)} / $
-                    {totalAmount.toFixed(2)}
-                    {!isCustomSplitValid && ' ⚠️ Amounts must match'}
-                  </p>
+                  <div className="space-y-1">
+                    <p
+                      className={`text-xs ${
+                        !isCustomSplitValid
+                          ? 'text-destructive font-medium'
+                          : 'text-muted-foreground'
+                      }`}
+                    >
+                      Total assigned: ${customTotal.toFixed(2)} / $
+                      {totalAmount.toFixed(2)}
+                      {!isCustomSplitValid && ' — amounts must match'}
+                    </p>
+                    {excludedFromCustom > 0 && (
+                      <p className="text-xs text-muted-foreground">
+                        {excludedFromCustom} member{excludedFromCustom > 1 ? 's' : ''} excluded (zero amount)
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
             )}
@@ -330,13 +387,18 @@ export function CreateExpenseModal({
               onClick={handleSubmitClick}
               disabled={!canSubmit || isLoading}
             >
-              {isLoading ? 'Adding...' : 'Add Expense'}
+              {isLoading
+                ? isEditMode
+                  ? 'Saving...'
+                  : 'Adding...'
+                : isEditMode
+                  ? 'Save Changes'
+                  : 'Add Expense'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Cancel Confirmation */}
       <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -354,26 +416,52 @@ export function CreateExpenseModal({
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Create Confirmation */}
-      <AlertDialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+      <AlertDialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Create Expense</AlertDialogTitle>
+            <AlertDialogTitle>
+              {isEditMode ? 'Save Changes' : 'Create Expense'}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              You paid ${parseFloat(expenseAmount || '0').toFixed(2)} for &quot;
-              {expenseName}&quot;.
-              {selectedMembers.length > 1 && (
-                <> This will be split among {selectedMembers.length} members.</>
+              {isEditMode ? (
+                <>
+                  Update &quot;{expenseName}&quot; to $
+                  {parseFloat(expenseAmount || '0').toFixed(2)} across{' '}
+                  {splitMode === 'custom'
+                    ? activeCustomEntries.length
+                    : selectedMembers.length}{' '}
+                  participant
+                  {(splitMode === 'custom'
+                    ? activeCustomEntries.length
+                    : selectedMembers.length) !== 1
+                    ? 's'
+                    : ''}
+                  . This will recreate the splits.
+                </>
+              ) : (
+                <>
+                  You paid ${parseFloat(expenseAmount || '0').toFixed(2)} for
+                  &quot;{expenseName}&quot;.
+                  {selectedMembers.length > 1 && (
+                    <> This will be split among {selectedMembers.length} members.</>
+                  )}
+                </>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleCreateConfirm}
+              onClick={handleSubmitConfirm}
               disabled={isLoading}
             >
-              {isLoading ? 'Creating...' : 'Create Expense'}
+              {isLoading
+                ? isEditMode
+                  ? 'Saving...'
+                  : 'Creating...'
+                : isEditMode
+                  ? 'Save Changes'
+                  : 'Create Expense'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

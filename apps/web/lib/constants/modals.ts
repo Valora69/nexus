@@ -1,6 +1,7 @@
 export enum GroupModals {
   AddExpense = 'ADD_EXPENSE',
   ViewExpense = 'VIEW_EXPENSE',
+  EditExpense = 'EDIT_EXPENSE',
   EditGroup = 'EDIT_GROUP',
 }
 

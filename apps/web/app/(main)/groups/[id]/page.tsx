@@ -15,9 +15,10 @@ import { useGetAllExpenses } from '@web/lib/client/queries/expenseQueries';
 import { useCurrentUser, useGetAllUsers } from '@web/lib/client/queries/userQueries';
 import { useUpdateGroup } from '@web/lib/client/mutations/groupMutations';
 import { useCreateGroupMember, useRemoveGroupMember } from '@web/lib/client/mutations/groupMemberMutations';
+import { RemoveMemberConflictError } from '@web/lib/client/services/groupMemberService';
 import { CreateExpenseModal } from '@web/components/features/expenses/create-expense-modal';
 import { ViewExpenseModal } from '@web/components/features/expenses/view-expense-modal';
-import { EditGroupModal } from '@web/components/features/groups/edit-group-modal';
+import { EditGroupModal, type RemovalBlocker } from '@web/components/features/groups/edit-group-modal';
 import { GroupHeader } from '@web/components/features/groups/group-header';
 import { GroupMembersCard } from '@web/components/features/groups/group-members-card';
 import { GroupExpensesList } from '@web/components/features/groups/group-expenses-list';
@@ -44,11 +45,15 @@ export default function GroupDetailPage() {
   const [activeModal, setActiveModal] = useState<GroupModals | null>(null);
   const [selectedExpense, setSelectedExpense] =
     useState<ExpenseWithRelations | null>(null);
+  const [removalBlockers, setRemovalBlockers] = useState<
+    Record<string, RemovalBlocker[]>
+  >({});
 
   useEffect(() => {
     if (!isOpen) {
       setActiveModal(null);
       setSelectedExpense(null);
+      setRemovalBlockers({});
     }
   }, [isOpen]);
 
@@ -80,7 +85,15 @@ export default function GroupDetailPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['groups', groupId] });
     },
-    onError: () => {
+    onError: (error, variables) => {
+      if (error instanceof RemoveMemberConflictError) {
+        setRemovalBlockers((prev) => ({
+          ...prev,
+          [variables.id]: error.blockers,
+        }));
+        toast.error('Member has unsettled balances');
+        return;
+      }
       toast.error('Failed to remove member');
     },
   });
@@ -94,6 +107,12 @@ export default function GroupDetailPage() {
   const onViewExpense = (expense: ExpenseWithRelations) => {
     setSelectedExpense(expense);
     setActiveModal(GroupModals.ViewExpense);
+    setIsOpen(true);
+  };
+
+  const onEditExpense = () => {
+    if (!selectedExpense) return;
+    setActiveModal(GroupModals.EditExpense);
     setIsOpen(true);
   };
 
@@ -111,6 +130,12 @@ export default function GroupDetailPage() {
   };
 
   const handleRemoveMember = (groupMemberId: string) => {
+    // Clear any prior blocker for this member before retrying
+    setRemovalBlockers((prev) => {
+      const next = { ...prev };
+      delete next[groupMemberId];
+      return next;
+    });
     removeMemberMutation.mutate({ id: groupMemberId });
   };
 
@@ -130,6 +155,17 @@ export default function GroupDetailPage() {
         onClose={() => setIsOpen(false)}
         expense={selectedExpense}
         members={members}
+        onEdit={onEditExpense}
+      />
+    ),
+    [GroupModals.EditExpense]: currentUser && selectedExpense && (
+      <CreateExpenseModal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        groupId={groupId}
+        members={members}
+        currentUserId={currentUser.id}
+        expense={selectedExpense}
       />
     ),
     [GroupModals.EditGroup]: (
@@ -142,6 +178,7 @@ export default function GroupDetailPage() {
         onAddMember={handleAddMember}
         onRemoveMember={handleRemoveMember}
         isLoading={updateGroupMutation.isPending}
+        blockersByMemberId={removalBlockers}
       />
     ),
   };
