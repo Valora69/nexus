@@ -167,17 +167,106 @@ export class GroupMemberService {
   }
 }
 
+  /**
+   * Returns a list of blocking reasons that prevent removing this member from
+   * their group. Empty list = safe to remove.
+   *
+   * Blocks:
+   *  1. Member has unsettled splits in the group (split.amount > sum of verified payments)
+   *  2. Member is the payee on a group expense with any unsettled split owed by others
+   *  3. Member has pending (unverified) payments on their splits in the group
+   */
+  async findRemovalBlockers(memberId: string) {
+    const member = await this.findOne(memberId);
+    const { userId, groupId } = member;
+
+    const [ownSplits, owedToMember, pendingPayments] = await Promise.all([
+      this.prisma.expenseSplit.findMany({
+        where: { userId, expense: { groupId } },
+        include: {
+          payments: { where: { isVerified: true } },
+          expense: { select: { id: true, name: true } },
+        },
+      }),
+      this.prisma.expense.findMany({
+        where: { groupId, payeeId: userId },
+        include: {
+          splits: {
+            where: { userId: { not: userId } },
+            include: { payments: { where: { isVerified: true } } },
+          },
+        },
+      }),
+      this.prisma.payment.findMany({
+        where: {
+          isVerified: false,
+          expenseSplit: { userId, expense: { groupId } },
+        },
+        include: {
+          expenseSplit: {
+            select: { expense: { select: { id: true, name: true } } },
+          },
+        },
+      }),
+    ]);
+
+    const blockers: Array<{ type: string; message: string }> = [];
+
+    for (const split of ownSplits) {
+      const paid = split.payments.reduce((s, p) => s + p.amountPaid, 0);
+      const remaining = split.amount - paid;
+      if (remaining > 0.01) {
+        blockers.push({
+          type: 'UNSETTLED_DEBT',
+          message: `Owes $${remaining.toFixed(2)} on "${split.expense.name}"`,
+        });
+      }
+    }
+
+    for (const expense of owedToMember) {
+      for (const split of expense.splits) {
+        const paid = split.payments.reduce((s, p) => s + p.amountPaid, 0);
+        const remaining = split.amount - paid;
+        if (remaining > 0.01) {
+          blockers.push({
+            type: 'OUTSTANDING_RECEIVABLE',
+            message: `Is owed $${remaining.toFixed(2)} on "${expense.name}"`,
+          });
+        }
+      }
+    }
+
+    for (const payment of pendingPayments) {
+      blockers.push({
+        type: 'PENDING_PAYMENT',
+        message: `Has an unverified payment on "${payment.expenseSplit.expense.name}"`,
+      });
+    }
+
+    return { member, blockers };
+  }
+
   async remove(id: string, userId: string) {
     this.logger.log('Removing group member...');
-    await this.findOne(id);
+
+    const { blockers } = await this.findRemovalBlockers(id);
+    if (blockers.length > 0) {
+      throw new HttpException(
+        {
+          message: 'Cannot remove member with unsettled group balances',
+          blockers,
+        },
+        HttpStatus.CONFLICT,
+      );
+    }
+
     try {
       const deletedMember = await this.prisma.groupMember.delete({
         where: { id },
       });
 
-
-      if(deletedMember){
-         this.eventEmitter.emit('activity.created', {
+      if (deletedMember) {
+        this.eventEmitter.emit('activity.created', {
           groupId: deletedMember.groupId,
           activityName: ActivityNameEnum.DELETED,
           activityOn: ActivityOnEnum.GROUP_MEMBER,
@@ -187,6 +276,7 @@ export class GroupMemberService {
       return deletedMember;
     } catch (error) {
       this.logger.error('Failed to delete group member');
+      if (error instanceof HttpException) throw error;
       throw new InternalServerErrorException('Failed to delete group member', {
         cause: error,
         description: 'An unexpected error occurred',
