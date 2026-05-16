@@ -1,8 +1,4 @@
-import {
-  useMutation,
-  UseMutationOptions,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { useMutation, UseMutationOptions, useQueryClient } from '@tanstack/react-query';
 
 import {
   createPayment,
@@ -10,6 +6,7 @@ import {
   removePayment,
 } from '../services/paymentService';
 import { CreatePaymentData, UpdatePaymentData } from '../../types/request';
+import { invalidatePaymentDomain } from '../invalidations';
 
 export const useCreatePayment = (
   mutationOptions: UseMutationOptions<
@@ -23,9 +20,7 @@ export const useCreatePayment = (
   return useMutation({
     mutationFn: ({ paymentData }) => createPayment(paymentData),
     onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: ['payments'] });
-      queryClient.invalidateQueries({ queryKey: ['expense-splits'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      invalidatePaymentDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
     ...mutationOptions,
@@ -44,9 +39,7 @@ export const useUpdatePayment = (
   return useMutation({
     mutationFn: ({ id, paymentData }) => updatePayment(id, paymentData),
     onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: ['payments'] });
-      queryClient.invalidateQueries({ queryKey: ['expense-splits'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      invalidatePaymentDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
     ...mutationOptions,
@@ -61,9 +54,7 @@ export const useRemovePayment = (
   return useMutation({
     mutationFn: ({ id }) => removePayment(id),
     onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: ['payments'] });
-      queryClient.invalidateQueries({ queryKey: ['expense-splits'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      invalidatePaymentDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
     ...mutationOptions,

@@ -1,8 +1,5 @@
-import {
-  useMutation,
-  UseMutationOptions,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { useMutation, UseMutationOptions, useQueryClient } from '@tanstack/react-query';
+
 import {
   markSplitAsPaid,
   updateExpenseSplit,
@@ -12,6 +9,7 @@ import type {
   PaymentMethod,
   Payment,
 } from '../../types/entities';
+import { invalidatePaymentDomain } from '../invalidations';
 
 type MarkAsPaidResponse = {
   payment: Payment;
@@ -38,11 +36,8 @@ export const useMarkSplitAsPaid = (
     mutationFn: ({ id, paymentMethod, amountPaid, paymentProof }) =>
       markSplitAsPaid(id, { paymentMethod, amountPaid, paymentProof }),
     onSuccess: (...args) => {
-      // 🔄 Invalidate related queries — payments and dashboard are downstream
-      queryClient.invalidateQueries({ queryKey: ['expense-splits'] });
-      queryClient.invalidateQueries({ queryKey: ['expenses'] });
-      queryClient.invalidateQueries({ queryKey: ['payments'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      // Mark-as-paid produces a Payment row — payment domain covers all surfaces.
+      invalidatePaymentDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
     ...mutationOptions,
@@ -61,9 +56,7 @@ export const useUpdateExpenseSplit = (
   return useMutation({
     mutationFn: ({ id, data }) => updateExpenseSplit(id, data),
     onSuccess: (...args) => {
-      // 🔄 Invalidate related queries
-      queryClient.invalidateQueries({ queryKey: ['expense-splits'] });
-      queryClient.invalidateQueries({ queryKey: ['expenses'] });
+      invalidatePaymentDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
     ...mutationOptions,

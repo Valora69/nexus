@@ -1,18 +1,12 @@
-import {
-  useMutation,
-  UseMutationOptions,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { useMutation, UseMutationOptions, useQueryClient } from '@tanstack/react-query';
 
 import {
   createExpense,
   updateExpense,
   removeExpense,
 } from '../services/expenseService';
-import {
-  CreateExpenseData,
-  UpdateExpenseData,
-} from '../../types/request';
+import { CreateExpenseData, UpdateExpenseData } from '../../types/request';
+import { invalidateExpenseDomain } from '../invalidations';
 
 export const useCreateExpense = (
   mutationOptions?: UseMutationOptions<
@@ -26,16 +20,7 @@ export const useCreateExpense = (
   return useMutation({
     mutationFn: ({ expenseData }) => createExpense(expenseData),
     onSuccess: (...args) => {
-      // 🔄 Invalidate and FORCE refetch immediately
-      queryClient.invalidateQueries({
-        queryKey: ['expenses'],
-        refetchType: 'active', // ✅ Refetch all active queries immediately
-      });
-      queryClient.invalidateQueries({
-        queryKey: ['expense-splits'],
-        refetchType: 'active',
-      });
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      invalidateExpenseDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
     ...mutationOptions,
@@ -54,16 +39,8 @@ export const useUpdateExpense = (
   return useMutation({
     mutationFn: ({ id, expenseData }) => updateExpense(id, expenseData),
     onSuccess: (...args) => {
-      // 🔄 Invalidate and FORCE refetch immediately
-      queryClient.invalidateQueries({
-        queryKey: ['expenses'],
-        refetchType: 'active',
-      });
-      queryClient.invalidateQueries({
-        queryKey: ['expense-splits'],
-        refetchType: 'active',
-      });
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      // Split replacement cascade-deletes pending payments — payments cache must refresh.
+      invalidateExpenseDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
     ...mutationOptions,
@@ -78,16 +55,7 @@ export const useRemoveExpense = (
   return useMutation({
     mutationFn: ({ id }) => removeExpense(id),
     onSuccess: (...args) => {
-      // 🔄 Invalidate and FORCE refetch immediately
-      queryClient.invalidateQueries({
-        queryKey: ['expenses'],
-        refetchType: 'active',
-      });
-      queryClient.invalidateQueries({
-        queryKey: ['expense-splits'],
-        refetchType: 'active',
-      });
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      invalidateExpenseDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
     ...mutationOptions,

@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient, UseMutationOptions } from '@tanstack/react-query';
 import { quickCapture } from '../services/personalTransactionService';
 import type { QuickCaptureData } from '../../types/request';
+import { invalidatePersonalTransactionDomain } from '../invalidations';
 
 export const useQuickCapture = (
   mutationOptions?: UseMutationOptions<unknown, Error, QuickCaptureData>,
@@ -10,8 +11,7 @@ export const useQuickCapture = (
   return useMutation({
     mutationFn: (data: QuickCaptureData) => quickCapture(data),
     onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: ['personal-transactions'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      invalidatePersonalTransactionDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
     ...mutationOptions,

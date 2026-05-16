@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import {
@@ -77,6 +78,7 @@ function AccountStats({
 
 export default function AccountPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   // Profile modal state
   const [editOpen, setEditOpen] = useState(false);
@@ -165,6 +167,8 @@ export default function AccountPage() {
         credentials: 'include',
       });
     } finally {
+      // Always wipe cache so prior user's data doesn't leak to the next session.
+      queryClient.clear();
       router.push('/login');
     }
   };

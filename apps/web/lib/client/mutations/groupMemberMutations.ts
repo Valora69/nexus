@@ -1,8 +1,5 @@
-import {
-  useMutation,
-  UseMutationOptions,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { useMutation, UseMutationOptions, useQueryClient } from '@tanstack/react-query';
+
 import {
   createGroupMember,
   updateGroupMember,
@@ -12,6 +9,7 @@ import {
   CreateGroupMemberData,
   UpdateGroupMemberData,
 } from '../../types/request';
+import { invalidateGroupDomain } from '../invalidations';
 
 export const useCreateGroupMember = (
   mutationOptions?: UseMutationOptions<
@@ -25,8 +23,7 @@ export const useCreateGroupMember = (
   return useMutation({
     mutationFn: ({ groupMemberData }) => createGroupMember(groupMemberData),
     onSuccess: (...args) => {
-      // 🔄 Invalidate related queries
-      queryClient.invalidateQueries({ queryKey: ['groupMembers'] });
+      invalidateGroupDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
     ...mutationOptions,
@@ -46,8 +43,7 @@ export const useUpdateGroupMember = (
     mutationFn: ({ id, groupMemberData }) =>
       updateGroupMember(id, groupMemberData),
     onSuccess: (...args) => {
-      // 🔄 Invalidate related queries
-      queryClient.invalidateQueries({ queryKey: ['groupMembers'] });
+      invalidateGroupDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
     ...mutationOptions,
@@ -62,8 +58,7 @@ export const useRemoveGroupMember = (
   return useMutation({
     mutationFn: ({ id }) => removeGroupMember(id),
     onSuccess: (...args) => {
-      // 🔄 Invalidate related queries
-      queryClient.invalidateQueries({ queryKey: ['groupMembers'] });
+      invalidateGroupDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
     ...mutationOptions,

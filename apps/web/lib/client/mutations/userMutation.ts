@@ -1,11 +1,9 @@
-import {
-  useMutation,
-  UseMutationOptions,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { useMutation, UseMutationOptions, useQueryClient } from '@tanstack/react-query';
 
 import { createUser, removeUser, updateUser } from '../services/userService';
 import { CreateUserData, UpdateUserData } from '../../types/request';
+import { invalidateUserDomain } from '../invalidations';
+import { queryKeys } from '../queryKeys';
 
 export const useCreateUser = (
   mutationOptions: UseMutationOptions<
@@ -19,8 +17,7 @@ export const useCreateUser = (
   return useMutation({
     mutationFn: ({ userData }) => createUser(userData),
     onSuccess: (...args) => {
-      // 🔄 Invalidate related queries
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.user.all() });
       mutationOptions?.onSuccess?.(...args);
     },
     ...mutationOptions,
@@ -39,9 +36,8 @@ export const useUpdateUser = (
   return useMutation({
     mutationFn: ({ id, userData }) => updateUser(id, userData),
     onSuccess: (...args) => {
-      // 🔄 Invalidate related queries
-      queryClient.invalidateQueries({ queryKey: ['currentUsers'] });
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+      // Name and gcashNumber are denormalized across many payloads.
+      invalidateUserDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
     ...mutationOptions,
@@ -56,8 +52,7 @@ export const useRemoveUser = (
   return useMutation({
     mutationFn: ({ id }) => removeUser(id),
     onSuccess: (...args) => {
-      // 🔄 Invalidate related queries
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+      invalidateUserDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
     ...mutationOptions,

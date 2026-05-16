@@ -1,8 +1,5 @@
-import {
-  useMutation,
-  UseMutationOptions,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { useMutation, UseMutationOptions, useQueryClient } from '@tanstack/react-query';
+
 import {
   sendFriendRequest,
   acceptFriendRequest,
@@ -14,6 +11,7 @@ import type {
   SendFriendRequestData,
   AcceptFriendRequestByTokenData,
 } from '../../types/request';
+import { invalidateFriendDomain } from '../invalidations';
 
 export const useSendFriendRequest = (
   mutationOptions: UseMutationOptions<
@@ -27,9 +25,7 @@ export const useSendFriendRequest = (
   return useMutation({
     mutationFn: ({ data }) => sendFriendRequest(data),
     onSuccess: (...args) => {
-      // 🔄 Invalidate related queries
-      queryClient.invalidateQueries({ queryKey: ['friends'] });
-      queryClient.invalidateQueries({ queryKey: ['friendRequests'] });
+      invalidateFriendDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
     ...mutationOptions,
@@ -48,9 +44,7 @@ export const useAcceptFriendRequest = (
   return useMutation({
     mutationFn: ({ requestId }) => acceptFriendRequest(requestId),
     onSuccess: (...args) => {
-      // 🔄 Invalidate related queries
-      queryClient.invalidateQueries({ queryKey: ['friends'] });
-      queryClient.invalidateQueries({ queryKey: ['friendRequests'] });
+      invalidateFriendDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
     ...mutationOptions,
@@ -69,9 +63,7 @@ export const useAcceptFriendRequestByToken = (
   return useMutation({
     mutationFn: ({ data }) => acceptFriendRequestByToken(data),
     onSuccess: (...args) => {
-      // 🔄 Invalidate related queries
-      queryClient.invalidateQueries({ queryKey: ['friends'] });
-      queryClient.invalidateQueries({ queryKey: ['friendRequests'] });
+      invalidateFriendDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
     ...mutationOptions,
@@ -90,9 +82,7 @@ export const useDeclineFriendRequest = (
   return useMutation({
     mutationFn: ({ requestId }) => declineFriendRequest(requestId),
     onSuccess: (...args) => {
-      // 🔄 Invalidate related queries
-      queryClient.invalidateQueries({ queryKey: ['friends'] });
-      queryClient.invalidateQueries({ queryKey: ['friendRequests'] });
+      invalidateFriendDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
     ...mutationOptions,
@@ -111,9 +101,7 @@ export const useRemoveFriend = (
   return useMutation({
     mutationFn: ({ friendId }) => removeFriend(friendId),
     onSuccess: (...args) => {
-      // 🔄 Invalidate related queries
-      queryClient.invalidateQueries({ queryKey: ['friends'] });
-      queryClient.invalidateQueries({ queryKey: ['friendRequests'] });
+      invalidateFriendDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
     ...mutationOptions,
