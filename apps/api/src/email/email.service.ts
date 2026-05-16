@@ -13,6 +13,8 @@ export class EmailService {
   private readonly logger = new Logger(EmailService.name, { timestamp: true });
   private transporter: nodemailer.Transporter;
 
+  private static readonly SMTP_TIMEOUT_MS = 10_000;
+
   constructor() {
     this.transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -20,6 +22,10 @@ export class EmailService {
         user: process.env.GMAIL_USER,
         pass: process.env.GMAIL_APP_PASSWORD,
       },
+      // Hard limits so a hung SMTP socket never keeps a Render worker alive.
+      connectionTimeout: EmailService.SMTP_TIMEOUT_MS,
+      greetingTimeout: EmailService.SMTP_TIMEOUT_MS,
+      socketTimeout: EmailService.SMTP_TIMEOUT_MS,
     });
   }
 
@@ -122,17 +128,27 @@ export class EmailService {
       </html>
     `;
 
+    const deadline = new Promise<never>((_, reject) =>
+      setTimeout(
+        () => reject(new Error(`SMTP deadline exceeded (${EmailService.SMTP_TIMEOUT_MS}ms)`)),
+        EmailService.SMTP_TIMEOUT_MS,
+      ),
+    );
+
     try {
-      await this.transporter.sendMail({
-        from: `"MoneyApp" <${process.env.GMAIL_USER}>`,
-        to,
-        subject,
-        html,
-      });
+      await Promise.race([
+        this.transporter.sendMail({
+          from: `"MoneyApp" <${process.env.GMAIL_USER}>`,
+          to,
+          subject,
+          html,
+        }),
+        deadline,
+      ]);
       this.logger.log(`Friend request email sent to ${to}`);
     } catch (error) {
       this.logger.error(`Failed to send email to ${to}`, error);
-      // Don't throw - email failure shouldn't block the friend request
+      // Never rethrow — caller is fire-and-forget, email failure is non-fatal.
     }
   }
 }

@@ -107,16 +107,20 @@ export class FriendService {
         },
       });
 
-      // Send email invitation
+      // Fire-and-forget: email runs in the background so the HTTP response
+      // returns immediately after the DB write, regardless of SMTP outcome.
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
       const inviteUrl = `${frontendUrl}/friends/accept?token=${request.token}`;
-
-      await this.emailService.sendFriendRequestEmail({
-        to: recipientEmail,
-        senderName: sender.name || sender.email,
-        inviteUrl,
-        isNewUser: !recipient,
-      });
+      void this.emailService
+        .sendFriendRequestEmail({
+          to: recipientEmail,
+          senderName: sender.name || sender.email,
+          inviteUrl,
+          isNewUser: !recipient,
+        })
+        .catch((err: unknown) =>
+          this.logger.error('Background email task failed', err),
+        );
 
       this.logger.log(`Friend request sent successfully to ${recipientEmail}`);
       return { message: 'Friend request sent!' };
