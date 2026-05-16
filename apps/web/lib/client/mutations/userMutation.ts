@@ -14,7 +14,7 @@ export const useCreateUser = (
 ) => {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<unknown, Error, { userData: CreateUserData }>({
     mutationFn: ({ userData }) => createUser(userData),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.user.all() });
@@ -33,7 +33,11 @@ export const useUpdateUser = (
 ) => {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<
+    unknown,
+    Error,
+    { id: string; userData: UpdateUserData }
+  >({
     mutationFn: ({ id, userData }) => updateUser(id, userData),
     onSuccess: (...args) => {
       // Name and gcashNumber are denormalized across many payloads.
@@ -49,7 +53,7 @@ export const useRemoveUser = (
 ) => {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<unknown, Error, { id: string }>({
     mutationFn: ({ id }) => removeUser(id),
     onSuccess: (...args) => {
       invalidateUserDomain(queryClient);

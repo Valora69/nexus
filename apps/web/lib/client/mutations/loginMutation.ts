@@ -21,7 +21,7 @@ interface LogoutError {
 export const useLoginUser = (
   mutationOptions?: UseMutationOptions<LoginResponse, LoginError, LoginDTO>,
 ) =>
-  useMutation({
+  useMutation<LoginResponse, LoginError, LoginDTO>({
     mutationFn: (credentials) => loginUser(credentials),
     onSuccess: (...args) => {
       // Prior session's cache (if any) must not leak across login boundaries.
@@ -34,7 +34,7 @@ export const useLoginUser = (
 export const useLogoutUser = (
   mutationOptions?: UseMutationOptions<LogoutResponse, LogoutError, void>,
 ) =>
-  useMutation({
+  useMutation<LogoutResponse, LogoutError, void>({
     mutationFn: () => logoutUser(),
     onSettled: (...args) => {
       // Always wipe — even if logout API failed, the local session is gone.

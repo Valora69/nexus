@@ -23,7 +23,10 @@ import {
   SelectValue,
 } from '@web/components/ui/select';
 import type { CreateExpenseData } from '@web/lib/types/request';
-import { expenseFormSchema } from '@web/lib/zod/expenseSchema';
+import {
+  expenseFormSchema,
+  type ExpenseFormValues,
+} from '@web/lib/zod/expenseSchema';
 
 interface ExpenseFormProps {
   onSubmit: (data: CreateExpenseData) => Promise<void>;
@@ -38,7 +41,7 @@ export function ExpenseForm({
   isLoading = false,
   onFormChange,
 }: ExpenseFormProps) {
-  const form = useForm<CreateExpenseData>({
+  const form = useForm<ExpenseFormValues>({
     resolver: zodResolver(expenseFormSchema),
     defaultValues: {
       name: '',
@@ -51,8 +54,8 @@ export function ExpenseForm({
     },
   });
 
-  const handleSubmit = async (data: CreateExpenseData) => {
-    await onSubmit(data);
+  const handleSubmit = async (data: ExpenseFormValues) => {
+    await onSubmit(data satisfies CreateExpenseData);
   };
 
   // Track form changes

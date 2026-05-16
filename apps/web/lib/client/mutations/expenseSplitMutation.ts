@@ -32,7 +32,7 @@ export const useMarkSplitAsPaid = (
 ) => {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<MarkAsPaidResponse, Error, MarkAsPaidInput>({
     mutationFn: ({ id, paymentMethod, amountPaid, paymentProof }) =>
       markSplitAsPaid(id, { paymentMethod, amountPaid, paymentProof }),
     onSuccess: (...args) => {
@@ -53,7 +53,11 @@ export const useUpdateExpenseSplit = (
 ) => {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<
+    ExpenseSplitWithRelations,
+    Error,
+    { id: string; data: { isPaid?: boolean; amount?: number } }
+  >({
     mutationFn: ({ id, data }) => updateExpenseSplit(id, data),
     onSuccess: (...args) => {
       invalidatePaymentDomain(queryClient);

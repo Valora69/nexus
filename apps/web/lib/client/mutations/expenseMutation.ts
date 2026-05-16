@@ -17,7 +17,7 @@ export const useCreateExpense = (
 ) => {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<unknown, Error, { expenseData: CreateExpenseData }>({
     mutationFn: ({ expenseData }) => createExpense(expenseData),
     onSuccess: (...args) => {
       invalidateExpenseDomain(queryClient);
@@ -36,7 +36,11 @@ export const useUpdateExpense = (
 ) => {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<
+    unknown,
+    Error,
+    { id: string; expenseData: UpdateExpenseData }
+  >({
     mutationFn: ({ id, expenseData }) => updateExpense(id, expenseData),
     onSuccess: (...args) => {
       // Split replacement cascade-deletes pending payments — payments cache must refresh.
@@ -52,7 +56,7 @@ export const useRemoveExpense = (
 ) => {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<unknown, Error, { id: string }>({
     mutationFn: ({ id }) => removeExpense(id),
     onSuccess: (...args) => {
       invalidateExpenseDomain(queryClient);

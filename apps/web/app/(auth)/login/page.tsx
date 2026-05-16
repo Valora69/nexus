@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@web/components/ui/button';
 import { Card, CardContent, CardHeader } from '@web/components/ui/card';
 import { toast } from 'sonner';
 import { AuthBackground } from '@web/components/auth/auth-background';
 
-const Login = () => {
+const LoginContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -86,5 +86,11 @@ const Login = () => {
     </AuthBackground>
   );
 };
+
+const Login = () => (
+  <Suspense fallback={null}>
+    <LoginContent />
+  </Suspense>
+);
 
 export default Login;

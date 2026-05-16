@@ -22,7 +22,7 @@ export function getInitials(
   const parts = name.trim().split(/\s+/);
 
   if (parts.length >= 2) {
-    return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    return `${parts[0]![0]}${parts[1]![0]}`.toUpperCase();
   }
 
   return name.substring(0, 2).toUpperCase();
@@ -38,7 +38,7 @@ export function getDisplayName(
   fallback: string = 'Unknown User',
 ): string {
   if (name?.trim()) return name.trim();
-  if (email) return email.split('@')[0];
+  if (email) return email.split('@')[0]!;
   return fallback;
 }
 

@@ -17,7 +17,7 @@ export const useCreatePayment = (
 ) => {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<unknown, Error, { paymentData: CreatePaymentData }>({
     mutationFn: ({ paymentData }) => createPayment(paymentData),
     onSuccess: (...args) => {
       invalidatePaymentDomain(queryClient);
@@ -36,7 +36,11 @@ export const useUpdatePayment = (
 ) => {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<
+    unknown,
+    Error,
+    { id: string; paymentData: UpdatePaymentData }
+  >({
     mutationFn: ({ id, paymentData }) => updatePayment(id, paymentData),
     onSuccess: (...args) => {
       invalidatePaymentDomain(queryClient);
@@ -51,7 +55,7 @@ export const useRemovePayment = (
 ) => {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<unknown, Error, { id: string }>({
     mutationFn: ({ id }) => removePayment(id),
     onSuccess: (...args) => {
       invalidatePaymentDomain(queryClient);

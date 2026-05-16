@@ -20,7 +20,11 @@ export const useCreateGroupMember = (
 ) => {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<
+    unknown,
+    Error,
+    { groupMemberData: CreateGroupMemberData }
+  >({
     mutationFn: ({ groupMemberData }) => createGroupMember(groupMemberData),
     onSuccess: (...args) => {
       invalidateGroupDomain(queryClient);
@@ -39,7 +43,11 @@ export const useUpdateGroupMember = (
 ) => {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<
+    unknown,
+    Error,
+    { id: string; groupMemberData: UpdateGroupMemberData }
+  >({
     mutationFn: ({ id, groupMemberData }) =>
       updateGroupMember(id, groupMemberData),
     onSuccess: (...args) => {
@@ -55,7 +63,7 @@ export const useRemoveGroupMember = (
 ) => {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<unknown, Error, { id: string }>({
     mutationFn: ({ id }) => removeGroupMember(id),
     onSuccess: (...args) => {
       invalidateGroupDomain(queryClient);

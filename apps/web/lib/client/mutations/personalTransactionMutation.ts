@@ -8,7 +8,7 @@ export const useQuickCapture = (
 ) => {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<unknown, Error, QuickCaptureData>({
     mutationFn: (data: QuickCaptureData) => quickCapture(data),
     onSuccess: (...args) => {
       invalidatePersonalTransactionDomain(queryClient);

@@ -20,12 +20,14 @@ interface ExpensesColumnsProps {
   onArchiveExpense?: (expenseId: string) => void;
   onViewExpense?: (expense: Expense) => void;
   onEditExpense?: (expense: Expense) => void;
+  onDeleteExpense?: (expenseId: string) => void;
 }
 
 export const createExpensesColumns = ({
   onArchiveExpense,
   onViewExpense,
   onEditExpense,
+  onDeleteExpense,
 }: ExpensesColumnsProps = {}): ColumnDef<Expense>[] => [
   {
     id: 'select',

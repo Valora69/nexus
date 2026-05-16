@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@web/components/ui/card';
 import { Button } from '@web/components/ui/button';
@@ -11,7 +11,7 @@ import { AuthBackground } from '@web/components/auth/auth-background';
 
 type Status = 'loading' | 'login-required' | 'accepting' | 'success' | 'error';
 
-export default function AcceptFriendPage() {
+function AcceptFriendContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams?.get('token');
@@ -182,5 +182,13 @@ export default function AcceptFriendPage() {
         </CardContent>
       </Card>
     </AuthBackground>
+  );
+}
+
+export default function AcceptFriendPage() {
+  return (
+    <Suspense fallback={null}>
+      <AcceptFriendContent />
+    </Suspense>
   );
 }

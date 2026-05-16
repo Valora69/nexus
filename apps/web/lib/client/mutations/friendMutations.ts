@@ -22,7 +22,11 @@ export const useSendFriendRequest = (
 ) => {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<
+    { message: string },
+    Error,
+    { data: SendFriendRequestData }
+  >({
     mutationFn: ({ data }) => sendFriendRequest(data),
     onSuccess: (...args) => {
       invalidateFriendDomain(queryClient);
@@ -41,7 +45,7 @@ export const useAcceptFriendRequest = (
 ) => {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<{ message: string }, Error, { requestId: string }>({
     mutationFn: ({ requestId }) => acceptFriendRequest(requestId),
     onSuccess: (...args) => {
       invalidateFriendDomain(queryClient);
@@ -60,7 +64,11 @@ export const useAcceptFriendRequestByToken = (
 ) => {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<
+    { message: string },
+    Error,
+    { data: AcceptFriendRequestByTokenData }
+  >({
     mutationFn: ({ data }) => acceptFriendRequestByToken(data),
     onSuccess: (...args) => {
       invalidateFriendDomain(queryClient);
@@ -79,7 +87,7 @@ export const useDeclineFriendRequest = (
 ) => {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<{ message: string }, Error, { requestId: string }>({
     mutationFn: ({ requestId }) => declineFriendRequest(requestId),
     onSuccess: (...args) => {
       invalidateFriendDomain(queryClient);
@@ -98,7 +106,7 @@ export const useRemoveFriend = (
 ) => {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<{ message: string }, Error, { friendId: string }>({
     mutationFn: ({ friendId }) => removeFriend(friendId),
     onSuccess: (...args) => {
       invalidateFriendDomain(queryClient);
