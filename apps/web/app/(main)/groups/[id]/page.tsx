@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import { Card, CardContent } from '@web/components/ui/card';
@@ -32,7 +31,6 @@ import type {
 export default function GroupDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const queryClient = useQueryClient();
   const groupId = params.id as string;
 
   const { data: group, isLoading: groupLoading } = useGetGroupById(groupId);
@@ -62,8 +60,6 @@ export default function GroupDetailPage() {
 
   const updateGroupMutation = useUpdateGroup({
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['groups'] });
-      queryClient.invalidateQueries({ queryKey: ['groups', groupId] });
       toast.success('Group updated successfully');
       setIsOpen(false);
     },
@@ -73,18 +69,12 @@ export default function GroupDetailPage() {
   });
 
   const addMemberMutation = useCreateGroupMember({
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['groups', groupId] });
-    },
     onError: () => {
       toast.error('Failed to add member');
     },
   });
 
   const removeMemberMutation = useRemoveGroupMember({
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['groups', groupId] });
-    },
     onError: (error, variables) => {
       if (error instanceof RemoveMemberConflictError) {
         setRemovalBlockers((prev) => ({
