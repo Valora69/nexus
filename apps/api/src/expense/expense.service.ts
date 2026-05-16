@@ -374,9 +374,11 @@ export class ExpenseService {
       const updated = await this.prisma.$transaction(async (tx) => {
         const oldSplitIds = existing.splits.map((s) => s.id);
 
-        // Explicitly delete linked PersonalTransactions first.
-        // The schema sets expenseSplitId to NULL on split delete (SetNull),
-        // which would leave orphaned PT records unlinked. We delete them outright.
+        // Schema cascades ExpenseSplit -> Payment (Payment.expenseSplitId
+        // has onDelete: Cascade), so deleting splits also wipes their
+        // pending payments. PersonalTransaction.expenseSplitId is SetNull
+        // in the schema, so we delete those rows explicitly to avoid
+        // orphaned ledger entries.
         if (oldSplitIds.length > 0) {
           await tx.personalTransaction.deleteMany({
             where: { expenseSplitId: { in: oldSplitIds } },
