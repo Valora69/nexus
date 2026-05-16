@@ -5,19 +5,20 @@ import {
   getAllGroupMembers,
   getGroupMemberById,
 } from '../services/groupMemberService';
+import { queryKeys } from '../queryKeys';
 
 export const useGetAllGroupMembers = () => {
   return useQuery({
-    queryKey: ['groupMembers'],
+    queryKey: queryKeys.groupMembers.all(),
     queryFn: () => getAllGroupMembers(),
-    staleTime: 5 * 60 * 1000, // ⏰ Cache for 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 };
 
 export const useGetGroupMemberById = (id: string) => {
   return useQuery({
-    queryKey: ['groupMembers', id],
+    queryKey: queryKeys.groupMembers.byId(id),
     queryFn: () => getGroupMemberById(id),
-    staleTime: 5 * 60 * 1000, // ⏰ Cache for 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 };

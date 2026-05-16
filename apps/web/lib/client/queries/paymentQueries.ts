@@ -7,41 +7,45 @@ import {
   getPendingVerification,
   getPendingConfirmation,
 } from '../services/paymentService';
+import { queryKeys } from '../queryKeys';
 
 export const useGetAllPayments = () => {
   return useQuery({
-    queryKey: ['payments'],
+    queryKey: queryKeys.payments.all(),
     queryFn: () => getAllPayments(),
-    staleTime: 2 * 60 * 1000, // ⏰ Cache for 2 minutes
+    staleTime: 2 * 60 * 1000,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
   });
 };
 
 export const useGetPaymentById = (id: string) => {
   return useQuery({
-    queryKey: ['payments', id],
+    queryKey: queryKeys.payments.byId(id),
     queryFn: () => getPaymentById(id),
-    staleTime: 2 * 60 * 1000, // ⏰ Cache for 2 minutes
+    staleTime: 2 * 60 * 1000,
+    enabled: !!id,
   });
 };
 
-// Critical: Payments waiting for verification
+// Critical: Payments waiting for verification (receivable side).
 export const useGetPendingVerification = () => {
   return useQuery({
-    queryKey: ['payments', 'pending-verification'],
+    queryKey: queryKeys.payments.pendingVerification(),
     queryFn: () => getPendingVerification(),
-    staleTime: 1 * 60 * 1000, // ⏰ 1 minute - time-sensitive
-    refetchOnMount: 'always', // ✅ Always fresh
-    refetchOnWindowFocus: true, // ✅ Refetch on focus
+    staleTime: 1 * 60 * 1000,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
   });
 };
 
-// Critical: Payments waiting for confirmation
+// Critical: Payments waiting for confirmation (payable side).
 export const useGetPendingConfirmation = () => {
   return useQuery({
-    queryKey: ['payments', 'pending-confirmation'],
+    queryKey: queryKeys.payments.pendingConfirmation(),
     queryFn: () => getPendingConfirmation(),
-    staleTime: 1 * 60 * 1000, // ⏰ 1 minute - time-sensitive
-    refetchOnMount: 'always', // ✅ Always fresh
-    refetchOnWindowFocus: true, // ✅ Refetch on focus
+    staleTime: 1 * 60 * 1000,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
   });
 };

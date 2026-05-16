@@ -2,10 +2,14 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { getAllExpenses, getExpenseById } from '../services/expenseService';
+import { queryKeys } from '../queryKeys';
 
-export const useGetAllExpenses = (type?: 'payable' | 'receivable', groupId?: string) => {
+export const useGetAllExpenses = (
+  type?: 'payable' | 'receivable',
+  groupId?: string,
+) => {
   return useQuery({
-    queryKey: ['expenses', type, groupId],
+    queryKey: queryKeys.expenses.list(type, groupId),
     queryFn: () => getAllExpenses(type, groupId),
     staleTime: 2 * 60 * 1000,
     refetchOnMount: 'always',
@@ -15,9 +19,10 @@ export const useGetAllExpenses = (type?: 'payable' | 'receivable', groupId?: str
 
 export const useGetExpenseById = (id: string) => {
   return useQuery({
-    queryKey: ['expenses', id],
+    queryKey: queryKeys.expenses.byId(id),
     queryFn: () => getExpenseById(id),
-    staleTime: 2 * 60 * 1000, // ⏰ Cache for 2 minutes
-    refetchOnMount: 'always', // ✅ Always fresh when viewing details
+    staleTime: 2 * 60 * 1000,
+    refetchOnMount: 'always',
+    enabled: !!id,
   });
 };

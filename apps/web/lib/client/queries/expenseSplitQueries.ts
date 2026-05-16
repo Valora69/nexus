@@ -9,62 +9,62 @@ import {
   getSplitsByUserId,
   getExpenseSplitById,
 } from '../services/expenseSplitService';
+import { queryKeys } from '../queryKeys';
 
 export const useGetAllExpenseSplits = () => {
   return useQuery({
-    queryKey: ['expense-splits'],
+    queryKey: queryKeys.expenseSplits.all(),
     queryFn: () => getAllExpenseSplits(),
-    staleTime: 3 * 60 * 1000, // ⏰ Cache for 3 minutes - less critical
+    staleTime: 3 * 60 * 1000,
   });
 };
 
-// Critical: User's payable splits (they need to pay)
+// Critical: user's payable splits (they need to pay).
 export const useGetMyPayableSplits = () => {
   return useQuery({
-    queryKey: ['expense-splits', 'my-payables'],
+    queryKey: queryKeys.expenseSplits.myPayables(),
     queryFn: () => getMyPayableSplits(),
-    staleTime: 1 * 60 * 1000, // ⏰ 1 minute - time-sensitive
-    refetchOnMount: 'always', // ✅ Always fresh on mount
-    refetchOnWindowFocus: true, // ✅ Refetch when user returns
+    staleTime: 1 * 60 * 1000,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
   });
 };
 
-// Critical: User's receivable splits (they receive money)
+// Critical: user's receivable splits (they receive money).
 export const useGetMyReceivableSplits = () => {
   return useQuery({
-    queryKey: ['expense-splits', 'my-receivables'],
+    queryKey: queryKeys.expenseSplits.myReceivables(),
     queryFn: () => getMyReceivableSplits(),
-    staleTime: 1 * 60 * 1000, // ⏰ 1 minute - time-sensitive
-    refetchOnMount: 'always', // ✅ Always fresh on mount
-    refetchOnWindowFocus: true, // ✅ Refetch when user returns
+    staleTime: 1 * 60 * 1000,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
   });
 };
 
 export const useGetSplitsByExpenseId = (expenseId: string) => {
   return useQuery({
-    queryKey: ['expense-splits', 'expense', expenseId],
+    queryKey: queryKeys.expenseSplits.byExpenseId(expenseId),
     queryFn: () => getSplitsByExpenseId(expenseId),
     enabled: !!expenseId,
-    staleTime: 2 * 60 * 1000, // ⏰ Cache for 2 minutes
+    staleTime: 2 * 60 * 1000,
   });
 };
 
 export const useGetSplitsByUserId = (userId: string) => {
   return useQuery({
-    queryKey: ['expense-splits', 'user', userId],
+    queryKey: queryKeys.expenseSplits.byUserId(userId),
     queryFn: () => getSplitsByUserId(userId),
     enabled: !!userId,
-    staleTime: 3 * 60 * 1000, // ⏰ Cache for 3 minutes
+    staleTime: 3 * 60 * 1000,
   });
 };
 
-// Detail view: Single split
 export const useGetExpenseSplitById = (id: string) => {
   return useQuery({
-    queryKey: ['expense-splits', id],
+    queryKey: queryKeys.expenseSplits.byId(id),
     queryFn: () => getExpenseSplitById(id),
     enabled: !!id,
-    staleTime: 2 * 60 * 1000, // ⏰ Cache for 2 minutes
-    refetchOnMount: 'always', // ✅ Always fresh when viewing details
+    staleTime: 2 * 60 * 1000,
+    refetchOnMount: 'always',
   });
 };

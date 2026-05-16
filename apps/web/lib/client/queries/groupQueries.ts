@@ -2,20 +2,21 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { getAllGroups, getGroupById } from '../services/groupService';
+import { queryKeys } from '../queryKeys';
 
 export const useGetAllGroups = () => {
   return useQuery({
-    queryKey: ['groups'],
+    queryKey: queryKeys.groups.all(),
     queryFn: () => getAllGroups(),
-    staleTime: 5 * 60 * 1000, // ⏰ Cache for 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 };
 
 export const useGetGroupById = (id: string, enabled = true) => {
   return useQuery({
-    queryKey: ['groups', id],
+    queryKey: queryKeys.groups.byId(id),
     queryFn: () => getGroupById(id),
-    staleTime: 5 * 60 * 1000, // ⏰ Cache for 5 minutes
+    staleTime: 5 * 60 * 1000,
     enabled: enabled && !!id,
   });
 };
