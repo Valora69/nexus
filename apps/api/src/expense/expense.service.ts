@@ -11,7 +11,7 @@ import {
 } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { ActivityNameEnum, ActivityOnEnum, PersonalTransactionType } from '@prisma/client';
+import { ActivityNameEnum, ActivityOnEnum, PersonalTransactionType, Prisma } from '@prisma/client';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 // Shared select for user fields to avoid duplication
@@ -94,90 +94,95 @@ export class ExpenseService {
     }
   }
 
-  async create(createExpenseDto: CreateExpenseDto, userId: string) {
+  // Validates input and writes a single expense inside the provided transaction
+  // client. Pulled out so createMany can run all writes in one atomic tx.
+  private async createExpenseInTx(
+    tx: Prisma.TransactionClient,
+    createExpenseDto: CreateExpenseDto,
+    userId: string,
+  ) {
     const { groupId, payeeId, payerId, splits, ...rest } = createExpenseDto;
+
+    // Validations use top-level prisma since they're reads — fine outside tx
+    await this.validateGroupExists(groupId);
+    if (userId) {
+      await Promise.all([
+        this.validateUserExists(userId),
+        this.validateGroupMembership(userId, groupId),
+      ]);
+    }
+
+    if (splits && splits.length > 0) {
+      const totalSplitAmount = splits.reduce(
+        (sum, split) => sum + split.amount,
+        0,
+      );
+      if (Math.abs(totalSplitAmount - rest.totalAmount) > 0.01) {
+        throw new HttpException(
+          'Split amounts must equal total expense amount',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      await Promise.all(
+        splits.map((split) =>
+          this.validateGroupMembership(split.userId, groupId),
+        ),
+      );
+    }
+
+    const expense = await tx.expense.create({
+      data: {
+        payer: { connect: { id: payerId } },
+        ...(payeeId && { payee: { connect: { id: payeeId } } }),
+        group: { connect: { id: groupId } },
+        ...(splits &&
+          splits.length > 0 && {
+            splits: {
+              create: splits.map((split) => ({
+                user: { connect: { id: split.userId } },
+                amount: split.amount,
+              })),
+            },
+          }),
+        ...rest,
+      },
+      include: EXPENSE_INCLUDE,
+    });
+
+    if (expense.splits && expense.splits.length > 0) {
+      await tx.personalTransaction.createMany({
+        data: expense.splits.map((split) => ({
+          userId: split.userId,
+          type: PersonalTransactionType.EXPENSE,
+          amount: split.amount,
+          description: expense.name,
+          category: expense.group.name,
+          isFromGroup: true,
+          expenseSplitId: split.id,
+          date: expense.date,
+        })),
+      });
+    }
+
+    return expense;
+  }
+
+  async create(createExpenseDto: CreateExpenseDto, userId: string) {
     this.logger.log('Creating expense...');
-
     try {
-      await this.validateGroupExists(groupId);
-      if (userId) {
-        await Promise.all([
-          this.validateUserExists(userId),
-          this.validateGroupMembership(userId, groupId),
-        ]);
-      }
+      const createdExpense = await this.prisma.$transaction((tx) =>
+        this.createExpenseInTx(tx, createExpenseDto, userId),
+      );
 
-      // Validate splits if provided
-      if (splits && splits.length > 0) {
-        const totalSplitAmount = splits.reduce(
-          (sum, split) => sum + split.amount,
-          0,
-        );
-        if (Math.abs(totalSplitAmount - rest.totalAmount) > 0.01) {
-          throw new HttpException(
-            'Split amounts must equal total expense amount',
-            HttpStatus.BAD_REQUEST,
-          );
-        }
-
-        // Validate all split users are group members
-        await Promise.all(
-          splits.map((split) =>
-            this.validateGroupMembership(split.userId, groupId),
-          ),
-        );
-      }
-
-      const createdExpense = await this.prisma.$transaction(async (tx) => {
-        const expense = await tx.expense.create({
-          data: {
-            payer: { connect: { id: payerId } },
-            ...(payeeId && { payee: { connect: { id: payeeId } } }),
-            group: { connect: { id: groupId } },
-            ...(splits &&
-              splits.length > 0 && {
-                splits: {
-                  create: splits.map((split) => ({
-                    user: { connect: { id: split.userId } },
-                    amount: split.amount,
-                  })),
-                },
-              }),
-            ...rest,
-          },
-          include: EXPENSE_INCLUDE,
-        });
-
-        // Auto-create a PersonalTransaction ledger entry for each split participant
-        if (expense.splits && expense.splits.length > 0) {
-          await tx.personalTransaction.createMany({
-            data: expense.splits.map((split) => ({
-              userId: split.userId,
-              type: PersonalTransactionType.EXPENSE,
-              amount: split.amount,
-              description: expense.name,
-              category: expense.group.name,
-              isFromGroup: true,
-              expenseSplitId: split.id,
-              date: expense.date,
-            })),
-          });
-        }
-
-        return expense;
+      this.eventEmitter.emit('activity.created', {
+        createdByUserId: userId,
+        activityName: ActivityNameEnum.CREATED,
+        activityOn: ActivityOnEnum.EXPENSE,
+        groupId: createExpenseDto.groupId,
       });
 
-      if (createdExpense) {
-        this.eventEmitter.emit('activity.created', {
-          createdByUserId: userId,
-          activityName: ActivityNameEnum.CREATED,
-          activityOn: ActivityOnEnum.EXPENSE,
-          groupId: groupId,
-        });
-      }
-
       this.logger.log(
-        `Expense created successfully with id: ${createdExpense.id}${splits ? ` and ${splits.length} splits` : ''}`,
+        `Expense created successfully with id: ${createdExpense.id}${createExpenseDto.splits ? ` and ${createExpenseDto.splits.length} splits` : ''}`,
       );
       return createdExpense;
     } catch (error) {
@@ -199,11 +204,25 @@ export class ExpenseService {
     this.logger.log('Creating multiple expenses...');
     const { expenses } = createManyExpensesDto;
     try {
-      // Each create() call already emits its own activity event,
-      // so we don't emit an additional one here.
-      const createdExpenses = await Promise.all(
-        expenses.map((expenseDto) => this.create(expenseDto, userId)),
-      );
+      // Single transaction — all-or-nothing. A failure on any expense rolls
+      // back every prior one, so users never see partial-success state.
+      const createdExpenses = await this.prisma.$transaction(async (tx) => {
+        const results = [];
+        for (const dto of expenses) {
+          results.push(await this.createExpenseInTx(tx, dto, userId));
+        }
+        return results;
+      });
+
+      // Emit activities outside the tx (event emission shouldn't roll DB back).
+      for (const dto of expenses) {
+        this.eventEmitter.emit('activity.created', {
+          createdByUserId: userId,
+          activityName: ActivityNameEnum.CREATED,
+          activityOn: ActivityOnEnum.EXPENSE,
+          groupId: dto.groupId,
+        });
+      }
 
       this.logger.log(
         `Created ${createdExpenses.length} expenses successfully`,
@@ -211,6 +230,7 @@ export class ExpenseService {
       return createdExpenses;
     } catch (error) {
       this.logger.error('Error creating multiple expenses', error);
+      if (error instanceof HttpException) throw error;
       throw new InternalServerErrorException('Failed to create expenses', {
         cause: error,
         description: 'An unexpected error occurred',
@@ -446,7 +466,33 @@ export class ExpenseService {
 
   async remove(id: string, userId: string) {
     this.logger.log('Removing expense...');
-    await this.findOne(id);
+
+    const expense = await this.prisma.expense.findUnique({
+      where: { id },
+      select: { id: true, groupId: true, payerId: true, payeeId: true },
+    });
+    if (!expense) {
+      throw new HttpException('Expense not found', HttpStatus.NOT_FOUND);
+    }
+
+    // Authorization: payer, payee, or any group member may delete.
+    // Anything stricter (e.g. payer-only) blocks legitimate cleanup when the
+    // original payer leaves the group.
+    const isPrincipal =
+      expense.payerId === userId || expense.payeeId === userId;
+    if (!isPrincipal) {
+      const member = await this.prisma.groupMember.findUnique({
+        where: { GroupMemberUnique: { userId, groupId: expense.groupId } },
+        select: { id: true },
+      });
+      if (!member) {
+        throw new HttpException(
+          'You do not have permission to delete this expense',
+          HttpStatus.FORBIDDEN,
+        );
+      }
+    }
+
     try {
       const deletedExpense = await this.prisma.expense.delete({
         where: { id },
@@ -462,7 +508,8 @@ export class ExpenseService {
       }
       return deletedExpense;
     } catch (error) {
-      this.logger.log('Failed to delete expense');
+      if (error instanceof HttpException) throw error;
+      this.logger.error('Failed to delete expense', error);
       throw new InternalServerErrorException('Failed to delete expense', {
         cause: error,
         description: 'An unexpected error occurred',

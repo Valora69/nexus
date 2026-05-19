@@ -164,22 +164,61 @@ export class GroupService {
   }
 
   async remove(id: string, userId: string) {
+    // Block deletion if any split in the group still has an unsettled balance,
+    // or any unverified payment exists. Cascade would otherwise wipe live
+    // financial obligations silently.
+    const unsettledSplits = await this.prisma.expenseSplit.findMany({
+      where: { expense: { groupId: id } },
+      include: { payments: { where: { isVerified: true } } },
+    });
+
+    const hasUnsettled = unsettledSplits.some((s) => {
+      const paid = s.payments.reduce((acc, p) => acc + p.amountPaid, 0);
+      return s.amount - paid > 0.01;
+    });
+    if (hasUnsettled) {
+      throw new HttpException(
+        'Cannot delete group: unsettled balances exist between members. Settle all expenses first.',
+        HttpStatus.CONFLICT,
+      );
+    }
+
+    const pendingPayments = await this.prisma.payment.count({
+      where: {
+        isVerified: false,
+        expenseSplit: { expense: { groupId: id } },
+      },
+    });
+    if (pendingPayments > 0) {
+      throw new HttpException(
+        'Cannot delete group: unverified payments still pending. Resolve them first.',
+        HttpStatus.CONFLICT,
+      );
+    }
+
     try {
-      const deletedGroup = await this.prisma.group.delete({
-        where: { id },
+      // Group → Expense and Group → Activity have no onDelete cascade in the
+      // schema (defaults to RESTRICT). We delete dependent rows first inside
+      // a transaction so the final group.delete cannot trip FK violations.
+      // Expense deletion cascades to ExpenseSplit → Payment, and SetNulls
+      // PersonalTransaction.expenseSplitId (ledger rows retained).
+      const deletedGroup = await this.prisma.$transaction(async (tx) => {
+        await tx.activity.deleteMany({ where: { groupId: id } });
+        await tx.expense.deleteMany({ where: { groupId: id } });
+        return tx.group.delete({ where: { id } });
       });
 
-      if (deletedGroup) {
-        this.eventEmitter.emit('activity.created', {
-          groupId: deletedGroup.id,
-          activityName: ActivityNameEnum.DELETED,
-          activityOn: ActivityOnEnum.GROUP_DETAILS,
-          createdByUserId: userId,
-        });
-      }
+      this.eventEmitter.emit('activity.created', {
+        groupId: deletedGroup.id,
+        activityName: ActivityNameEnum.DELETED,
+        activityOn: ActivityOnEnum.GROUP_DETAILS,
+        createdByUserId: userId,
+      });
 
       return deletedGroup;
     } catch (error) {
+      if (error instanceof HttpException) throw error;
+      this.logger.error('Failed to delete group', error);
       throw new InternalServerErrorException('Failed to delete group', {
         cause: error,
         description: 'An unexpected error occurred',

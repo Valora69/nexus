@@ -203,10 +203,7 @@ export class ExpenseSplitService {
     try {
       return await this.prisma.expenseSplit.update({
         where: { id },
-        data: {
-          ...updateExpenseSplitDto,
-          ...(updateExpenseSplitDto.isPaid && { paidAt: new Date() }),
-        },
+        data: updateExpenseSplitDto,
         include: EXPENSE_SPLIT_INCLUDE,
       });
     } catch (error) {

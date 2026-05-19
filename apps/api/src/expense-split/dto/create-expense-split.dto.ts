@@ -3,8 +3,6 @@ import {
   IsUUID,
   IsNumber,
   IsPositive,
-  IsOptional,
-  IsBoolean,
 } from 'class-validator';
 
 export class CreateExpenseSplitDto {
@@ -20,8 +18,4 @@ export class CreateExpenseSplitDto {
   @IsNumber()
   @IsPositive()
   amount: number;
-
-  @IsOptional()
-  @IsBoolean()
-  isPaid?: boolean;
 }

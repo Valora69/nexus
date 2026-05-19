@@ -79,7 +79,10 @@ export class PersonalTransactionService {
     if (!tx || tx.userId !== userId) {
       throw new BadRequestException('Transaction not found');
     }
-    if (tx.isFromGroup) {
+    // Block deletion only while the transaction is still tied to a live split.
+    // Once the parent expense is gone (expenseSplitId becomes null via SetNull),
+    // the row is an orphan ledger entry — let the user clean it up.
+    if (tx.isFromGroup && tx.expenseSplitId) {
       throw new BadRequestException(
         'Group-linked transactions cannot be deleted directly. Delete the group expense instead.',
       );
