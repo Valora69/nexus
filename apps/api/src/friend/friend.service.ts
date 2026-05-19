@@ -19,7 +19,9 @@ export class FriendService {
     private readonly emailService: EmailService,
   ) {}
 
-  async sendFriendRequest(senderId: string, recipientEmail: string) {
+  async sendFriendRequest(senderId: string, recipientEmailRaw: string) {
+    // Normalize casing — emails are stored lowercase server-side.
+    const recipientEmail = recipientEmailRaw.toLowerCase().trim();
     this.logger.log(`Sending friend request from ${senderId} to ${recipientEmail}`);
 
     const sender = await this.prisma.user.findUnique({ where: { id: senderId } });
