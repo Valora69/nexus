@@ -1,5 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
-import * as nodemailer from 'nodemailer';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Resend } from 'resend';
 
 interface FriendRequestEmailOptions {
   to: string;
@@ -9,24 +9,25 @@ interface FriendRequestEmailOptions {
 }
 
 @Injectable()
-export class EmailService {
+export class EmailService implements OnModuleInit {
   private readonly logger = new Logger(EmailService.name, { timestamp: true });
-  private transporter: nodemailer.Transporter;
+  private resend: Resend | null = null;
+  private from = '';
 
-  private static readonly SMTP_TIMEOUT_MS = 10_000;
+  onModuleInit() {
+    const apiKey = process.env.RESEND_API_KEY;
+    this.from =
+      process.env.EMAIL_FROM ?? 'MoneyApp <noreply@send.moneyapp.click>';
 
-  constructor() {
-    this.transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASSWORD,
-      },
-      // Hard limits so a hung SMTP socket never keeps a Render worker alive.
-      connectionTimeout: EmailService.SMTP_TIMEOUT_MS,
-      greetingTimeout: EmailService.SMTP_TIMEOUT_MS,
-      socketTimeout: EmailService.SMTP_TIMEOUT_MS,
-    });
+    if (!apiKey) {
+      // Don't crash boot — outbound email is non-critical. Log and degrade
+      // to no-op sends so the API still serves requests.
+      this.logger.warn(
+        'RESEND_API_KEY not set; email sending is disabled for this process.',
+      );
+      return;
+    }
+    this.resend = new Resend(apiKey);
   }
 
   async sendFriendRequestEmail(
@@ -34,9 +35,41 @@ export class EmailService {
   ): Promise<void> {
     const { to, senderName, inviteUrl, isNewUser } = options;
 
-    const subject = `${senderName} wants to connect with you on Money App`;
+    if (!this.resend) {
+      this.logger.warn(`Skipping email to ${to} (Resend not configured)`);
+      return;
+    }
 
-    const html = `
+    const subject = `${senderName} wants to connect with you on Money App`;
+    const html = this.buildFriendRequestHtml({ senderName, inviteUrl, isNewUser });
+
+    try {
+      const { data, error } = await this.resend.emails.send({
+        from: this.from,
+        to,
+        subject,
+        html,
+      });
+      if (error) {
+        this.logger.error(`Resend rejected email to ${to}`, error);
+        return;
+      }
+      this.logger.log(`Friend request email sent to ${to} (id: ${data?.id})`);
+    } catch (error) {
+      this.logger.error(`Failed to send email to ${to}`, error);
+      // Never rethrow — caller is fire-and-forget, email failure is non-fatal.
+    }
+  }
+
+  private buildFriendRequestHtml({
+    senderName,
+    inviteUrl,
+    isNewUser,
+  }: Pick<
+    FriendRequestEmailOptions,
+    'senderName' | 'inviteUrl' | 'isNewUser'
+  >): string {
+    return `
       <!DOCTYPE html>
       <html>
       <head>
@@ -47,42 +80,27 @@ export class EmailService {
         <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 40px 20px;">
           <tr>
             <td align="center">
-              <!-- Main Container -->
               <table width="100%" style="max-width: 600px; background-color: #0a0a0a; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-                <!-- Hero Image -->
-                <tr>
-                </tr>
-                
-                <!-- Content Section -->
                 <tr>
                   <td style="padding: 48px 40px 40px;">
                     <table width="100%" cellpadding="0" cellspacing="0">
                       <tr>
                         <td align="center">
-                          <!-- Title -->
                           <h1 style="color: #ffffff; font-size: 32px; font-weight: 700; margin: 0 0 12px; letter-spacing: -0.5px;">
                             Friend Request
                           </h1>
-                          
-                          <!-- Subtitle -->
                           <p style="color: #a1a1aa; font-size: 15px; margin: 0 0 32px; font-weight: 400;">
                             Someone wants to connect with you
                           </p>
-                          
-                          <!-- Main Message -->
                           <p style="color: #ffffff; font-size: 18px; line-height: 1.6; margin: 0 0 8px; font-weight: 500;">
                             <span style="color: #00ff41; font-weight: 700;">${senderName}</span> wants to add you
                           </p>
                           <p style="color: #ffffff; font-size: 18px; line-height: 1.6; margin: 0 0 32px; font-weight: 500;">
                             as a friend on Money App
                           </p>
-                          
-                          <!-- Description -->
                           <p style="color: #a1a1aa; font-size: 15px; margin: 0 0 32px; line-height: 1.5;">
                             ${isNewUser ? 'Create an account to connect and start splitting expenses together' : 'Accept their request to start splitting expenses together'}
                           </p>
-                          
-                          <!-- CTA Button -->
                           <table cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                             <tr>
                               <td align="center" style="border-radius: 8px; background-color: #00ff41;">
@@ -97,8 +115,6 @@ export class EmailService {
                     </table>
                   </td>
                 </tr>
-                
-                <!-- Footer -->
                 <tr>
                   <td style="padding: 32px 40px; background-color: #000000; border-top: 1px solid #1a1a1a;">
                     <p style="color: #71717a; font-size: 13px; margin: 0 0 16px; text-align: center; line-height: 1.5;">
@@ -110,8 +126,6 @@ export class EmailService {
                   </td>
                 </tr>
               </table>
-              
-              <!-- Logo Footer -->
               <table width="100%" style="max-width: 600px; margin-top: 32px;">
                 <tr>
                   <td align="center">
@@ -127,28 +141,5 @@ export class EmailService {
       </body>
       </html>
     `;
-
-    const deadline = new Promise<never>((_, reject) =>
-      setTimeout(
-        () => reject(new Error(`SMTP deadline exceeded (${EmailService.SMTP_TIMEOUT_MS}ms)`)),
-        EmailService.SMTP_TIMEOUT_MS,
-      ),
-    );
-
-    try {
-      await Promise.race([
-        this.transporter.sendMail({
-          from: `"MoneyApp" <${process.env.GMAIL_USER}>`,
-          to,
-          subject,
-          html,
-        }),
-        deadline,
-      ]);
-      this.logger.log(`Friend request email sent to ${to}`);
-    } catch (error) {
-      this.logger.error(`Failed to send email to ${to}`, error);
-      // Never rethrow — caller is fire-and-forget, email failure is non-fatal.
-    }
   }
 }
