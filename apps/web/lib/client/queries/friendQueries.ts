@@ -29,7 +29,6 @@ export const useGetPendingRequests = () => {
     queryKey: queryKeys.friends.pendingRequests(),
     queryFn: () => getPendingRequests(),
     ...FRIEND_QUERY_OPTIONS,
-    refetchInterval: 30_000,
   });
 };
 
