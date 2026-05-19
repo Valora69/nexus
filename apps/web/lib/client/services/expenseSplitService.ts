@@ -152,7 +152,7 @@ export const markSplitAsPaid = async (
 
 export const updateExpenseSplit = async (
   id: string,
-  data: { isPaid?: boolean; amount?: number },
+  data: { amount?: number },
 ): Promise<ExpenseSplitWithRelations> => {
   const response = await fetch(`${BASE_URL}${EXPENSE_SPLIT_URI}/${id}`, {
     method: 'PATCH',

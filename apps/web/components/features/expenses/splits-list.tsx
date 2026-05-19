@@ -8,7 +8,7 @@ import { Badge } from '@web/components/ui/badge';
 import { Receipt, CheckCircle } from 'lucide-react';
 import type { ExpenseSplitWithRelations } from '@web/lib/types/entities';
 import type { SplitFilter } from './split-filter-tabs';
-import { formatCurrency, formatDateShort } from '@web/lib/utils';
+import { formatCurrency, formatDateShort, isSplitSettled } from '@web/lib/utils';
 
 interface SplitsListProps {
   splits: ExpenseSplitWithRelations[];
@@ -134,7 +134,9 @@ function SplitCard({ split, filter, currentUserId, onClick }: SplitCardProps) {
           <p className="text-lg font-mono font-bold text-primary">
             {formatCurrency(split.amount)}
           </p>
-          {split.isPaid && <CheckCircle className="h-4 w-4 text-green-500" />}
+          {isSplitSettled(split) && (
+            <CheckCircle className="h-4 w-4 text-green-500" />
+          )}
         </div>
       </div>
     </div>

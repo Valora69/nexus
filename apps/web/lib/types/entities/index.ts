@@ -67,8 +67,6 @@ export type ExpenseSplit = {
   expenseId: string;
   userId: string;
   amount: number;
-  isPaid: boolean;
-  paidAt?: string;
   createdAt: string;
   updatedAt: string;
 };

@@ -116,14 +116,6 @@ export function ViewExpenseModal({
                               Paid
                             </Badge>
                           )}
-                          {split.isPaid && !isPayer && (
-                            <Badge
-                              variant="outline"
-                              className="ml-2 text-[10px] border-green-500 text-green-500"
-                            >
-                              Settled
-                            </Badge>
-                          )}
                         </span>
                         <span className="font-mono">
                           ${split.amount.toFixed(2)}

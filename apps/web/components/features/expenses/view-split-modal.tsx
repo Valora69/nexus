@@ -8,7 +8,12 @@ import { Button } from '@web/components/ui/button';
 import { Separator } from '@web/components/ui/separator';
 import { CreditCard } from 'lucide-react';
 import type { ExpenseSplitWithRelations } from '@web/lib/types/entities';
-import { formatCurrency, formatDateShort } from '@web/lib/utils';
+import {
+  formatCurrency,
+  formatDateShort,
+  isSplitSettled,
+  latestVerifiedPaymentAt,
+} from '@web/lib/utils';
 
 interface ViewSplitModalProps {
   isOpen: boolean;
@@ -27,7 +32,9 @@ export function ViewSplitModal({
 }: ViewSplitModalProps) {
   if (!split) return null;
 
-  const isMyPayable = split.userId === currentUserId && !split.isPaid;
+  const settled = isSplitSettled(split);
+  const settledAt = latestVerifiedPaymentAt(split.payments);
+  const isMyPayable = split.userId === currentUserId && !settled;
   const isPayee = split.expense.payeeId === currentUserId;
 
   return (
@@ -78,16 +85,16 @@ export function ViewSplitModal({
             <div>
               <p className="text-muted-foreground">Status</p>
               <p
-                className={`font-medium ${split.isPaid ? 'text-green-500' : 'text-yellow-500'}`}
+                className={`font-medium ${settled ? 'text-green-500' : 'text-yellow-500'}`}
               >
-                {split.isPaid ? 'Paid' : 'Pending'}
+                {settled ? 'Paid' : 'Pending'}
               </p>
             </div>
-            {split.isPaid && split.paidAt && (
+            {settled && settledAt && (
               <div>
                 <p className="text-muted-foreground">Paid On</p>
                 <p className="font-medium font-mono">
-                  {formatDateShort(split.paidAt)}
+                  {formatDateShort(settledAt)}
                 </p>
               </div>
             )}

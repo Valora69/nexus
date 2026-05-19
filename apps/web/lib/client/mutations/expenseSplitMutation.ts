@@ -48,7 +48,7 @@ export const useUpdateExpenseSplit = (
   mutationOptions?: UseMutationOptions<
     ExpenseSplitWithRelations,
     Error,
-    { id: string; data: { isPaid?: boolean; amount?: number } }
+    { id: string; data: { amount?: number } }
   >,
 ) => {
   const queryClient = useQueryClient();
@@ -56,7 +56,7 @@ export const useUpdateExpenseSplit = (
   return useMutation<
     ExpenseSplitWithRelations,
     Error,
-    { id: string; data: { isPaid?: boolean; amount?: number } }
+    { id: string; data: { amount?: number } }
   >({
     mutationFn: ({ id, data }) => updateExpenseSplit(id, data),
     onSuccess: (...args) => {

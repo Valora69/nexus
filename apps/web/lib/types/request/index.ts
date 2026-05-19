@@ -4,7 +4,6 @@ import { ActivityNameEnum, ActivityOnEnum } from '../entities';
 export type ExpenseSplitData = {
   userId: string;
   amount: number;
-  isPaid?: boolean;
 };
 
 export type CreateExpenseData = {
