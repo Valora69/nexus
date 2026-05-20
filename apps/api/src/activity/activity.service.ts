@@ -30,8 +30,8 @@ export class ActivityService {
     try {
       return await this.prismaService.activity.findMany({
         orderBy: { createdAt: 'desc' },
-        ...(skip !== undefined && { skip }),
-        ...(take !== undefined && { take }),
+        skip: skip ?? 0,
+        take: Math.min(take ?? 50, 100),
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'An unknown error occurred';
@@ -41,7 +41,11 @@ export class ActivityService {
 
   async findAllByGroup(id: string, skip?: number, take?: number) {
     try {
-      const group = await this.prismaService.group.findUnique({ where: { id } });
+      // Existence-only probe — was loading full Group row just to check existence.
+      const group = await this.prismaService.group.findUnique({
+        where: { id },
+        select: { id: true },
+      });
 
       if (!group) {
         throw new HttpException('Group not found', HttpStatus.NOT_FOUND);
@@ -50,8 +54,8 @@ export class ActivityService {
       return await this.prismaService.activity.findMany({
         where: { groupId: id },
         orderBy: { createdAt: 'desc' },
-        ...(skip !== undefined && { skip }),
-        ...(take !== undefined && { take }),
+        skip: skip ?? 0,
+        take: Math.min(take ?? 50, 100),
       });
     } catch (error) {
       if (error instanceof HttpException) throw error;
