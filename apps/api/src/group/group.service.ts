@@ -33,6 +33,15 @@ export class GroupService {
             createdBy: { connect: { id: userId } },
             ...groupData,
           },
+          // Slim response — write returns id+name+description+createdByUserId only.
+          // Frontend invalidates queries and refetches the list anyway.
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            createdByUserId: true,
+            createdAt: true,
+          },
         });
 
         // Always add the creator as the first member
@@ -73,7 +82,7 @@ export class GroupService {
     }
   }
 
-  async findAll(userId: string) {
+  async findAll(userId: string, skip?: number, take?: number) {
     this.logger.log('Retrieving groups for user...');
     try {
       const groups = await this.prisma.group.findMany({
@@ -90,6 +99,10 @@ export class GroupService {
             },
           },
         },
+        orderBy: { createdAt: 'desc' },
+        skip: skip ?? 0,
+        // Groups are small in count, but cap to be safe against unbounded loads.
+        take: Math.min(take ?? 50, 100),
       });
 
       this.logger.log(`Found ${groups.length} groups for user ${userId}`);
@@ -143,6 +156,7 @@ export class GroupService {
       const updatedGroup = await this.prisma.group.update({
         where: { id },
         data: groupData,
+        select: { id: true, name: true, description: true },
       });
 
       if (updatedGroup) {
