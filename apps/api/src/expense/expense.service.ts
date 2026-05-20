@@ -14,7 +14,9 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { ActivityNameEnum, ActivityOnEnum, PersonalTransactionType, Prisma } from '@prisma/client';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
-// Shared select for user fields to avoid duplication
+// Shared select for user fields on READ paths.
+// `picture` and `gcashNumber` are only needed where the UI renders avatars or
+// initiates payment — exclude them from lightweight read endpoints.
 const USER_SELECT = {
   id: true,
   name: true,
@@ -23,9 +25,11 @@ const USER_SELECT = {
   gcashNumber: true,
 } as const;
 
-// Shared include for expense relations
-const EXPENSE_INCLUDE = {
-  group: true,
+// READ include — used by findAll / findOne which return data to the UI.
+// Group is explicitly selected (was `group: true`) to avoid pulling
+// description/createdAt/updatedAt which the UI never reads.
+const EXPENSE_READ_INCLUDE = {
+  group: { select: { id: true, name: true } },
   payer: { select: USER_SELECT },
   payee: { select: USER_SELECT },
   splits: {
@@ -33,6 +37,23 @@ const EXPENSE_INCLUDE = {
       user: { select: USER_SELECT },
     },
   },
+} as const;
+
+// WRITE select — used by create/update flows. The frontend types these
+// responses as `unknown` and only invalidates queries on success, so we don't
+// need to hydrate the full nested tree just to throw it away. We DO need
+// `splits` + `group.name` + `date` + `name` for the in-transaction
+// PersonalTransaction.createMany.
+const EXPENSE_WRITE_SELECT = {
+  id: true,
+  name: true,
+  totalAmount: true,
+  date: true,
+  groupId: true,
+  payerId: true,
+  payeeId: true,
+  group: { select: { name: true } },
+  splits: { select: { id: true, userId: true, amount: true } },
 } as const;
 
 @Injectable()
@@ -45,47 +66,44 @@ export class ExpenseService {
     timestamp: true,
   });
 
-  // @TODO: Move to separate class
+  // Existence-only checks: select just { id } so we don't drag full rows into
+  // memory or across the network. Each call is a row-existence probe, not a
+  // data fetch.
   private async validateGroupExists(groupId: string) {
     this.logger.log('Validating Group...');
     try {
-      const group = await this.prisma.group.findUnique({
+      return await this.prisma.group.findUnique({
         where: { id: groupId },
+        select: { id: true },
       });
-      return group;
     } catch (error) {
       this.logger.error(`Failed to validate group existence`);
       throw new InternalServerErrorException('Failed to validate group');
     }
   }
 
-  // @TODO: Move to separate class
   private async validateUserExists(userId: string) {
     this.logger.log('Validating User...');
     try {
-      const user = await this.prisma.user.findUnique({
+      return await this.prisma.user.findUnique({
         where: { id: userId },
+        select: { id: true },
       });
-      return user;
     } catch (error) {
       this.logger.error(`Failed to validate user`);
       throw new InternalServerErrorException('Failed to validate user');
     }
   }
 
-  // @TODO: Move to separate class
   private async validateGroupMembership(userId: string, groupId: string) {
     this.logger.log('Validating Group Membership...');
     try {
-      const member = await this.prisma.groupMember.findUnique({
+      return await this.prisma.groupMember.findUnique({
         where: {
-          GroupMemberUnique: {
-            userId,
-            groupId,
-          },
+          GroupMemberUnique: { userId, groupId },
         },
+        select: { id: true },
       });
-      return member;
     } catch (error) {
       this.logger.error(`Failed to validate group membership`);
       throw new InternalServerErrorException(
@@ -146,7 +164,7 @@ export class ExpenseService {
           }),
         ...rest,
       },
-      include: EXPENSE_INCLUDE,
+      select: EXPENSE_WRITE_SELECT,
     });
 
     if (expense.splits && expense.splits.length > 0) {
@@ -269,10 +287,11 @@ export class ExpenseService {
 
       const expenses = await this.prisma.expense.findMany({
         where: whereClause,
-        include: EXPENSE_INCLUDE,
+        include: EXPENSE_READ_INCLUDE,
         orderBy: { createdAt: 'desc' },
-        ...(skip !== undefined && { skip }),
-        ...(take !== undefined && { take }),
+        skip: skip ?? 0,
+        // Hard cap: default 50, never above 100 — prevents unbounded loads as data grows.
+        take: Math.min(take ?? 50, 100),
       });
       return expenses;
     } catch (error) {
@@ -286,7 +305,7 @@ export class ExpenseService {
     try {
       const expense = await this.prisma.expense.findUnique({
         where: { id },
-        include: EXPENSE_INCLUDE,
+        include: EXPENSE_READ_INCLUDE,
       });
       return expense;
     } catch (error) {
@@ -325,7 +344,7 @@ export class ExpenseService {
       const updatedExpense = await this.prisma.expense.update({
         where: { id },
         data: updateData,
-        include: EXPENSE_INCLUDE,
+        select: EXPENSE_WRITE_SELECT,
       });
 
       let activityOn: ActivityOnEnum = ActivityOnEnum.EXPENSE;
@@ -422,7 +441,7 @@ export class ExpenseService {
         const expense = await tx.expense.update({
           where: { id },
           data: updateData,
-          include: EXPENSE_INCLUDE,
+          select: EXPENSE_WRITE_SELECT,
         });
 
         if (expense.splits && expense.splits.length > 0) {
