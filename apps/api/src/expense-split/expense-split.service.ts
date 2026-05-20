@@ -19,16 +19,27 @@ const USER_SELECT = {
   gcashNumber: true,
 } as const;
 
+// READ include for endpoints that render full split details (modals, lists).
+// `group: true` replaced with explicit select — frontend only needs id+name.
 const EXPENSE_SPLIT_INCLUDE = {
   user: { select: USER_SELECT },
   expense: {
     include: {
-      group: true,
+      group: { select: { id: true, name: true } },
       payer: { select: USER_SELECT },
       payee: { select: USER_SELECT },
     },
   },
   payments: true,
+} as const;
+
+// WRITE select for create/update mutations whose response the frontend types
+// as `unknown`. Avoids hydrating the full nested tree just to return it.
+const EXPENSE_SPLIT_WRITE_SELECT = {
+  id: true,
+  expenseId: true,
+  userId: true,
+  amount: true,
 } as const;
 
 // Two views of "settled":
@@ -59,7 +70,7 @@ export class ExpenseSplitService {
     try {
       const split = await this.prisma.expenseSplit.create({
         data: createExpenseSplitDto,
-        include: EXPENSE_SPLIT_INCLUDE,
+        select: EXPENSE_SPLIT_WRITE_SELECT,
       });
       return split;
     } catch (error) {
@@ -68,12 +79,14 @@ export class ExpenseSplitService {
     }
   }
 
-  async findAll() {
+  async findAll(skip?: number, take?: number) {
     this.logger.log('Retrieving all expense splits...');
     try {
       return await this.prisma.expenseSplit.findMany({
         include: EXPENSE_SPLIT_INCLUDE,
         orderBy: { createdAt: 'desc' },
+        skip: skip ?? 0,
+        take: Math.min(take ?? 50, 100),
       });
     } catch (error) {
       this.logger.error('Failed to fetch expense splits', error);
@@ -86,7 +99,7 @@ export class ExpenseSplitService {
    * has claimed payment for the full amount (verified + pending), because no
    * further payment action is possible from their side.
    */
-  async findMyPayables(userId: string) {
+  async findMyPayables(userId: string, skip?: number, take?: number) {
     this.logger.log(`Retrieving payable splits for user ${userId}...`);
     try {
       const splits = await this.prisma.expenseSplit.findMany({
@@ -98,6 +111,8 @@ export class ExpenseSplitService {
         },
         include: EXPENSE_SPLIT_INCLUDE,
         orderBy: { createdAt: 'desc' },
+        skip: skip ?? 0,
+        take: Math.min(take ?? 50, 100),
       });
       const active = splits.filter(
         (s) => s.amount - sumPayments(s.payments, false) > 0.01,
@@ -117,7 +132,7 @@ export class ExpenseSplitService {
    * totals only (authoritative balance) — pending unverified payments stay
    * visible here until the receiver verifies them.
    */
-  async findMyReceivables(userId: string) {
+  async findMyReceivables(userId: string, skip?: number, take?: number) {
     this.logger.log(`Retrieving receivable splits for user ${userId}...`);
     try {
       const splits = await this.prisma.expenseSplit.findMany({
@@ -127,6 +142,8 @@ export class ExpenseSplitService {
         },
         include: EXPENSE_SPLIT_INCLUDE,
         orderBy: { createdAt: 'desc' },
+        skip: skip ?? 0,
+        take: Math.min(take ?? 50, 100),
       });
       const active = splits.filter(
         (s) => s.amount - sumPayments(s.payments, true) > 0.01,
@@ -146,13 +163,15 @@ export class ExpenseSplitService {
   /**
    * Get splits by expense ID
    */
-  async findByExpenseId(expenseId: string) {
+  async findByExpenseId(expenseId: string, skip?: number, take?: number) {
     this.logger.log(`Retrieving splits for expense ${expenseId}...`);
     try {
       return await this.prisma.expenseSplit.findMany({
         where: { expenseId },
         include: EXPENSE_SPLIT_INCLUDE,
         orderBy: { createdAt: 'desc' },
+        skip: skip ?? 0,
+        take: Math.min(take ?? 50, 100),
       });
     } catch (error) {
       this.logger.error('Failed to fetch splits by expense', error);
@@ -165,13 +184,15 @@ export class ExpenseSplitService {
   /**
    * Get splits by user ID
    */
-  async findByUserId(userId: string) {
+  async findByUserId(userId: string, skip?: number, take?: number) {
     this.logger.log(`Retrieving splits for user ${userId}...`);
     try {
       return await this.prisma.expenseSplit.findMany({
         where: { userId },
         include: EXPENSE_SPLIT_INCLUDE,
         orderBy: { createdAt: 'desc' },
+        skip: skip ?? 0,
+        take: Math.min(take ?? 50, 100),
       });
     } catch (error) {
       this.logger.error('Failed to fetch splits by user', error);
@@ -199,12 +220,19 @@ export class ExpenseSplitService {
 
   async update(id: string, updateExpenseSplitDto: UpdateExpenseSplitDto) {
     this.logger.log(`Updating expense split ${id}...`);
-    await this.findOne(id);
+    // Existence check via direct lookup (no full include) — cheaper than findOne.
+    const exists = await this.prisma.expenseSplit.findUnique({
+      where: { id },
+      select: { id: true },
+    });
+    if (!exists) {
+      throw new NotFoundException(`Expense split with ID ${id} not found`);
+    }
     try {
       return await this.prisma.expenseSplit.update({
         where: { id },
         data: updateExpenseSplitDto,
-        include: EXPENSE_SPLIT_INCLUDE,
+        select: EXPENSE_SPLIT_WRITE_SELECT,
       });
     } catch (error) {
       this.logger.error('Failed to update expense split', error);
