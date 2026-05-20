@@ -19,6 +19,7 @@ const USER_SELECT = {
   gcashNumber: true,
 } as const;
 
+// READ include — used by list/detail endpoints that render full payment UI.
 const PAYMENT_INCLUDE = {
   expenseSplit: {
     include: {
@@ -32,6 +33,31 @@ const PAYMENT_INCLUDE = {
       },
     },
   },
+} as const;
+
+// Minimal selects for authorization probes in update/remove. Avoids
+// hydrating the full nested tree just to check ownership.
+const PAYMENT_AUTH_SELECT = {
+  id: true,
+  expenseSplit: {
+    select: {
+      userId: true,
+      expense: {
+        select: { groupId: true, payeeId: true },
+      },
+    },
+  },
+} as const;
+
+// WRITE select — mutation responses the frontend types as `unknown`.
+const PAYMENT_WRITE_SELECT = {
+  id: true,
+  amountPaid: true,
+  paymentMethod: true,
+  isVerified: true,
+  verifiedAt: true,
+  paidAt: true,
+  expenseSplitId: true,
 } as const;
 
 @Injectable()
@@ -83,17 +109,16 @@ export class PaymentService {
 
       const createdPayment = await this.prisma.payment.create({
         data: createPaymentDto,
-        include: PAYMENT_INCLUDE,
+        select: PAYMENT_WRITE_SELECT,
       });
 
-      if (createdPayment?.expenseSplit?.expense) {
-        this.eventEmitter.emit('activity.created', {
-          groupId: createdPayment.expenseSplit.expense.groupId,
-          activityName: ActivityNameEnum.CREATED,
-          activityOn: ActivityOnEnum.PAYMENT,
-          createdByUserId: userId,
-        });
-      }
+      // Use the pre-loaded split for the activity event so we don't refetch.
+      this.eventEmitter.emit('activity.created', {
+        groupId: split.expense.groupId,
+        activityName: ActivityNameEnum.CREATED,
+        activityOn: ActivityOnEnum.PAYMENT,
+        createdByUserId: userId,
+      });
 
       this.logger.log(
         `Payment created successfully with id: ${createdPayment.id}`,
@@ -125,8 +150,8 @@ export class PaymentService {
         }),
         include: PAYMENT_INCLUDE,
         orderBy: { paidAt: 'desc' },
-        ...(skip !== undefined && { skip }),
-        ...(take !== undefined && { take }),
+        skip: skip ?? 0,
+        take: Math.min(take ?? 50, 100),
       });
     } catch (error) {
       this.logger.error('Failed to fetch payments', error);
@@ -138,7 +163,7 @@ export class PaymentService {
   }
 
   // Get payments pending verification (where current user is the expense payer - they receive payments)
-  async findPendingVerification(userId: string) {
+  async findPendingVerification(userId: string, skip?: number, take?: number) {
     this.logger.log(
       `Retrieving pending verification payments for user ${userId}...`,
     );
@@ -154,9 +179,9 @@ export class PaymentService {
           },
         },
         include: PAYMENT_INCLUDE,
-        orderBy: {
-          paidAt: 'desc',
-        },
+        orderBy: { paidAt: 'desc' },
+        skip: skip ?? 0,
+        take: Math.min(take ?? 50, 100),
       });
     } catch (error) {
       this.logger.error('Failed to fetch pending verification payments', error);
@@ -171,7 +196,7 @@ export class PaymentService {
   }
 
   // Get payments pending confirmation (where current user made the payment)
-  async findPendingConfirmation(userId: string) {
+  async findPendingConfirmation(userId: string, skip?: number, take?: number) {
     this.logger.log(
       `Retrieving pending confirmation payments for user ${userId}...`,
     );
@@ -184,9 +209,9 @@ export class PaymentService {
           },
         },
         include: PAYMENT_INCLUDE,
-        orderBy: {
-          paidAt: 'desc',
-        },
+        orderBy: { paidAt: 'desc' },
+        skip: skip ?? 0,
+        take: Math.min(take ?? 50, 100),
       });
     } catch (error) {
       this.logger.error('Failed to fetch pending confirmation payments', error);
@@ -223,13 +248,18 @@ export class PaymentService {
   }
 
   async update(id: string, updatePaymentDto: UpdatePaymentDto, userId: string) {
-    const payment = await this.findOne(id);
+    // Lean auth probe — no full include.
+    const payment = await this.prisma.payment.findUnique({
+      where: { id },
+      select: PAYMENT_AUTH_SELECT,
+    });
+    if (!payment) {
+      throw new HttpException('Payment not found', HttpStatus.NOT_FOUND);
+    }
 
-    // Verify user can update this payment
     const canUpdate =
-      payment.expenseSplit.userId === userId || // User who made the payment
-      payment.expenseSplit.expense.payeeId === userId; // User who receives payment
-
+      payment.expenseSplit.userId === userId ||
+      payment.expenseSplit.expense.payeeId === userId;
     if (!canUpdate) {
       throw new HttpException(
         'You do not have permission to update this payment',
@@ -245,17 +275,15 @@ export class PaymentService {
           ...updatePaymentDto,
           ...(updatePaymentDto.isVerified && { verifiedAt: new Date() }),
         },
-        include: PAYMENT_INCLUDE,
+        select: PAYMENT_WRITE_SELECT,
       });
 
-      if (updatedPayment?.expenseSplit?.expense) {
-        this.eventEmitter.emit('activity.created', {
-          groupId: updatedPayment.expenseSplit.expense.groupId,
-          activityName: ActivityNameEnum.UPDATED,
-          activityOn: ActivityOnEnum.PAYMENT,
-          createdByUserId: userId,
-        });
-      }
+      this.eventEmitter.emit('activity.created', {
+        groupId: payment.expenseSplit.expense.groupId,
+        activityName: ActivityNameEnum.UPDATED,
+        activityOn: ActivityOnEnum.PAYMENT,
+        createdByUserId: userId,
+      });
 
       this.logger.log(`Payment ${id} updated successfully`);
       return updatedPayment;
@@ -269,9 +297,14 @@ export class PaymentService {
   }
 
   async remove(id: string, userId: string) {
-    const payment = await this.findOne(id);
-
-    // Verify user can delete this payment
+    // Lean auth probe — no full include.
+    const payment = await this.prisma.payment.findUnique({
+      where: { id },
+      select: PAYMENT_AUTH_SELECT,
+    });
+    if (!payment) {
+      throw new HttpException('Payment not found', HttpStatus.NOT_FOUND);
+    }
     if (payment.expenseSplit.userId !== userId) {
       throw new HttpException(
         'You can only delete your own payments',
@@ -279,21 +312,21 @@ export class PaymentService {
       );
     }
 
+    const groupId = payment.expenseSplit.expense.groupId;
+
     this.logger.log(`Removing payment ${id}...`);
     try {
       const deletedPayment = await this.prisma.payment.delete({
         where: { id },
-        include: PAYMENT_INCLUDE,
+        select: { id: true },
       });
 
-      if (deletedPayment?.expenseSplit?.expense) {
-        this.eventEmitter.emit('activity.created', {
-          groupId: deletedPayment.expenseSplit.expense.groupId,
-          activityName: ActivityNameEnum.DELETED,
-          activityOn: ActivityOnEnum.PAYMENT,
-          createdByUserId: userId,
-        });
-      }
+      this.eventEmitter.emit('activity.created', {
+        groupId,
+        activityName: ActivityNameEnum.DELETED,
+        activityOn: ActivityOnEnum.PAYMENT,
+        createdByUserId: userId,
+      });
 
       this.logger.log(`Payment ${id} deleted successfully`);
       return deletedPayment;
