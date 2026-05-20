@@ -48,18 +48,36 @@ export class PersonalTransactionService {
     });
   }
 
-  async findAll(userId: string, type?: PersonalTransactionType) {
+  async findAll(
+    userId: string,
+    type?: PersonalTransactionType,
+    skip?: number,
+    take?: number,
+  ) {
     try {
       return await this.prisma.personalTransaction.findMany({
         where: {
           userId,
           ...(type && { type }),
         },
-        include: {
+        // Lean select instead of nested include — only what the UI renders.
+        select: {
+          id: true,
+          userId: true,
+          type: true,
+          amount: true,
+          description: true,
+          category: true,
+          source: true,
+          isFromGroup: true,
+          expenseSplitId: true,
+          date: true,
+          createdAt: true,
+          updatedAt: true,
           expenseSplit: {
-            include: {
+            select: {
               expense: {
-                include: {
+                select: {
                   group: { select: { id: true, name: true } },
                 },
               },
@@ -67,6 +85,8 @@ export class PersonalTransactionService {
           },
         },
         orderBy: { date: 'desc' },
+        skip: skip ?? 0,
+        take: Math.min(take ?? 50, 100),
       });
     } catch (error) {
       this.logger.error('Failed to fetch personal transactions', error);
