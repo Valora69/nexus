@@ -132,7 +132,7 @@ export class FriendService {
     }
   }
 
-  async getPendingRequests(userId: string) {
+  async getPendingRequests(userId: string, skip?: number, take?: number) {
     this.logger.log(`Getting pending requests for user ${userId}`);
 
     return this.prisma.friendRequest.findMany({
@@ -147,10 +147,12 @@ export class FriendService {
         },
       },
       orderBy: { createdAt: 'desc' },
+      skip: skip ?? 0,
+      take: Math.min(take ?? 50, 100),
     });
   }
 
-  async getSentRequests(userId: string) {
+  async getSentRequests(userId: string, skip?: number, take?: number) {
     this.logger.log(`Getting sent requests for user ${userId}`);
 
     return this.prisma.friendRequest.findMany({
@@ -164,6 +166,8 @@ export class FriendService {
         },
       },
       orderBy: { createdAt: 'desc' },
+      skip: skip ?? 0,
+      take: Math.min(take ?? 50, 100),
     });
   }
 
@@ -311,17 +315,20 @@ export class FriendService {
     return { message: 'Friend request declined' };
   }
 
-  async getFriends(userId: string) {
+  async getFriends(userId: string, skip?: number, take?: number) {
     this.logger.log(`Getting friends for user ${userId}`);
 
     const friendships = await this.prisma.friendship.findMany({
       where: { userId },
-      include: {
+      // Lean select — drop the Friendship row, project the friend user directly.
+      select: {
         friend: {
           select: { id: true, name: true, email: true, picture: true },
         },
       },
       orderBy: { createdAt: 'desc' },
+      skip: skip ?? 0,
+      take: Math.min(take ?? 100, 200),
     });
 
     return friendships.map((f) => f.friend);
