@@ -2,83 +2,187 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+:root {
+  --color-background: 246 248 252;
+  --color-foreground: 15 23 42;
+  --color-muted: 100 116 139;
+  --color-gain: 4 153 64;
+  --color-loss: 220 38 38;
+  /* Brand green — matches the previous hsl(145 100% 50%) palette */
+  --color-accent: 4 153 64;
+  --color-accent2: 16 185 129;
 
-@layer base {
-  :root {
-    /* Trading platform theme - black background with green accents */
-    --background: 0 0% 0%;
-    --foreground: 0 0% 88%;
+  --color-card: rgb(255 255 255 / 0.6);
+  --color-card-hover: rgb(255 255 255 / 0.85);
+  --color-card-strong: rgb(255 255 255 / 0.78);
+  --color-border: rgb(15 23 42 / 0.08);
+  --color-border-strong: rgb(15 23 42 / 0.16);
+  --color-overlay: rgb(255 255 255 / 0.94);
+  --color-scrim: rgb(15 23 42 / 0.32);
 
-    --card: 0 0% 5%;
-    --card-foreground: 0 0% 88%;
+  --scrollbar: rgb(15 23 42 / 0.18);
+  --scrollbar-hover: rgb(15 23 42 / 0.3);
+}
 
-    --popover: 0 0% 5%;
-    --popover-foreground: 0 0% 88%;
+.dark {
+  --color-background: 7 10 17;
+  --color-foreground: 232 237 244;
+  --color-muted: 142 151 169;
+  --color-gain: 0 255 106;
+  --color-loss: 248 113 113;
+  /* Brand neon green — the previous hsl(145 100% 50%) ≈ rgb(0 255 106) */
+  --color-accent: 0 255 106;
+  --color-accent2: 52 211 153;
 
-    --primary: 145 100% 50%;
-    --primary-foreground: 0 0% 0%;
+  --color-card: rgb(255 255 255 / 0.05);
+  --color-card-hover: rgb(255 255 255 / 0.1);
+  --color-card-strong: rgb(255 255 255 / 0.08);
+  --color-border: rgb(255 255 255 / 0.09);
+  --color-border-strong: rgb(255 255 255 / 0.18);
+  --color-overlay: rgb(13 17 28 / 0.92);
+  --color-scrim: rgb(0 0 0 / 0.7);
 
-    --secondary: 0 0% 10%;
-    --secondary-foreground: 0 0% 88%;
+  --scrollbar: rgb(255 255 255 / 0.12);
+  --scrollbar-hover: rgb(255 255 255 / 0.24);
+}
 
-    --muted: 0 0% 12%;
-    --muted-foreground: 0 0% 60%;
+* {
+  font-variant-numeric: tabular-nums;
+}
 
-    --accent: 145 100% 50%;
-    --accent-foreground: 0 0% 0%;
-
-    --destructive: 348 100% 50%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 0 0% 15%;
-    --input: 0 0% 15%;
-    --ring: 145 100% 50%;
-
-    --radius: 0.25rem;
-
-    --sidebar-background: 0 0% 2%;
-    --sidebar-foreground: 0 0% 88%;
-    --sidebar-primary: 145 100% 50%;
-    --sidebar-primary-foreground: 0 0% 0%;
-    --sidebar-accent: 0 0% 8%;
-    --sidebar-accent-foreground: 145 100% 50%;
-    --sidebar-border: 0 0% 10%;
-    --sidebar-ring: 145 100% 50%;
-    
-    /* Trading platform specific */
-    --terminal-green: 145 100% 50%;
-    --terminal-red: 348 100% 50%;
-    --glow-green: 145 100% 50%;
-  }
+html {
+  color-scheme: light;
+}
+html.dark {
+  color-scheme: dark;
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-
   body {
-    @apply bg-background text-foreground font-sans font-light antialiased;
+    color: rgb(var(--color-foreground));
+    font-family: 'Inter', system-ui, sans-serif;
+    background-color: rgb(var(--color-background));
+    background-image:
+      radial-gradient(60rem 60rem at 88% -8%, rgb(4 153 64 / 0.1), transparent 60%),
+      radial-gradient(55rem 55rem at 6% 108%, rgb(16 185 129 / 0.09), transparent 60%);
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    @apply antialiased;
+  }
+  .dark body {
+    background-image:
+      radial-gradient(60rem 60rem at 88% -8%, rgb(0 255 106 / 0.1), transparent 60%),
+      radial-gradient(55rem 55rem at 6% 108%, rgb(52 211 153 / 0.08), transparent 60%),
+      radial-gradient(40rem 40rem at 50% 50%, rgb(34 197 94 / 0.05), transparent 70%);
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-normal tracking-tight;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-semibold tracking-tight;
   }
 
-  /* Terminal-style monospace for numbers */
   .font-mono {
-    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Mono', 'Droid Sans Mono', 'Source Code Pro', monospace;
+    font-family: 'JetBrains Mono', 'SF Mono', 'Monaco', monospace;
+  }
+}
+
+::selection {
+  background: rgb(var(--color-accent) / 0.28);
+  color: rgb(var(--color-foreground));
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--scrollbar);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-hover);
+  background-clip: padding-box;
+}
+
+@layer components {
+  .glass {
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
+    @apply backdrop-blur-xl;
+  }
+  .glass-card {
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
+    @apply rounded-4xl shadow-glass backdrop-blur-xl;
+  }
+  .glass-card-elevated {
+    background-color: var(--color-card-strong);
+    border: 1px solid var(--color-border-strong);
+    @apply rounded-4xl shadow-neu backdrop-blur-xl;
+  }
+
+  .input {
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
+    @apply w-full rounded-2xl px-4 py-2.5 text-sm text-foreground shadow-neu-inset transition placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/30;
+  }
+  .input:focus {
+    border-color: rgb(var(--color-accent) / 0.5);
+  }
+  .input:hover:not(:focus) {
+    border-color: var(--color-border-strong);
+  }
+
+  .aurora-bg {
+    position: relative;
+    isolation: isolate;
+    background-color: rgb(var(--color-background));
+    background-image:
+      radial-gradient(50rem 40rem at 85% -10%, rgb(4 153 64 / 0.22), transparent 55%),
+      radial-gradient(45rem 40rem at 10% 110%, rgb(16 185 129 / 0.2), transparent 55%),
+      radial-gradient(40rem 35rem at 50% 120%, rgb(250 204 21 / 0.14), transparent 60%),
+      linear-gradient(160deg, #eef5ff 0%, #ebfaf0 100%);
+  }
+  .dark .aurora-bg {
+    background-image:
+      radial-gradient(50rem 40rem at 85% -10%, rgb(0 255 106 / 0.28), transparent 55%),
+      radial-gradient(45rem 40rem at 10% 110%, rgb(52 211 153 / 0.22), transparent 55%),
+      radial-gradient(40rem 35rem at 50% 120%, rgb(234 179 8 / 0.12), transparent 60%),
+      linear-gradient(160deg, rgb(8 12 22) 0%, rgb(6 12 16) 100%);
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-br from-foreground via-foreground to-accent bg-clip-text text-transparent;
   }
 }
 
 @layer utilities {
-  /* Deprecated — glow utilities retained as no-ops to avoid breakage if referenced anywhere */
-  .glow-green,
-  .border-glow-green,
-  .border-glow-green-hover {
-    /* intentionally empty */
+  .hover-lift {
+    @apply transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-lift;
+  }
+  .text-muted-foreground {
+    color: rgb(var(--color-muted));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
 }

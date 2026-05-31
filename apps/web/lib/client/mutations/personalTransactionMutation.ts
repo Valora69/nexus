@@ -1,4 +1,8 @@
-import { useMutation, useQueryClient, UseMutationOptions } from '@tanstack/react-query';
+import {
+  useMutation,
+  useQueryClient,
+  UseMutationOptions,
+} from '@tanstack/react-query';
 import { quickCapture } from '../services/personalTransactionService';
 import type { QuickCaptureData } from '../../types/request';
 import { invalidatePersonalTransactionDomain } from '../invalidations';

@@ -8,7 +8,11 @@ import { Badge } from '@web/components/ui/badge';
 import { Receipt, CheckCircle } from 'lucide-react';
 import type { ExpenseSplitWithRelations } from '@web/lib/types/entities';
 import type { SplitFilter } from './split-filter-tabs';
-import { formatCurrency, formatDateShort, isSplitSettled } from '@web/lib/utils';
+import {
+  formatCurrency,
+  formatDateShort,
+  isSplitSettled,
+} from '@web/lib/utils';
 
 interface SplitsListProps {
   splits: ExpenseSplitWithRelations[];

@@ -25,7 +25,9 @@ export function ProfileCard({ user, onEdit }: ProfileCardProps) {
           </Avatar>
 
           <div className="flex-1 min-w-0">
-            <p className="text-xl font-light tracking-wide truncate">{user.name}</p>
+            <p className="text-xl font-light tracking-wide truncate">
+              {user.name}
+            </p>
 
             <div className="mt-4 space-y-3">
               <div className="flex items-center gap-2.5">
@@ -50,7 +52,12 @@ export function ProfileCard({ user, onEdit }: ProfileCardProps) {
             </div>
           </div>
 
-          <Button variant="ghost" size="sm" onClick={onEdit} className="shrink-0 -mt-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onEdit}
+            className="shrink-0 -mt-1"
+          >
             <Pencil className="h-4 w-4 mr-1.5" />
             Edit
           </Button>

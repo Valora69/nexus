@@ -12,7 +12,9 @@ export function FriendsHeader({ onAddFriend }: FriendsHeaderProps) {
     <div className="flex items-center justify-between">
       <div>
         <h1 className="text-3xl font-light tracking-wide">Friends</h1>
-        <p className="text-muted-foreground text-sm font-light">Manage your connections</p>
+        <p className="text-muted-foreground text-sm font-light">
+          Manage your connections
+        </p>
       </div>
       <Button onClick={onAddFriend} size="sm">
         <UserPlus className="h-4 w-4 mr-2" /> Add Friend

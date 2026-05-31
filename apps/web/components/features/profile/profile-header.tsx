@@ -12,7 +12,9 @@ export function ProfileHeader({ onLogout }: ProfileHeaderProps) {
     <div className="flex items-center justify-between">
       <div>
         <h1 className="text-3xl font-light tracking-wide">Account</h1>
-        <p className="text-muted-foreground text-sm font-light">Identity and connections</p>
+        <p className="text-muted-foreground text-sm font-light">
+          Identity and connections
+        </p>
       </div>
       <Button
         variant="destructive"

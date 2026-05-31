@@ -1,7 +1,9 @@
 import { BASE_URL } from '../config';
 import { DashboardResponse } from '../../types/entities';
 
-export const getDashboard = async (month?: string): Promise<DashboardResponse> => {
+export const getDashboard = async (
+  month?: string,
+): Promise<DashboardResponse> => {
   const params = month ? `?month=${month}` : '';
   const res = await fetch(`${BASE_URL}/dashboard${params}`, {
     method: 'GET',

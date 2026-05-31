@@ -1,8 +1,5 @@
 import { BASE_URL } from '../config';
-import {
-  CreateExpenseData,
-  UpdateExpenseData,
-} from '../../types/request';
+import { CreateExpenseData, UpdateExpenseData } from '../../types/request';
 
 const EXPENSE_URI = '/expenses';
 
@@ -24,7 +21,10 @@ export const createExpense = async (expenseData: CreateExpenseData) => {
   return response;
 };
 
-export const getAllExpenses = async (type?: 'payable' | 'receivable', groupId?: string) => {
+export const getAllExpenses = async (
+  type?: 'payable' | 'receivable',
+  groupId?: string,
+) => {
   const query = new URLSearchParams();
   if (type) query.set('type', type);
   if (groupId) query.set('groupId', groupId);

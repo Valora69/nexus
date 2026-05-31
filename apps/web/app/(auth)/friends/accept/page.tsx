@@ -2,12 +2,11 @@
 
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle } from '@web/components/ui/card';
-import { Button } from '@web/components/ui/button';
 import { Loader2, UserPlus, CheckCircle, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
+
+import { Button } from '@web/components/ui/button';
 import { useAcceptFriendRequestByToken } from '@web/lib/client/mutations/friendMutations';
-import { AuthBackground } from '@web/components/auth/auth-background';
 
 type Status = 'loading' | 'login-required' | 'accepting' | 'success' | 'error';
 
@@ -42,7 +41,8 @@ function AcceptFriendContent() {
 
     const checkAuth = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
         const res = await fetch(`${apiUrl}/api/auth/profile`, {
           credentials: 'include',
         });
@@ -74,114 +74,60 @@ function AcceptFriendContent() {
   };
 
   return (
-    <AuthBackground>
-      <Card
-        className="w-full max-w-md bg-card/60 backdrop-blur-xl border border-primary/20 rounded-2xl shadow-2xl relative z-10 animate-auth-fade-in-up hover:shadow-[0_20px_40px_rgba(0,255,65,0.1)] transition-shadow duration-300"
-        style={{ willChange: 'transform' }}
-      >
-        <CardHeader className="text-center space-y-4 pb-2">
-          <div className="flex items-center justify-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10 border border-primary/30">
-              <UserPlus className="h-8 w-8 text-primary" />
-            </div>
+    <div className="text-center">
+      <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-accent/25 bg-accent/10 text-accent">
+        {status === 'success' ? (
+          <CheckCircle className="h-7 w-7" />
+        ) : status === 'error' ? (
+          <XCircle className="h-7 w-7 text-loss" />
+        ) : (
+          <UserPlus className="h-7 w-7" />
+        )}
+      </div>
+      <h1 className="text-2xl font-bold tracking-tight">Friend request</h1>
+      <p className="mt-1.5 text-sm text-muted">
+        {status === 'loading' && 'Checking your session…'}
+        {status === 'login-required' &&
+          'Sign in with Google to accept this invite.'}
+        {status === 'accepting' && 'Accepting your friend request…'}
+        {status === 'success' && "You're in. Redirecting to your friends list."}
+        {status === 'error' && 'We couldn’t accept this invite.'}
+      </p>
+
+      <div className="mt-8">
+        {status === 'loading' || status === 'accepting' ? (
+          <div className="flex justify-center">
+            <Loader2 className="h-7 w-7 animate-spin text-accent" />
           </div>
-          <CardTitle className="text-xl font-light tracking-wide">
-            Friend Request
-          </CardTitle>
-        </CardHeader>
+        ) : null}
 
-        <CardContent className="pt-4">
-          {status === 'loading' && (
-            <div className="flex flex-col items-center gap-4 py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="text-muted-foreground text-sm font-light">
-                Checking authentication...
-              </p>
-            </div>
-          )}
+        {status === 'login-required' && (
+          <Button
+            type="button"
+            variant="secondary"
+            size="lg"
+            className="w-full"
+            onClick={handleLogin}
+          >
+            Continue with Google
+          </Button>
+        )}
 
-          {status === 'login-required' && (
-            <div className="flex flex-col items-center gap-4 py-4">
-              <p className="text-center text-muted-foreground text-sm font-light">
-                Sign in with Google to accept this friend request
-              </p>
-              <Button
-                onClick={handleLogin}
-                className="w-full bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 font-light flex items-center justify-center gap-3 h-12"
-              >
-                <svg
-                  className="w-5 h-5"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                    fill="#4285F4"
-                  />
-                  <path
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                    fill="#34A853"
-                  />
-                  <path
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                    fill="#FBBC05"
-                  />
-                  <path
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                    fill="#EA4335"
-                  />
-                </svg>
-                Sign in with Google
-              </Button>
-            </div>
-          )}
-
-          {status === 'accepting' && (
-            <div className="flex flex-col items-center gap-4 py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="text-muted-foreground text-sm font-light">
-                Accepting friend request...
-              </p>
-            </div>
-          )}
-
-          {status === 'success' && (
-            <div className="flex flex-col items-center gap-4 py-8">
-              <CheckCircle className="h-12 w-12 text-primary" />
-              <div className="text-center space-y-1">
-                <p className="text-lg font-light text-foreground">
-                  Friend Added
-                </p>
-                <p className="text-muted-foreground text-sm font-light">
-                  Redirecting to your friends list...
-                </p>
-              </div>
-            </div>
-          )}
-
-          {status === 'error' && (
-            <div className="flex flex-col items-center gap-4 py-8">
-              <XCircle className="h-12 w-12 text-destructive" />
-              <div className="text-center space-y-1">
-                <p className="text-lg font-light text-foreground">
-                  Unable to accept
-                </p>
-                <p className="text-muted-foreground text-sm font-light">
-                  {errorMessage}
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                className="font-light"
-                onClick={() => router.push('/friends')}
-              >
-                Go to Friends
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </AuthBackground>
+        {status === 'error' && (
+          <div className="space-y-3">
+            <p className="text-sm text-muted">{errorMessage}</p>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => router.push('/friends')}
+            >
+              Go to Friends
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 

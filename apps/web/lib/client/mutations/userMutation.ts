@@ -1,4 +1,8 @@
-import { useMutation, UseMutationOptions, useQueryClient } from '@tanstack/react-query';
+import {
+  useMutation,
+  UseMutationOptions,
+  useQueryClient,
+} from '@tanstack/react-query';
 
 import { createUser, removeUser, updateUser } from '../services/userService';
 import { CreateUserData, UpdateUserData } from '../../types/request';
@@ -33,11 +37,7 @@ export const useUpdateUser = (
 ) => {
   const queryClient = useQueryClient();
 
-  return useMutation<
-    unknown,
-    Error,
-    { id: string; userData: UpdateUserData }
-  >({
+  return useMutation<unknown, Error, { id: string; userData: UpdateUserData }>({
     mutationFn: ({ id, userData }) => updateUser(id, userData),
     onSuccess: (...args) => {
       // Name and gcashNumber are denormalized across many payloads.
