@@ -67,7 +67,7 @@ function MarketingPanel() {
 
       <div className="max-w-md">
         <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
-          Tactile clarity
+          We got you covered
         </p>
         <h1 className="mt-3 text-4xl font-bold leading-[1.05] tracking-tight xl:text-5xl">
           Split anything.{' '}
@@ -77,7 +77,7 @@ function MarketingPanel() {
           A calm, deliberate place to track shared expenses with people you
           actually know. No spreadsheets. No awkward follow-ups.
         </p>
-        <div className="mt-7 flex flex-wrap gap-2">
+        {/* <div className="mt-7 flex flex-wrap gap-2">
           {CHIPS.map((chip) => (
             <span
               key={chip.label}
@@ -87,7 +87,7 @@ function MarketingPanel() {
               <span className="font-medium">{chip.label}</span>
             </span>
           ))}
-        </div>
+        </div> */}
       </div>
 
       <p className="text-xs text-muted">

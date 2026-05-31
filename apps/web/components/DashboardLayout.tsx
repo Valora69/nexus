@@ -11,23 +11,6 @@ import { ThemeToggle } from '@web/components/ui/theme-toggle';
 import { useCurrentUser } from '@web/lib/client/queries/userQueries';
 import { cn } from '@web/lib/utils';
 
-const PAGE_TITLES: Record<string, string> = {
-  '/home': 'Dashboard',
-  '/groups': 'Groups',
-  '/expenses': 'Expenses',
-  '/payments': 'Payments',
-  '/profile': 'Account',
-  '/friends': 'Friends',
-};
-
-function resolvePageTitle(pathname: string): string {
-  if (!pathname) return 'Dashboard';
-  for (const [prefix, title] of Object.entries(PAGE_TITLES)) {
-    if (pathname === prefix || pathname.startsWith(`${prefix}/`)) return title;
-  }
-  return 'Dashboard';
-}
-
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { data: currentUser, isLoading: userLoading } = useCurrentUser();
   const router = useRouter();
@@ -104,8 +87,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
-
-  const pageTitle = resolvePageTitle(pathname);
 
   return (
     <div className="relative min-h-screen">
@@ -205,12 +186,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       <div className="flex min-h-screen flex-col pt-16 md:pl-[17.5rem] md:pt-0">
         {/* Desktop sticky topbar */}
         <div className="sticky top-0 z-20 hidden px-6 pt-4 md:block">
-          <div className="flex items-center justify-between gap-3 rounded-3xl border border-border bg-card px-4 py-2.5 shadow-glass backdrop-blur-2xl">
-            <div className="flex items-center gap-3">
-              <h2 className="text-base font-semibold tracking-tight">
-                {pageTitle}
-              </h2>
-            </div>
+          <div className="flex items-center justify-end gap-3 rounded-3xl border border-border bg-card px-4 py-2.5 shadow-glass backdrop-blur-2xl">
             <div className="flex items-center gap-2">
               <button
                 type="button"
@@ -218,10 +194,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 onClick={() => setCaptureOpen(true)}
               >
                 <Search className="h-4 w-4" />
-                <span>Quick capture</span>
-                <kbd className="ml-1 rounded-md border border-border bg-card px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted">
-                  B
-                </kbd>
+                <span> Press B </span>
               </button>
               <button
                 type="button"
