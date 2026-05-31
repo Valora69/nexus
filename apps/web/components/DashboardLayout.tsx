@@ -194,11 +194,11 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       <div className="flex min-h-screen flex-col pt-16 md:pl-[17.5rem] md:pt-0">
         {/* Desktop sticky topbar */}
         <div className="sticky top-0 z-20 hidden px-6 pt-4 md:block">
-          <div className="flex items-center justify-between gap-3 rounded-3xl border border-border bg-card px-4 py-2.5 shadow-glass backdrop-blur-2xl">
-            <div className="flex items-center gap-3">
-              <h2 className="text-base font-semibold tracking-tight">
+          <div className="flex items-center justify-between gap-3 rounded-3xl border border-border bg-card px-5 py-3 shadow-glass backdrop-blur-2xl">
+            <div className="flex min-w-0 items-center gap-3">
+              <h1 className="truncate text-lg font-bold tracking-tight text-foreground">
                 {pageTitle}
-              </h2>
+              </h1>
             </div>
             <div className="flex items-center gap-2">
               <button
