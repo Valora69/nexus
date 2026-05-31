@@ -45,7 +45,7 @@ function MarketingPanel() {
         className="flex items-center gap-2 text-base font-bold tracking-tight"
       >
         <BrandLogo />
-        Money<span className="text-accent">App</span>
+        Money App
       </Link>
 
       <div className="max-w-md">
