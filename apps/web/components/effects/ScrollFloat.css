@@ -1,0 +1,16 @@
+.scroll-float {
+  overflow: hidden;
+  /* size + weight are deliberately not set here — consumers control
+     these via textClassName so the component plays nicely with the
+     existing landing type scale. */
+}
+
+.scroll-float-text {
+  display: inline-block;
+  text-align: center;
+  line-height: 1.15;
+}
+
+.scroll-float .char {
+  display: inline-block;
+}
