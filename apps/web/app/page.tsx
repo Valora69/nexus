@@ -257,17 +257,10 @@ function FinalCta() {
   return (
     <section className="pb-32 pt-32 sm:pb-40 sm:pt-40">
       <div className="mx-auto max-w-2xl text-center">
-        <ScrollFloat
-          textClassName={SECTION_HEADLINE}
-          stagger={0.025}
-        >
-          Ready to make &ldquo;who owes who&rdquo; a one-second answer?
+        <ScrollFloat textClassName={SECTION_HEADLINE} stagger={0.025}>
+          No more guessing where money goes.
         </ScrollFloat>
         <p className="mt-6 text-base text-muted">
-        <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-          No more guessing where money goes.
-        </h2>
-        <p className="mt-4 text-base text-muted">
           Free, forever. Sign in once and you&apos;re set.
         </p>
         <div className="mt-10 flex justify-center">
