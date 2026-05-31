@@ -61,7 +61,10 @@ export function EditGroupModal({
 
   const handleSave = () => {
     if (!editName.trim()) return;
-    onSave({ name: editName.trim(), description: editDesc.trim() || undefined });
+    onSave({
+      name: editName.trim(),
+      description: editDesc.trim() || undefined,
+    });
   };
 
   if (!group) return null;

@@ -11,13 +11,22 @@ import { ArrowLeft } from 'lucide-react';
 import { useGetGroupById } from '@web/lib/client/queries/groupQueries';
 import { useGetAllExpenses } from '@web/lib/client/queries/expenseQueries';
 
-import { useCurrentUser, useGetAllUsers } from '@web/lib/client/queries/userQueries';
+import {
+  useCurrentUser,
+  useGetAllUsers,
+} from '@web/lib/client/queries/userQueries';
 import { useUpdateGroup } from '@web/lib/client/mutations/groupMutations';
-import { useCreateGroupMember, useRemoveGroupMember } from '@web/lib/client/mutations/groupMemberMutations';
+import {
+  useCreateGroupMember,
+  useRemoveGroupMember,
+} from '@web/lib/client/mutations/groupMemberMutations';
 import { RemoveMemberConflictError } from '@web/lib/client/services/groupMemberService';
 import { CreateExpenseModal } from '@web/components/features/expenses/create-expense-modal';
 import { ViewExpenseModal } from '@web/components/features/expenses/view-expense-modal';
-import { EditGroupModal, type RemovalBlocker } from '@web/components/features/groups/edit-group-modal';
+import {
+  EditGroupModal,
+  type RemovalBlocker,
+} from '@web/components/features/groups/edit-group-modal';
 import { GroupHeader } from '@web/components/features/groups/group-header';
 import { GroupMembersCard } from '@web/components/features/groups/group-members-card';
 import { GroupExpensesList } from '@web/components/features/groups/group-expenses-list';
@@ -26,7 +35,6 @@ import type {
   ExpenseWithRelations,
   GroupWithRelations,
 } from '@web/lib/types/entities';
-
 
 export default function GroupDetailPage() {
   const params = useParams();

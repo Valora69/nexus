@@ -20,7 +20,9 @@ export const quickCapture = async (data: QuickCaptureData) => {
   return res.json();
 };
 
-export const getAllPersonalTransactions = async (type?: PersonalTransactionType) => {
+export const getAllPersonalTransactions = async (
+  type?: PersonalTransactionType,
+) => {
   const params = type ? `?type=${type}` : '';
   const res = await fetch(`${BASE_URL}${URI}${params}`, {
     credentials: 'include',

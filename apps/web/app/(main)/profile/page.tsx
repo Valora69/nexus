@@ -65,7 +65,9 @@ function AccountStats({
             </p>
           </div>
           <div className="px-3 py-1">
-            <p className="text-sm font-light tracking-wide leading-6">{since}</p>
+            <p className="text-sm font-light tracking-wide leading-6">
+              {since}
+            </p>
             <p className="text-xs text-muted-foreground font-light mt-0.5">
               Member since
             </p>
@@ -277,7 +279,8 @@ export default function AccountPage() {
         }}
         friend={friendToRemove}
         onConfirm={() =>
-          friendToRemove && removeMutation.mutate({ friendId: friendToRemove.id })
+          friendToRemove &&
+          removeMutation.mutate({ friendId: friendToRemove.id })
         }
         isPending={removeMutation.isPending}
       />

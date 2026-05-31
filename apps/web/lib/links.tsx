@@ -1,4 +1,4 @@
 export enum Links {
-  dashboard = "/dashboard",
-  login = "/login",
+  dashboard = '/dashboard',
+  login = '/login',
 }

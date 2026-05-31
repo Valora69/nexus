@@ -82,7 +82,10 @@ export const updateGroupMember = async (
 
 export class RemoveMemberConflictError extends Error {
   blockers: Array<{ type: string; message: string }>;
-  constructor(message: string, blockers: Array<{ type: string; message: string }>) {
+  constructor(
+    message: string,
+    blockers: Array<{ type: string; message: string }>,
+  ) {
     super(message);
     this.name = 'RemoveMemberConflictError';
     this.blockers = blockers;

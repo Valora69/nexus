@@ -88,9 +88,7 @@ export function CreateExpenseModal({
       const splitAmounts = (expense.splits ?? []).map((s) => s.amount);
       const isUneven =
         splitAmounts.length > 1 &&
-        splitAmounts.some(
-          (a) => Math.abs(a - splitAmounts[0]!) > 0.01,
-        );
+        splitAmounts.some((a) => Math.abs(a - splitAmounts[0]!) > 0.01);
       const startInCustom = fromNotes || isUneven;
       setSplitMode(startInCustom ? 'custom' : 'equal');
 
@@ -132,7 +130,8 @@ export function CreateExpenseModal({
     const v = parseFloat(customSplits[id] || '0');
     return isFinite(v) && v > 0;
   });
-  const excludedFromCustom = selectedMembers.length - activeCustomEntries.length;
+  const excludedFromCustom =
+    selectedMembers.length - activeCustomEntries.length;
 
   const customTotal = activeCustomEntries.reduce(
     (sum, id) => sum + (parseFloat(customSplits[id] || '0') || 0),
@@ -196,7 +195,11 @@ export function CreateExpenseModal({
       ]);
       if (!knownLocalErrors.has(msg)) {
         // Server-side conflicts (e.g. verified-payments lock) bubble here.
-        toast.error(msg.includes('verified payments') ? msg : `Failed to ${isEditMode ? 'update' : 'add'} expense`);
+        toast.error(
+          msg.includes('verified payments')
+            ? msg
+            : `Failed to ${isEditMode ? 'update' : 'add'} expense`,
+        );
       }
     }
   };
@@ -219,7 +222,9 @@ export function CreateExpenseModal({
       <Dialog open={isOpen} onOpenChange={handleCancel}>
         <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{isEditMode ? 'Edit Expense' : 'Add Expense'}</DialogTitle>
+            <DialogTitle>
+              {isEditMode ? 'Edit Expense' : 'Add Expense'}
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
@@ -305,7 +310,8 @@ export function CreateExpenseModal({
                     const isCurrentUser = userId === currentUserId;
                     const customVal = parseFloat(customSplits[userId] || '0');
                     const isZeroCustom =
-                      splitMode === 'custom' && (!isFinite(customVal) || customVal <= 0);
+                      splitMode === 'custom' &&
+                      (!isFinite(customVal) || customVal <= 0);
                     return (
                       <div
                         key={userId}
@@ -371,7 +377,9 @@ export function CreateExpenseModal({
                     </p>
                     {excludedFromCustom > 0 && (
                       <p className="text-xs text-muted-foreground">
-                        {excludedFromCustom} member{excludedFromCustom > 1 ? 's' : ''} excluded (zero amount)
+                        {excludedFromCustom} member
+                        {excludedFromCustom > 1 ? 's' : ''} excluded (zero
+                        amount)
                       </p>
                     )}
                   </div>
@@ -443,7 +451,10 @@ export function CreateExpenseModal({
                   You paid ${parseFloat(expenseAmount || '0').toFixed(2)} for
                   &quot;{expenseName}&quot;.
                   {selectedMembers.length > 1 && (
-                    <> This will be split among {selectedMembers.length} members.</>
+                    <>
+                      {' '}
+                      This will be split among {selectedMembers.length} members.
+                    </>
                   )}
                 </>
               )}

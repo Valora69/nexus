@@ -3,17 +3,17 @@ import { describe, it, expect, jest, afterAll } from '@jest/globals';
 
 import RootPage from '../app/page';
 
-window.fetch = jest.fn().mockImplementation(() =>
-  Promise.resolve({
-    ok: true,
-    json: () => [],
-  })
-);
+(window as unknown as { fetch: typeof fetch }).fetch = jest
+  .fn()
+  .mockImplementation(() =>
+    Promise.resolve({
+      ok: true,
+      json: () => [],
+    }),
+  ) as unknown as typeof fetch;
 
 describe('Root page', () => {
-  const { container, unmount } = render(
-    <RootPage params={{ forTest: true }} />
-  );
+  const { container, unmount } = render(<RootPage />);
 
   it('should match the snapshot', () => {
     expect(container).toMatchSnapshot();

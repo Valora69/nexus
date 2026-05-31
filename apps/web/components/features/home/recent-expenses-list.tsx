@@ -1,6 +1,11 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@web/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@web/components/ui/card';
 import { ArrowDownRight, ArrowUpRight } from 'lucide-react';
 import { FeedItem } from '@web/lib/types/entities';
 
@@ -18,7 +23,9 @@ export function RecentExpensesList({ feed }: RecentExpensesListProps) {
         <div className="space-y-2 min-h-[282px]">
           {feed.length === 0 ? (
             <div className="flex items-center h-[282px]">
-              <p className="text-sm text-muted-foreground font-light">No activity yet</p>
+              <p className="text-sm text-muted-foreground font-light">
+                No activity yet
+              </p>
             </div>
           ) : (
             feed.map((item) => (
@@ -35,9 +42,7 @@ export function RecentExpensesList({ feed }: RecentExpensesListProps) {
                   <div className="min-w-0">
                     <p className="font-normal truncate">{item.label}</p>
                     <p className="text-xs text-muted-foreground font-light truncate">
-                      {item.sublabel
-                        ? `${item.sublabel} · `
-                        : ''}
+                      {item.sublabel ? `${item.sublabel} · ` : ''}
                       {new Date(item.date).toLocaleDateString()}
                     </p>
                   </div>

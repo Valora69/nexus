@@ -41,7 +41,12 @@ export function FriendsTabs({
             )}
           </TabsTrigger>
         </TabsList>
-        <Button size="sm" variant="outline" onClick={onAddFriend} className="shrink-0">
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={onAddFriend}
+          className="shrink-0"
+        >
           <UserPlus className="h-4 w-4 mr-1.5" />
           Add Friend
         </Button>
