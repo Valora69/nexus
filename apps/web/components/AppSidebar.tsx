@@ -71,8 +71,20 @@ export function AppSidebar({
           onClick={onNavigate}
           className="flex items-center gap-2 text-base font-bold tracking-tight"
         >
-          <BrandLogo />
-          Money<span className="text-accent">App</span>
+          <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-br from-accent to-accent-2 text-white shadow-glow">
+            <svg
+              viewBox="0 0 24 24"
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M7 17L17 7M17 7H8M17 7v9" />
+            </svg>
+          </span>
+          Money App
         </Link>
         {/* <span className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-accent/25 bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent">
           <span className="h-1.5 w-1.5 rounded-full bg-accent shadow-glow" />
