@@ -14,10 +14,7 @@ export function BrandLogo({ className }: { className?: string }) {
       aria-hidden
       width={28}
       height={28}
-      className={cn(
-        'h-7 w-7 shrink-0 select-none [filter:drop-shadow(0_6px_18px_rgb(0_255_65_/_0.45))]',
-        className,
-      )}
+      className={cn('h-7 w-7 shrink-0 select-none', className)}
       draggable={false}
     />
   );
