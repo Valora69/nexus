@@ -12,6 +12,23 @@ import { useCurrentUser } from '@web/lib/client/queries/userQueries';
 import { cn } from '@web/lib/utils';
 import { BrandLogo } from '@web/components/ui/brand-logo';
 
+const PAGE_TITLES: Record<string, string> = {
+  '/home': 'Dashboard',
+  '/groups': 'Groups',
+  '/expenses': 'Expenses',
+  '/payments': 'Payments',
+  '/profile': 'Account',
+  '/friends': 'Friends',
+};
+
+function resolvePageTitle(pathname: string): string {
+  if (!pathname) return 'Dashboard';
+  for (const [prefix, title] of Object.entries(PAGE_TITLES)) {
+    if (pathname === prefix || pathname.startsWith(`${prefix}/`)) return title;
+  }
+  return 'Dashboard';
+}
+
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { data: currentUser, isLoading: userLoading } = useCurrentUser();
   const router = useRouter();
@@ -88,6 +105,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
+
+  const pageTitle = resolvePageTitle(pathname);
 
   return (
     <div className="relative min-h-screen">
