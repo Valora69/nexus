@@ -10,6 +10,7 @@ import { QuickCaptureModal } from './QuickCaptureModal';
 import { ThemeToggle } from '@web/components/ui/theme-toggle';
 import { useCurrentUser } from '@web/lib/client/queries/userQueries';
 import { cn } from '@web/lib/utils';
+import { BrandLogo } from '@web/components/ui/brand-logo';
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { data: currentUser, isLoading: userLoading } = useCurrentUser();
@@ -107,19 +108,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           href="/home"
           className="flex items-center gap-2 text-sm font-bold tracking-tight"
         >
-          <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-br from-accent to-accent-2 text-white shadow-glow">
-            <svg
-              viewBox="0 0 24 24"
-              className="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M7 17L17 7M17 7H8M17 7v9" />
-            </svg>
-          </span>
+          <BrandLogo />
           Money<span className="text-accent">App</span>
         </Link>
         <div className="flex items-center gap-2">
@@ -208,7 +197,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
 
-        <main className="flex-1 overflow-x-hidden px-4 py-6 sm:px-6 md:px-6 md:py-8">
+        <main className="flex-1 overflow-x-hidden">
           <div className="mx-auto max-w-7xl animate-fade-in">{children}</div>
         </main>
       </div>

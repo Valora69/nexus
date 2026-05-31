@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 
 import { cn } from '@web/lib/utils';
+import { BrandLogo } from '@web/components/ui/brand-logo';
 
 type NavItem = {
   title: string;
@@ -70,19 +71,7 @@ export function AppSidebar({
           onClick={onNavigate}
           className="flex items-center gap-2 text-base font-bold tracking-tight"
         >
-          <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-br from-accent to-accent-2 text-white shadow-glow">
-            <svg
-              viewBox="0 0 24 24"
-              className="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M7 17L17 7M17 7H8M17 7v9" />
-            </svg>
-          </span>
+          <BrandLogo />
           Money<span className="text-accent">App</span>
         </Link>
         {/* <span className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-accent/25 bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent">
@@ -132,7 +121,7 @@ export function AppSidebar({
       {user ? (
         <div className="border-t border-border p-3">
           <div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3 backdrop-blur-xl">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-accent to-accent-2 text-xs font-semibold text-white">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-accent text-xs font-semibold text-background">
               {user.picture ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img

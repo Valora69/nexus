@@ -17,6 +17,12 @@ import {
 } from '@web/components/ui/dialog';
 import { Input } from '@web/components/ui/input';
 import { Badge } from '@web/components/ui/badge';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@web/components/ui/tooltip';
 import { useQuickCapture } from '@web/lib/client/mutations/personalTransactionMutation';
 import { useCreateExpense } from '@web/lib/client/mutations/expenseMutation';
 import { useGetGroupById } from '@web/lib/client/queries/groupQueries';
@@ -37,13 +43,33 @@ interface QuickCaptureModalProps {
 }
 
 const PERSONAL_EXAMPLES = [
-  { text: '50 grab chowking', label: 'expense', icon: ArrowDownRight },
-  { text: '+50 gcash james', label: 'credit', icon: ArrowUpRight },
+  {
+    text: '50 grab chowking',
+    label: 'expense',
+    hint: 'Logs ₱50 you spent at Chowking (Grab order)',
+    icon: ArrowDownRight,
+  },
+  {
+    text: '+50 gcash james',
+    label: 'credit',
+    hint: 'Logs ₱50 incoming — James paid you via GCash',
+    icon: ArrowUpRight,
+  },
 ];
 
 const GROUP_EXAMPLES = [
-  { text: '50 grab james', label: 'they owe you', icon: ArrowUpRight },
-  { text: '-50 grab james', label: 'you owe them', icon: ArrowDownRight },
+  {
+    text: '50 grab james',
+    label: 'they owe you',
+    hint: 'You paid ₱50 for Grab → James owes you back',
+    icon: ArrowUpRight,
+  },
+  {
+    text: '-50 grab james',
+    label: 'you owe them',
+    hint: 'James paid ₱50 for Grab → you owe James',
+    icon: ArrowDownRight,
+  },
 ];
 
 function parsePersonalPreview(
@@ -122,8 +148,6 @@ export function QuickCaptureModal({
 
     const { direction, amount, description, memberId } = result.data;
 
-    // direction='paid'  → current user paid, member owes (receivable)
-    // direction='owes'  → member paid, current user owes (payable)
     const payeeId = direction === 'paid' ? currentUser.id : memberId;
     const debtorId = direction === 'paid' ? memberId : currentUser.id;
 
@@ -164,7 +188,6 @@ export function QuickCaptureModal({
     if (e.key === 'Escape') onClose();
   };
 
-  // Live preview / validation
   const groupPreview = useMemo(() => {
     if (!isGroupMode || !currentUser) return null;
     if (!value.trim()) return null;
@@ -179,21 +202,21 @@ export function QuickCaptureModal({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-md p-0 gap-0 overflow-hidden">
-        <DialogHeader className="px-4 pt-4 pb-2">
+      <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-md">
+        <DialogHeader className="px-5 pb-3 pt-5">
           <DialogTitle className="flex items-center gap-2 text-base">
-            <Plus className="h-4 w-4 text-primary" />
+            <Plus className="h-4 w-4 text-accent" />
             {isGroupMode ? 'Group Expense' : 'Personal Expense'}
             {isGroupMode && group && (
-              <Badge variant="outline" className="text-xs ml-1 font-light">
-                <Users className="h-3 w-3 mr-1" />
+              <Badge variant="accent" className="ml-1 text-xs font-medium">
+                <Users className="h-3 w-3" />
                 {group.name}
               </Badge>
             )}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="px-4 pb-2">
+        <div className="px-5 pb-3">
           <Input
             ref={inputRef}
             value={value}
@@ -204,14 +227,14 @@ export function QuickCaptureModal({
                 ? '50 grab james  or  -50 grab james'
                 : '50 grab chowking  or  +50 gcash james'
             }
-            className="text-base h-11 border-0 border-b rounded-none px-0 focus-visible:ring-0 shadow-none"
+            className="h-12 text-base"
             disabled={isPending}
           />
         </div>
 
         {/* Group-mode: member pills with live highlight */}
         {isGroupMode && members.length > 0 && (
-          <div className="px-4 pb-2 flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-1.5 px-5 pb-3">
             {members
               .filter((m) => m.userId !== currentUser?.id)
               .map((m) => {
@@ -220,9 +243,9 @@ export function QuickCaptureModal({
                 return (
                   <Badge
                     key={m.userId}
-                    variant={isMatch ? 'default' : 'outline'}
-                    className={`text-xs font-light transition-colors ${
-                      isMatch ? 'ring-2 ring-primary/40' : ''
+                    variant={isMatch ? 'accent' : 'neutral'}
+                    className={`text-xs transition-colors ${
+                      isMatch ? 'ring-2 ring-accent/40' : ''
                     }`}
                   >
                     {m.name}
@@ -234,26 +257,26 @@ export function QuickCaptureModal({
 
         {/* Personal preview */}
         {!isGroupMode && personalPreview && (
-          <div className="px-4 pb-3 flex items-center gap-2">
+          <div className="flex items-center gap-2 px-5 pb-3">
             {personalPreview.type === 'credit' ? (
-              <ArrowUpRight className="h-4 w-4 text-green-500 shrink-0" />
+              <ArrowUpRight className="h-4 w-4 shrink-0 text-gain" />
             ) : (
-              <ArrowDownRight className="h-4 w-4 text-destructive shrink-0" />
+              <ArrowDownRight className="h-4 w-4 shrink-0 text-loss" />
             )}
             <span className="text-sm">
               <span
-                className={`font-semibold ${personalPreview.type === 'credit' ? 'text-green-500' : 'text-destructive'}`}
+                className={`font-semibold ${
+                  personalPreview.type === 'credit' ? 'text-gain' : 'text-loss'
+                }`}
               >
                 {personalPreview.type === 'credit' ? '+' : '-'}₱
                 {personalPreview.amount}
               </span>
               {personalPreview.rest && (
-                <span className="text-muted-foreground ml-1">
-                  {personalPreview.rest}
-                </span>
+                <span className="ml-1 text-muted">{personalPreview.rest}</span>
               )}
             </span>
-            <Badge variant="secondary" className="ml-auto text-xs">
+            <Badge variant="neutral" className="ml-auto text-xs">
               {personalPreview.type}
             </Badge>
           </div>
@@ -261,30 +284,30 @@ export function QuickCaptureModal({
 
         {/* Group preview / validation */}
         {isGroupMode && groupPreview && (
-          <div className="px-4 pb-3">
+          <div className="px-5 pb-3">
             {groupPreview.ok ? (
               <div className="flex items-center gap-2 text-sm">
                 {groupPreview.data.direction === 'paid' ? (
-                  <ArrowUpRight className="h-4 w-4 text-green-500 shrink-0" />
+                  <ArrowUpRight className="h-4 w-4 shrink-0 text-gain" />
                 ) : (
-                  <ArrowDownRight className="h-4 w-4 text-destructive shrink-0" />
+                  <ArrowDownRight className="h-4 w-4 shrink-0 text-loss" />
                 )}
                 <span>
                   {groupPreview.data.direction === 'paid'
                     ? `${groupPreview.data.memberName} owes you `
                     : `You owe ${groupPreview.data.memberName} `}
-                  <span className="font-semibold font-mono">
+                  <span className="font-mono font-semibold">
                     ₱{groupPreview.data.amount.toFixed(2)}
                   </span>
                   {groupPreview.data.description && (
-                    <span className="text-muted-foreground ml-1">
+                    <span className="ml-1 text-muted">
                       for {groupPreview.data.description}
                     </span>
                   )}
                 </span>
               </div>
             ) : (
-              <div className="flex items-center gap-2 text-xs text-destructive">
+              <div className="flex items-center gap-2 text-xs text-loss">
                 <AlertCircle className="h-3.5 w-3.5 shrink-0" />
                 {formatGroupCaptureError(groupPreview.error)}
               </div>
@@ -292,31 +315,54 @@ export function QuickCaptureModal({
           </div>
         )}
 
-        {/* Example hints */}
+        {/* Example hints — hover any chip for an explanation */}
         {!value && (
-          <div className="px-4 pb-4 flex gap-2 flex-wrap">
-            {examples.map((ex) => (
-              <button
-                key={ex.text}
-                onClick={() => {
-                  setValue(ex.text);
-                  inputRef.current?.focus();
-                }}
-                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground bg-muted hover:bg-muted/80 rounded px-2 py-1 transition-colors"
-              >
-                <ex.icon className="h-3 w-3" />
-                {ex.text}
-                <span className="text-[10px] text-muted-foreground/70 ml-1">
-                  {ex.label}
-                </span>
-              </button>
-            ))}
+          <div className="px-5 pb-5">
+            <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-muted">
+              Try one (hover for details)
+            </p>
+            <TooltipProvider delayDuration={150}>
+              <div className="flex flex-wrap gap-2">
+                {examples.map((ex) => (
+                  <Tooltip key={ex.text}>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setValue(ex.text);
+                          inputRef.current?.focus();
+                        }}
+                        className="glass inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs text-foreground transition hover:border-border-strong hover:bg-[var(--color-card-hover)]"
+                      >
+                        <ex.icon className="h-3 w-3 text-accent" />
+                        <span className="font-mono">{ex.text}</span>
+                        <span className="text-[10px] uppercase tracking-wider text-muted">
+                          {ex.label}
+                        </span>
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" sideOffset={6}>
+                      {ex.hint}
+                    </TooltipContent>
+                  </Tooltip>
+                ))}
+              </div>
+            </TooltipProvider>
           </div>
         )}
 
-        <div className="border-t px-4 py-2 flex items-center justify-between text-xs text-muted-foreground bg-muted/30">
-          <span>Enter to save · Esc to close</span>
-          {isPending && <span className="text-primary">Saving...</span>}
+        <div className="flex items-center justify-between border-t border-border bg-card px-5 py-2.5 text-xs text-muted backdrop-blur-xl">
+          <span>
+            <kbd className="rounded border border-border bg-card px-1 py-0.5 font-mono text-[10px] uppercase">
+              Enter
+            </kbd>{' '}
+            to save ·{' '}
+            <kbd className="rounded border border-border bg-card px-1 py-0.5 font-mono text-[10px] uppercase">
+              Esc
+            </kbd>{' '}
+            to close
+          </span>
+          {isPending && <span className="font-medium text-accent">Saving…</span>}
         </div>
       </DialogContent>
     </Dialog>

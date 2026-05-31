@@ -10,9 +10,9 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          'bg-gradient-to-br from-accent to-accent-2 text-white shadow-glow hover:shadow-lift',
+          'bg-accent text-background shadow-glow hover:shadow-lift',
         primary:
-          'bg-gradient-to-br from-accent to-accent-2 text-white shadow-glow hover:shadow-lift',
+          'bg-accent text-background shadow-glow hover:shadow-lift',
         secondary:
           'glass text-foreground hover:bg-[var(--color-card-hover)] hover:border-border-strong',
         ghost:
