@@ -120,7 +120,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <path d="M7 17L17 7M17 7H8M17 7v9" />
             </svg>
           </span>
-          Money<span className="text-accent">App</span>
+          Money App
         </Link>
         <div className="flex items-center gap-2">
           <button

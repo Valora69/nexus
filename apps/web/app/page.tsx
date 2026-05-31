@@ -92,25 +92,19 @@ function BrandMark({ className }: { className?: string }) {
 function Hero() {
   return (
     <section className="mx-auto mt-16 max-w-3xl text-center sm:mt-24">
-      <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-sm text-muted backdrop-blur-xl">
-        <span className="font-semibold text-accent">100% free</span>
-        <span className="text-border-strong">|</span>
-        <span>No credit card required</span>
-      </span>
       <h1 className="mt-6 text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl md:text-6xl">
-        Shared expenses, <span className="text-gradient">untangled.</span>
+        Shared and missing expenses? We got you.
       </h1>
       <p className="mx-auto mt-6 max-w-xl text-lg text-muted">
         Track who paid for what, split fairly, and settle up in seconds.
-        Designed for the bills you actually share — trips, roommates, group
-        dinners.
+        Designed for people who share money, not spreadsheets.
       </p>
       <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
         <Link
           href="/login"
           className={buttonClasses({ variant: 'primary', size: 'lg' })}
         >
-          Get Started — Free
+          Get Started
         </Link>
         <a
           href="#features"
@@ -146,34 +140,28 @@ function ProblemPanel() {
 
 const FEATURES = [
   {
-    icon: '👥',
+    title: 'Build for daily use',
+    desc: 'From morning coffee to monthly rent, track shared expenses as they happen — not a week later when nobody remembers.',
+  },
+  {
+    title: 'Quick Add expenses',
+    desc: 'Just press B from anywhere in the app. Add an expense in a single sentence!',
+  },
+  {
     title: 'Groups that make sense',
-    desc: 'Roommates, trips, weekly poker — every shared cost lives in the right place, with the right people.',
+    desc: 'Friends, trips, lunch — every shared cost lives in the right place, with the right people.',
   },
   {
-    icon: '⚡',
-    title: 'Quick-capture expenses',
-    desc: 'Hit B from anywhere in the app. Capture an expense in a single sentence and split it however you like.',
-  },
-  {
-    icon: '🧮',
     title: 'Fair splits, every time',
     desc: 'Equal, percentage, or custom shares — math is calculated to the cent so nobody silently overpays.',
   },
   {
-    icon: '💸',
     title: 'Settle up in one tap',
     desc: 'Net balances per friend or per group. Mark a transfer as paid and the books reconcile instantly.',
   },
   {
-    icon: '🔔',
     title: 'Gentle confirmations',
-    desc: 'Payments wait on confirmation from both sides. No phantom IOUs, no awkward follow-up messages.',
-  },
-  {
-    icon: '🌗',
-    title: 'Tactile-glass interface',
-    desc: 'Light or dark, the surface is calm, fast, and easy on the eyes — built for daily glances, not dashboards.',
+    desc: 'Payments wait on confirmation from both sides. Nothing gets missed and no awkward follow-up messages.',
   },
 ];
 
@@ -185,7 +173,8 @@ function Features() {
           Features
         </p>
         <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-          Built for the way friends actually share money.
+          Built tracking not just expenses, but the whole shared money
+          experience.
         </h2>
       </div>
       <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -194,9 +183,6 @@ function Features() {
             key={f.title}
             className="glass-card hover-lift p-6 hover:border-border-strong"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-border bg-accent/10 text-2xl">
-              {f.icon}
-            </div>
             <h3 className="mt-4 text-lg font-semibold tracking-tight">
               {f.title}
             </h3>
@@ -214,12 +200,12 @@ const STEPS = [
     desc: 'One tap. No password to forget, no email to verify.',
   },
   {
-    title: 'Add the people you share with',
-    desc: 'Invite friends by email or share a link. They join with one click — same Google sign-in, no extra accounts.',
-  },
-  {
     title: 'Log expenses as they happen',
     desc: 'Quick-capture an expense from anywhere with the keyboard shortcut, or open a group and add it inline.',
+  },
+  {
+    title: 'Add the people you share with',
+    desc: 'Invite friends by email or share a link. They join with one click.',
   },
   {
     title: 'Settle up when it suits you',
@@ -269,7 +255,7 @@ function FinalCta() {
     <section className="mb-20 mt-24">
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-          Ready to make &ldquo;who owes who&rdquo; a one-second answer?
+          No more guessing where money goes.
         </h2>
         <p className="mt-4 text-base text-muted">
           Free, forever. Sign in once and you&apos;re set.
@@ -279,7 +265,7 @@ function FinalCta() {
             href="/login"
             className={buttonClasses({ variant: 'primary', size: 'lg' })}
           >
-            Get Started — Free
+            Get Started
           </Link>
         </div>
       </div>

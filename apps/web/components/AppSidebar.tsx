@@ -83,7 +83,7 @@ export function AppSidebar({
               <path d="M7 17L17 7M17 7H8M17 7v9" />
             </svg>
           </span>
-          Money<span className="text-accent">App</span>
+          Money App
         </Link>
         {/* <span className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-accent/25 bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent">
           <span className="h-1.5 w-1.5 rounded-full bg-accent shadow-glow" />
