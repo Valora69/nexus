@@ -196,7 +196,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         <div className="sticky top-0 z-20 hidden px-6 pt-4 md:block">
           <div className="flex items-center justify-between gap-3 rounded-3xl border border-border bg-card px-5 py-3 shadow-glass backdrop-blur-2xl">
             <div className="flex min-w-0 items-center gap-3">
-              <h1 className="truncate text-lg font-bold tracking-tight text-foreground">
+              <h1 className="truncate text-lg font-light tracking-wide text-foreground">
                 {pageTitle}
               </h1>
             </div>

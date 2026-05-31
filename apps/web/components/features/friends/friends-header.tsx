@@ -9,15 +9,10 @@ interface FriendsHeaderProps {
 
 export function FriendsHeader({ onAddFriend }: FriendsHeaderProps) {
   return (
-    <div className="flex items-center justify-between">
-      <div>
-        <h1 className="text-3xl font-light tracking-wide">Friends</h1>
-        <p className="text-muted-foreground text-sm font-light">
-          Manage your connections
-        </p>
-      </div>
+    <div className="flex items-center justify-between gap-3">
+      <p className="text-sm font-light text-muted">Manage your connections.</p>
       <Button onClick={onAddFriend} size="sm">
-        <UserPlus className="h-4 w-4 mr-2" /> Add Friend
+        <UserPlus className="h-4 w-4" /> Add Friend
       </Button>
     </div>
   );
