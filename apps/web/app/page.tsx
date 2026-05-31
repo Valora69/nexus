@@ -2,6 +2,7 @@ import Link from 'next/link';
 
 import { buttonClasses } from '@web/components/ui/button';
 import { BrandLogo } from '@web/components/ui/brand-logo';
+import { ScrollFloat } from '@web/components/effects/ScrollFloat';
 import { cn } from '@web/lib/utils';
 
 export default function LandingPage() {
@@ -68,7 +69,7 @@ function BrandMark({ className }: { className?: string }) {
     <Link
       href="/"
       className={cn(
-        'flex items-center gap-2 text-base font-bold tracking-tight',
+        'flex items-center gap-2 text-base font-medium tracking-tight',
         className,
       )}
     >
@@ -77,6 +78,11 @@ function BrandMark({ className }: { className?: string }) {
     </Link>
   );
 }
+
+/* ---------- Sections ---------- */
+
+const SECTION_HEADLINE =
+  'block text-3xl font-light leading-[1.1] tracking-tight text-foreground sm:text-4xl md:text-5xl';
 
 function Hero() {
   return (
@@ -108,15 +114,19 @@ function Hero() {
 
 function ProblemPanel() {
   return (
-    <section className="mt-24">
-      <div className="mx-auto max-w-3xl rounded-4xl border border-border bg-card p-8 text-center backdrop-blur-xl sm:p-12">
-        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
+    <section className="py-32 sm:py-40">
+      <div className="mx-auto max-w-3xl rounded-4xl border border-border bg-card p-8 text-center backdrop-blur-xl sm:p-14">
+        <p className="text-xs font-medium uppercase tracking-[0.25em] text-accent">
           The Problem
         </p>
-        <h2 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">
-          You shouldn't need a spreadsheet to split a pizza.
-        </h2>
-        <p className="mt-4 text-base leading-relaxed text-muted">
+        <ScrollFloat
+          containerClassName="mt-4"
+          textClassName={SECTION_HEADLINE}
+          stagger={0.025}
+        >
+          You shouldn&apos;t need a spreadsheet to split a pizza.
+        </ScrollFloat>
+        <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-muted">
           Group expenses are a quiet kind of friction. Someone fronts the bill,
           others promise to pay later, and a week later nobody quite remembers
           who owed what. Money App keeps the math automatic and the receipts
@@ -156,9 +166,9 @@ const FEATURES = [
 
 function Features() {
   return (
-    <section id="features" className="mt-24">
+    <section id="features" className="py-32 sm:py-40">
       <div className="mx-auto max-w-3xl text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
+        <p className="text-xs font-medium uppercase tracking-[0.25em] text-accent">
           Features
         </p>
         <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
@@ -166,7 +176,7 @@ function Features() {
           experience.
         </h2>
       </div>
-      <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-16 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {FEATURES.map((f) => (
           <article
             key={f.title}
@@ -204,27 +214,31 @@ const STEPS = [
 
 function HowItWorks() {
   return (
-    <section id="how-it-works" className="mt-24">
+    <section id="how-it-works" className="py-32 sm:py-40">
       <div className="mx-auto max-w-3xl">
         <div className="text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
+          <p className="text-xs font-medium uppercase tracking-[0.25em] text-accent">
             How it works
           </p>
-          <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+          <ScrollFloat
+            containerClassName="mt-4"
+            textClassName={SECTION_HEADLINE}
+            stagger={0.025}
+          >
             Four steps. No tutorial required.
-          </h2>
+          </ScrollFloat>
         </div>
-        <ol className="mt-10 space-y-5">
+        <ol className="mt-16 space-y-5">
           {STEPS.map((step, i) => (
             <li
               key={step.title}
               className="glass-card flex items-start gap-5 p-5 sm:p-6"
             >
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-accent text-lg font-bold text-background shadow-glow">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-accent text-lg font-medium text-background shadow-glow">
                 {i + 1}
               </span>
               <div className="min-w-0">
-                <h3 className="text-base font-semibold tracking-tight">
+                <h3 className="text-base font-normal tracking-tight">
                   {step.title}
                 </h3>
                 <p className="mt-1 text-sm leading-relaxed text-muted">
@@ -241,15 +255,15 @@ function HowItWorks() {
 
 function FinalCta() {
   return (
-    <section className="mb-20 mt-24">
+    <section className="pb-32 pt-32 sm:pb-40 sm:pt-40">
       <div className="mx-auto max-w-2xl text-center">
-        <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+        <ScrollFloat textClassName={SECTION_HEADLINE} stagger={0.025}>
           No more guessing where money goes.
-        </h2>
-        <p className="mt-4 text-base text-muted">
+        </ScrollFloat>
+        <p className="mt-6 text-base text-muted">
           Free, forever. Sign in once and you&apos;re set.
         </p>
-        <div className="mt-8 flex justify-center">
+        <div className="mt-10 flex justify-center">
           <Link
             href="/login"
             className={buttonClasses({ variant: 'primary', size: 'lg' })}
