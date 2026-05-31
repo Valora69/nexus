@@ -6,11 +6,11 @@
   --color-background: 246 248 252;
   --color-foreground: 15 23 42;
   --color-muted: 100 116 139;
-  --color-gain: 4 153 64;
+  --color-gain: 0 200 51;
   --color-loss: 220 38 38;
-  /* Brand green — matches the previous hsl(145 100% 50%) palette */
-  --color-accent: 4 153 64;
-  --color-accent2: 16 185 129;
+  /* Brand neon green — matches the favicon (#00ff41) */
+  --color-accent: 0 255 65;
+  --color-accent2: 0 255 65;
 
   --color-card: rgb(255 255 255 / 0.6);
   --color-card-hover: rgb(255 255 255 / 0.85);
@@ -28,11 +28,11 @@
   --color-background: 7 10 17;
   --color-foreground: 232 237 244;
   --color-muted: 142 151 169;
-  --color-gain: 0 255 106;
+  --color-gain: 0 255 65;
   --color-loss: 248 113 113;
-  /* Brand neon green — the previous hsl(145 100% 50%) ≈ rgb(0 255 106) */
-  --color-accent: 0 255 106;
-  --color-accent2: 52 211 153;
+  /* Brand neon green — matches the favicon (#00ff41) exactly */
+  --color-accent: 0 255 65;
+  --color-accent2: 0 255 65;
 
   --color-card: rgb(255 255 255 / 0.05);
   --color-card-hover: rgb(255 255 255 / 0.1);
@@ -63,18 +63,18 @@ html.dark {
     font-family: 'Inter', system-ui, sans-serif;
     background-color: rgb(var(--color-background));
     background-image:
-      radial-gradient(60rem 60rem at 88% -8%, rgb(4 153 64 / 0.1), transparent 60%),
-      radial-gradient(55rem 55rem at 6% 108%, rgb(16 185 129 / 0.09), transparent 60%);
+      radial-gradient(60rem 60rem at 88% -8%, rgb(0 255 65 / 0.08), transparent 60%),
+      radial-gradient(55rem 55rem at 6% 108%, rgb(0 255 65 / 0.06), transparent 60%);
     background-attachment: fixed;
     background-repeat: no-repeat;
     min-height: 100vh;
-    @apply antialiased;
+    @apply font-light antialiased;
   }
   .dark body {
     background-image:
-      radial-gradient(60rem 60rem at 88% -8%, rgb(0 255 106 / 0.1), transparent 60%),
-      radial-gradient(55rem 55rem at 6% 108%, rgb(52 211 153 / 0.08), transparent 60%),
-      radial-gradient(40rem 40rem at 50% 50%, rgb(34 197 94 / 0.05), transparent 70%);
+      radial-gradient(60rem 60rem at 88% -8%, rgb(0 255 65 / 0.1), transparent 60%),
+      radial-gradient(55rem 55rem at 6% 108%, rgb(0 255 65 / 0.07), transparent 60%),
+      radial-gradient(40rem 40rem at 50% 50%, rgb(0 255 65 / 0.04), transparent 70%);
   }
 
   h1,
@@ -83,7 +83,7 @@ html.dark {
   h4,
   h5,
   h6 {
-    @apply font-semibold tracking-tight;
+    @apply font-normal tracking-tight;
   }
 
   .font-mono {
@@ -162,8 +162,9 @@ html.dark {
       linear-gradient(160deg, rgb(8 12 22) 0%, rgb(6 12 16) 100%);
   }
 
+  /* Reads as solid brand-green; named .text-gradient for back-compat. */
   .text-gradient {
-    @apply bg-gradient-to-br from-foreground via-foreground to-accent bg-clip-text text-transparent;
+    color: rgb(var(--color-accent));
   }
 }
 

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
 import { buttonClasses } from '@web/components/ui/button';
+import { BrandLogo } from '@web/components/ui/brand-logo';
 import { cn } from '@web/lib/utils';
 
 export default function LandingPage() {
@@ -71,19 +72,7 @@ function BrandMark({ className }: { className?: string }) {
         className,
       )}
     >
-      <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-br from-accent to-accent-2 text-white shadow-glow">
-        <svg
-          viewBox="0 0 24 24"
-          className="h-4 w-4"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M7 17L17 7M17 7H8M17 7v9" />
-        </svg>
-      </span>
+      <BrandLogo />
       Money<span className="text-accent">App</span>
     </Link>
   );
@@ -231,7 +220,7 @@ function HowItWorks() {
               key={step.title}
               className="glass-card flex items-start gap-5 p-5 sm:p-6"
             >
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-accent to-accent-2 text-lg font-bold text-white shadow-glow">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-accent text-lg font-bold text-background shadow-glow">
                 {i + 1}
               </span>
               <div className="min-w-0">

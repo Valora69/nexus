@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 
 import { cn } from '@web/lib/utils';
+import { BrandLogo } from '@web/components/ui/brand-logo';
 
 type NavItem = {
   title: string;
@@ -132,7 +133,7 @@ export function AppSidebar({
       {user ? (
         <div className="border-t border-border p-3">
           <div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3 backdrop-blur-xl">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-accent to-accent-2 text-xs font-semibold text-white">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-accent text-xs font-semibold text-background">
               {user.picture ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img

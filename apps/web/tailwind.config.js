@@ -84,9 +84,9 @@ module.exports = {
         'neu-inset':
           'inset 0 2px 5px 0 rgb(0 0 0 / 0.18), inset 0 -1px 0 0 rgb(255 255 255 / 0.06)',
         glow:
-          '0 0 0 1px rgb(0 255 106 / 0.2), 0 10px 34px -8px rgb(0 255 106 / 0.4)',
+          '0 0 0 1px rgb(0 255 65 / 0.2), 0 10px 34px -8px rgb(0 255 65 / 0.4)',
         'glow-cyan':
-          '0 0 0 1px rgb(52 211 153 / 0.2), 0 10px 34px -8px rgb(52 211 153 / 0.4)',
+          '0 0 0 1px rgb(0 255 65 / 0.2), 0 10px 34px -8px rgb(0 255 65 / 0.4)',
       },
       backdropBlur: { xs: '2px' },
       keyframes: {

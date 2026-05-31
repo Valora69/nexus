@@ -1,5 +1,10 @@
 'use client';
 
+/**
+ * Page-level context line for the dashboard.
+ * The page title now lives in the global sticky topbar, so this just renders
+ * a soft date label as a sub-heading.
+ */
 export function DashboardHeader() {
   const dateLabel = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
@@ -9,9 +14,8 @@ export function DashboardHeader() {
   });
 
   return (
-    <div>
-      <h1 className="text-3xl font-light tracking-wide">Dashboard</h1>
-      <p className="text-muted-foreground text-sm font-light">{dateLabel}</p>
-    </div>
+    <p className="text-sm font-medium text-muted">
+      <span className="text-accent">Today ·</span> {dateLabel}
+    </p>
   );
 }

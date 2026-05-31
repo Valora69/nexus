@@ -11,7 +11,13 @@ export default function MainLayout({
   return (
     <DashboardLayout>
       {children}
-      <Toaster position="top-right" richColors />
+      <Toaster
+        position="bottom-right"
+        richColors
+        // sit above the sticky topbar (z-20) and mobile header (z-40)
+        // so error toasts are never hidden behind the chrome
+        style={{ zIndex: 9999 }}
+      />
     </DashboardLayout>
   );
 }

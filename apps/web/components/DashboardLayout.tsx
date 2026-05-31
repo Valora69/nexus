@@ -10,6 +10,24 @@ import { QuickCaptureModal } from './QuickCaptureModal';
 import { ThemeToggle } from '@web/components/ui/theme-toggle';
 import { useCurrentUser } from '@web/lib/client/queries/userQueries';
 import { cn } from '@web/lib/utils';
+import { BrandLogo } from '@web/components/ui/brand-logo';
+
+const PAGE_TITLES: Record<string, string> = {
+  '/home': 'Dashboard',
+  '/groups': 'Groups',
+  '/expenses': 'Expenses',
+  '/payments': 'Payments',
+  '/profile': 'Account',
+  '/friends': 'Friends',
+};
+
+function resolvePageTitle(pathname: string): string {
+  if (!pathname) return 'Dashboard';
+  for (const [prefix, title] of Object.entries(PAGE_TITLES)) {
+    if (pathname === prefix || pathname.startsWith(`${prefix}/`)) return title;
+  }
+  return 'Dashboard';
+}
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { data: currentUser, isLoading: userLoading } = useCurrentUser();
@@ -87,6 +105,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
+
+  const pageTitle = resolvePageTitle(pathname);
 
   return (
     <div className="relative min-h-screen">
@@ -186,7 +206,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       <div className="flex min-h-screen flex-col pt-16 md:pl-[17.5rem] md:pt-0">
         {/* Desktop sticky topbar */}
         <div className="sticky top-0 z-20 hidden px-6 pt-4 md:block">
-          <div className="flex items-center justify-end gap-3 rounded-3xl border border-border bg-card px-4 py-2.5 shadow-glass backdrop-blur-2xl">
+          <div className="flex items-center justify-between gap-3 rounded-3xl border border-border bg-card px-5 py-3 shadow-glass backdrop-blur-2xl">
+            <div className="flex min-w-0 items-center gap-3">
+              <h1 className="truncate text-lg font-light tracking-wide text-foreground">
+                {pageTitle}
+              </h1>
+            </div>
             <div className="flex items-center gap-2">
               <button
                 type="button"
@@ -208,7 +233,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
 
-        <main className="flex-1 overflow-x-hidden px-4 py-6 sm:px-6 md:px-6 md:py-8">
+        <main className="flex-1 overflow-x-hidden">
           <div className="mx-auto max-w-7xl animate-fade-in">{children}</div>
         </main>
       </div>

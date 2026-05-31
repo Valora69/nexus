@@ -9,15 +9,12 @@ interface GroupsListHeaderProps {
 
 export function GroupsListHeader({ onCreateGroup }: GroupsListHeaderProps) {
   return (
-    <div className="flex items-center justify-between">
-      <div>
-        <h1 className="text-3xl font-light tracking-wide">Groups</h1>
-        <p className="text-muted-foreground text-sm font-light">
-          Manage your expense groups
-        </p>
-      </div>
+    <div className="flex items-center justify-between gap-3">
+      <p className="text-sm font-light text-muted">
+        Manage your expense groups.
+      </p>
       <Button onClick={onCreateGroup} size="sm">
-        <Plus className="h-4 w-4 mr-2" /> Create Group
+        <Plus className="h-4 w-4" /> Create Group
       </Button>
     </div>
   );
