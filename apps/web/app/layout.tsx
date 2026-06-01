@@ -21,6 +21,10 @@ const jetbrains = JetBrains_Mono({
 export const metadata: Metadata = {
   title: 'Money App',
   description: 'Effortless shared expense tracking with tactile-glass clarity.',
+  icons: {
+    icon: '/icon.svg',
+    apple: '/icon.svg',
+  },
 };
 
 export default function RootLayout({ children }: Readonly<PropsWithChildren>) {
