@@ -19,7 +19,10 @@ export function PlasmaBackdrop() {
           direction="forward"
           scale={1.15}
           opacity={0.65}
-          mouseInteractive={true}
+          // Mouse interaction fires uniform writes on every mousemove —
+          // expensive on low-end devices and the auth page has nothing
+          // meaningful to mouse over. Keep the background calm.
+          mouseInteractive={false}
         />
       </div>
       {/* Vignette keeps the centre calm so glass cards remain legible */}

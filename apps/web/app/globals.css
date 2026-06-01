@@ -25,7 +25,7 @@
 }
 
 .dark {
-  --color-background: 7 10 17;
+  --color-background: 0 0 0;
   --color-foreground: 232 237 244;
   --color-muted: 142 151 169;
   --color-gain: 0 255 65;
@@ -71,10 +71,7 @@ html.dark {
     @apply font-light antialiased;
   }
   .dark body {
-    background-image:
-      radial-gradient(60rem 60rem at 88% -8%, rgb(0 255 65 / 0.1), transparent 60%),
-      radial-gradient(55rem 55rem at 6% 108%, rgb(0 255 65 / 0.07), transparent 60%),
-      radial-gradient(40rem 40rem at 50% 50%, rgb(0 255 65 / 0.04), transparent 70%);
+    background-image: none;
   }
 
   h1,
