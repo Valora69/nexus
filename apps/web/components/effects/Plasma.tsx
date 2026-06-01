@@ -126,7 +126,10 @@ export const Plasma = ({
         webgl: 2,
         alpha: true,
         antialias: false,
-        dpr: Math.min(window.devicePixelRatio || 1, 2),
+        // Cap DPR aggressively — the plasma is organic/blurry so the visual
+        // difference between DPR 1.25 and 2 is invisible, but the fragment
+        // shader cost scales with DPR² and tanks low-end GPUs at higher values.
+        dpr: Math.min(window.devicePixelRatio || 1, 1.25),
       });
     } catch {
       return;
@@ -190,11 +193,14 @@ export const Plasma = ({
 
     let raf = 0;
     let contextLost = false;
-    let isVisible = true;
+    let isIntersecting = true;
+    let isPageVisible =
+      typeof document !== 'undefined' ? !document.hidden : true;
+    const isVisible = () => isIntersecting && isPageVisible;
     const t0 = performance.now();
 
     const loop = (t: number) => {
-      if (contextLost || !isVisible) return;
+      if (contextLost || !isVisible()) return;
       const timeValue = (t - t0) * 0.001;
       if (direction === 'pingpong') {
         const pingpongDuration = 10;
@@ -222,7 +228,7 @@ export const Plasma = ({
     };
     const handleContextRestored = () => {
       contextLost = false;
-      if (isVisible) {
+      if (isVisible()) {
         cancelAnimationFrame(raf);
         raf = requestAnimationFrame(loop);
       }
@@ -232,9 +238,9 @@ export const Plasma = ({
 
     const io = new IntersectionObserver(
       ([entry]) => {
-        const wasVisible = isVisible;
-        isVisible = entry?.isIntersecting ?? false;
-        if (isVisible && !wasVisible && !contextLost) {
+        const wasVisible = isVisible();
+        isIntersecting = entry?.isIntersecting ?? false;
+        if (isVisible() && !wasVisible && !contextLost) {
           cancelAnimationFrame(raf);
           raf = requestAnimationFrame(loop);
         }
@@ -243,12 +249,23 @@ export const Plasma = ({
     );
     io.observe(containerEl);
 
+    const handleVisibilityChange = () => {
+      const wasVisible = isVisible();
+      isPageVisible = !document.hidden;
+      if (isVisible() && !wasVisible && !contextLost) {
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(loop);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
     raf = requestAnimationFrame(loop);
 
     return () => {
       cancelAnimationFrame(raf);
       ro.disconnect();
       io.disconnect();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       canvas.removeEventListener('webglcontextlost', handleContextLost);
       canvas.removeEventListener('webglcontextrestored', handleContextRestored);
       if (mouseInteractive && containerEl) {
