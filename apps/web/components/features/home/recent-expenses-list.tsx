@@ -22,7 +22,7 @@ export function RecentExpensesList({ feed }: RecentExpensesListProps) {
       <CardContent>
         <div className="space-y-2 min-h-[282px]">
           {feed.length === 0 ? (
-            <div className="flex items-center h-[282px]">
+            <div className="flex items-center justify-center h-[282px] w-full">
               <p className="text-sm text-muted-foreground font-light">
                 No activity yet
               </p>
