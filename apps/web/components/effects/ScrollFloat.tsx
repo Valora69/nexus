@@ -1,6 +1,12 @@
 'use client';
 
-import { useEffect, useMemo, useRef, type ReactNode, type RefObject } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  type ReactNode,
+  type RefObject,
+} from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -90,7 +96,14 @@ export const ScrollFloat = ({
       tween.scrollTrigger?.kill();
       tween.kill();
     };
-  }, [scrollContainerRef, animationDuration, ease, scrollStart, scrollEnd, stagger]);
+  }, [
+    scrollContainerRef,
+    animationDuration,
+    ease,
+    scrollStart,
+    scrollEnd,
+    stagger,
+  ]);
 
   return (
     <Tag

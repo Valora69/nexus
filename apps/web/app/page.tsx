@@ -7,7 +7,6 @@ import { cn } from '@web/lib/utils';
 export default function LandingPage() {
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden bg-black">
-
       <header className="relative z-10 mx-auto mt-4 flex w-[calc(100%-2rem)] max-w-6xl items-center justify-between rounded-full border border-border bg-card px-5 py-3 backdrop-blur-xl">
         <BrandMark />
         <nav className="hidden items-center gap-6 text-sm text-muted md:flex">

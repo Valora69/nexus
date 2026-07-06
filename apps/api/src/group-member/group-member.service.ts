@@ -11,10 +11,12 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ActivityNameEnum, ActivityOnEnum } from '@prisma/client';
 
-
 @Injectable()
 export class GroupMemberService {
-  constructor(private readonly prisma: PrismaService, private readonly eventEmitter: EventEmitter2) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
   private readonly logger = new Logger(GroupMemberService.name, {
     timestamp: true,
   });
@@ -38,7 +40,6 @@ export class GroupMemberService {
         );
       }
 
-
       const createdMember = await this.prisma.groupMember.create({
         data: createGroupMemberDto,
         include: {
@@ -47,8 +48,8 @@ export class GroupMemberService {
         },
       });
 
-      if(createdMember ){
-         this.eventEmitter.emit('activity.created', {
+      if (createdMember) {
+        this.eventEmitter.emit('activity.created', {
           groupId: createdMember.groupId,
           activityName: ActivityNameEnum.CREATED,
           activityOn: ActivityOnEnum.GROUP_MEMBER,
@@ -106,45 +107,50 @@ export class GroupMemberService {
     }
   }
 
-  async update(id: string, updateGroupMemberDto: UpdateGroupMemberDto, userId: string) {
-  this.logger.log('Updating group member...');
+  async update(
+    id: string,
+    updateGroupMemberDto: UpdateGroupMemberDto,
+    userId: string,
+  ) {
+    this.logger.log('Updating group member...');
 
-  try {
-    const existingMember = await this.findOne(id);
+    try {
+      const existingMember = await this.findOne(id);
 
-    if (updateGroupMemberDto.userId || updateGroupMemberDto.groupId) {
-      const newUserId = updateGroupMemberDto.userId || existingMember.userId;
-      const newGroupId = updateGroupMemberDto.groupId || existingMember.groupId;
+      if (updateGroupMemberDto.userId || updateGroupMemberDto.groupId) {
+        const newUserId = updateGroupMemberDto.userId || existingMember.userId;
+        const newGroupId =
+          updateGroupMemberDto.groupId || existingMember.groupId;
 
-      const duplicateMember = await this.prisma.groupMember.findUnique({
-        where: {
-          GroupMemberUnique: {
-            userId: newUserId,
-            groupId: newGroupId,
+        const duplicateMember = await this.prisma.groupMember.findUnique({
+          where: {
+            GroupMemberUnique: {
+              userId: newUserId,
+              groupId: newGroupId,
+            },
           },
+        });
+
+        if (duplicateMember && duplicateMember.id !== id) {
+          this.logger.error('User is already a member of this group');
+          throw new HttpException(
+            'User is already a member of this group',
+            HttpStatus.CONFLICT,
+          );
+        }
+      }
+
+      const updatedMember = await this.prisma.groupMember.update({
+        where: { id },
+        data: updateGroupMemberDto,
+        include: {
+          user: true,
+          group: true,
         },
       });
 
-      if (duplicateMember && duplicateMember.id !== id) {
-        this.logger.error('User is already a member of this group');
-        throw new HttpException(
-          'User is already a member of this group',
-          HttpStatus.CONFLICT,
-        );
-      }
-    }
-
-    const updatedMember = await this.prisma.groupMember.update({
-      where: { id },
-      data: updateGroupMemberDto,
-      include: {
-        user: true,
-        group: true,
-      },
-    });
-
-    if(updatedMember ){
-         this.eventEmitter.emit('activity.created', {
+      if (updatedMember) {
+        this.eventEmitter.emit('activity.created', {
           groupId: updatedMember.groupId,
           activityName: ActivityNameEnum.UPDATED,
           activityOn: ActivityOnEnum.GROUP_MEMBER,
@@ -152,20 +158,19 @@ export class GroupMemberService {
         });
       }
 
-
-    this.logger.log(`Group member ${id} updated successfully`);
-    return updatedMember;
-  } catch (error) {
-    this.logger.error('Failed to update group member');
-    if (error instanceof HttpException) {
-      throw error;
+      this.logger.log(`Group member ${id} updated successfully`);
+      return updatedMember;
+    } catch (error) {
+      this.logger.error('Failed to update group member');
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to update group member', {
+        cause: error,
+        description: 'An unexpected error occurred',
+      });
     }
-    throw new InternalServerErrorException('Failed to update group member', {
-      cause: error,
-      description: 'An unexpected error occurred',
-    });
   }
-}
 
   /**
    * Returns a list of blocking reasons that prevent removing this member from

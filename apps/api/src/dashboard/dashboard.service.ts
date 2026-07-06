@@ -43,7 +43,9 @@ export class DashboardService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getDashboard(userId: string, month?: string) {
-    this.logger.log(`Dashboard request for user ${userId}, month: ${month ?? 'current'}`);
+    this.logger.log(
+      `Dashboard request for user ${userId}, month: ${month ?? 'current'}`,
+    );
 
     const { startDate, endDate, monthLabel, monthParam } = parseMonth(month);
 
@@ -55,10 +57,7 @@ export class DashboardService {
         where: {
           userId,
           expense: {
-            AND: [
-              { payeeId: { not: null } },
-              { payeeId: { not: userId } },
-            ],
+            AND: [{ payeeId: { not: null } }, { payeeId: { not: userId } }],
           },
         },
         include: {
@@ -139,16 +138,58 @@ export class DashboardService {
     const unwrap = <T>(idx: number, fallback: T, label: string): T => {
       const r = settled[idx];
       if (r && r.status === 'fulfilled') return r.value as T;
-      this.logger.error(`Dashboard section "${label}" failed`, r && r.status === 'rejected' ? r.reason : 'unknown');
+      this.logger.error(
+        `Dashboard section "${label}" failed`,
+        r && r.status === 'rejected' ? r.reason : 'unknown',
+      );
       return fallback;
     };
 
-    const payableSplits = unwrap<Array<{ amount: number; expense: { payee?: { name: string } | null; group: { name: string } }; payments: Array<{ amountPaid: number }> }>>(0, [], 'payableSplits');
-    const receivableSplits = unwrap<Array<{ amount: number; user?: { name: string } | null; expense: { group: { name: string } }; payments: Array<{ amountPaid: number }> }>>(1, [], 'receivableSplits');
-    const spentAggregate = unwrap<{ _sum: { amount: number | null } }>(2, { _sum: { amount: 0 } }, 'spentAggregate');
-    const recentFeedRows = unwrap<Array<{ id: string; description: string | null; type: PersonalTransactionType; amount: number; date: Date; isFromGroup: boolean; category: string | null; source: string | null; expenseSplit: { expense: { group: { id: string; name: string } | null } | null } | null }>>(3, [], 'recentFeedRows');
-    const allTimeCreditAggregate = unwrap<{ _sum: { amount: number | null } }>(4, { _sum: { amount: 0 } }, 'allTimeCreditAggregate');
-    const allTimeExpenseAggregate = unwrap<{ _sum: { amount: number | null } }>(5, { _sum: { amount: 0 } }, 'allTimeExpenseAggregate');
+    const payableSplits = unwrap<
+      Array<{
+        amount: number;
+        expense: { payee?: { name: string } | null; group: { name: string } };
+        payments: Array<{ amountPaid: number }>;
+      }>
+    >(0, [], 'payableSplits');
+    const receivableSplits = unwrap<
+      Array<{
+        amount: number;
+        user?: { name: string } | null;
+        expense: { group: { name: string } };
+        payments: Array<{ amountPaid: number }>;
+      }>
+    >(1, [], 'receivableSplits');
+    const spentAggregate = unwrap<{ _sum: { amount: number | null } }>(
+      2,
+      { _sum: { amount: 0 } },
+      'spentAggregate',
+    );
+    const recentFeedRows = unwrap<
+      Array<{
+        id: string;
+        description: string | null;
+        type: PersonalTransactionType;
+        amount: number;
+        date: Date;
+        isFromGroup: boolean;
+        category: string | null;
+        source: string | null;
+        expenseSplit: {
+          expense: { group: { id: string; name: string } | null } | null;
+        } | null;
+      }>
+    >(3, [], 'recentFeedRows');
+    const allTimeCreditAggregate = unwrap<{ _sum: { amount: number | null } }>(
+      4,
+      { _sum: { amount: 0 } },
+      'allTimeCreditAggregate',
+    );
+    const allTimeExpenseAggregate = unwrap<{ _sum: { amount: number | null } }>(
+      5,
+      { _sum: { amount: 0 } },
+      'allTimeExpenseAggregate',
+    );
 
     // ── Debt calculations ─────────────────────────────────────────────────────
     // Use split.amount (the user's share) minus verified payments on that split.

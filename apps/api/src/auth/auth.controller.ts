@@ -33,7 +33,7 @@ export class AuthController {
   @UseGuards(PassportAuthGuard('google'))
   async googleAuthRedirect(@Request() req, @Res() res) {
     const token = await this.authService.googleLogin(req.user);
-    
+
     // Set cookie
     res.cookie('token', token.access_token, {
       httpOnly: true,

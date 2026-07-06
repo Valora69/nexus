@@ -13,6 +13,7 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
+    "typecheck": "tsc --noEmit",
     "prisma:check-drift": "prisma migrate diff --from-migrations prisma/migrations --to-schema-datamodel prisma/schema.prisma --exit-code"
   },
   "dependencies": {
@@ -47,6 +48,7 @@
     "@repo/jest-config": "*",
     "@repo/typescript-config": "*",
     "@types/express": "^4.17.17",
+    "@types/jest": "^30.0.0",
     "@types/node": "^20.3.1",
     "@types/passport-google-oauth20": "^2.0.17",
     "@types/supertest": "^6.0.0",

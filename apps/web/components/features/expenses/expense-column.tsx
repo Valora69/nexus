@@ -24,7 +24,6 @@ interface ExpensesColumnsProps {
 }
 
 export const createExpensesColumns = ({
-  onArchiveExpense,
   onViewExpense,
   onEditExpense,
   onDeleteExpense,

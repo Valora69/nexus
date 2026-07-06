@@ -9,7 +9,10 @@ describe('GroupController', () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [GroupController],
       providers: [GroupService],
-    }).compile();
+    })
+      // Auto-mock every unresolved dependency (Prisma, JWT, event emitter…)
+      .useMocker(() => ({}))
+      .compile();
 
     controller = module.get<GroupController>(GroupController);
   });

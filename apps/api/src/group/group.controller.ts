@@ -35,7 +35,11 @@ export class GroupController {
 
   @ThrottleWrite()
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateGroupDto: UpdateGroupDto, @Req() req) {
+  update(
+    @Param('id') id: string,
+    @Body() updateGroupDto: UpdateGroupDto,
+    @Req() req,
+  ) {
     return this.groupService.update(id, updateGroupDto, req.user.sub);
   }
 

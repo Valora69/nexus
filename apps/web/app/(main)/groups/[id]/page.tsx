@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
-import { Card, CardContent } from '@web/components/ui/card';
 import { Button } from '@web/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 

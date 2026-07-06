@@ -95,7 +95,9 @@ export class PersonalTransactionService {
   }
 
   async remove(id: string, userId: string) {
-    const tx = await this.prisma.personalTransaction.findUnique({ where: { id } });
+    const tx = await this.prisma.personalTransaction.findUnique({
+      where: { id },
+    });
     if (!tx || tx.userId !== userId) {
       throw new BadRequestException('Transaction not found');
     }
@@ -121,7 +123,11 @@ export class PersonalTransactionService {
         _sum: { amount: true },
       }),
       this.prisma.personalTransaction.aggregate({
-        where: { userId, type: PersonalTransactionType.EXPENSE, isFromGroup: true },
+        where: {
+          userId,
+          type: PersonalTransactionType.EXPENSE,
+          isFromGroup: true,
+        },
         _sum: { amount: true },
       }),
     ]);

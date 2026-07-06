@@ -7,7 +7,10 @@ describe('ActivityService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [ActivityService],
-    }).compile();
+    })
+      // Auto-mock every unresolved dependency (Prisma, JWT, event emitter…)
+      .useMocker(() => ({}))
+      .compile();
 
     service = module.get<ActivityService>(ActivityService);
   });

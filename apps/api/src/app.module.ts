@@ -24,18 +24,18 @@ import { DashboardModule } from './dashboard/dashboard.module';
     ThrottlerModule.forRoot([
       {
         name: 'default',
-        ttl: 60_000,  // 1 minute window
-        limit: 60,    // 60 requests per window (general reads)
+        ttl: 60_000, // 1 minute window
+        limit: 60, // 60 requests per window (general reads)
       },
       {
         name: 'write',
         ttl: 60_000,
-        limit: 30,    // 30 mutations per minute
+        limit: 30, // 30 mutations per minute
       },
       {
         name: 'auth',
         ttl: 60_000,
-        limit: 10,    // 10 auth attempts per minute
+        limit: 10, // 10 auth attempts per minute
       },
     ]),
     UserModule,

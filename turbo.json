@@ -3,6 +3,21 @@
   "globalDependencies": [
     "**/.env.*local"
   ],
+  "globalEnv": [
+    "CI",
+    "NODE_ENV",
+    "PORT",
+    "DATABASE_URL",
+    "DIRECT_URL",
+    "JWT_SECRET",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "GOOGLE_CALLBACK_URL",
+    "RESEND_API_KEY",
+    "EMAIL_FROM",
+    "FRONTEND_URL",
+    "ALLOWED_ORIGINS"
+  ],
   "tasks": {
     "dev": {
       "cache": false,
@@ -14,10 +29,14 @@
       ],
       "outputs": [
         ".next/**",
-        "!.next/cache/**"
+        "!.next/cache/**",
+        "dist/**"
       ]
     },
     "lint": {},
+    "typecheck": {
+      "dependsOn": ["^build"]
+    },
     "test": {},
     "test:e2e": {}
   }

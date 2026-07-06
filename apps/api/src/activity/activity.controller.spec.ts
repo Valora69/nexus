@@ -7,7 +7,10 @@ describe('ActivityController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ActivityController],
-    }).compile();
+    })
+      // Auto-mock every unresolved dependency (Prisma, JWT, event emitter…)
+      .useMocker(() => ({}))
+      .compile();
 
     controller = module.get<ActivityController>(ActivityController);
   });

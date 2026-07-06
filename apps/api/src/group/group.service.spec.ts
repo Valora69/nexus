@@ -7,7 +7,10 @@ describe('GroupService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [GroupService],
-    }).compile();
+    })
+      // Auto-mock every unresolved dependency (Prisma, JWT, event emitter…)
+      .useMocker(() => ({}))
+      .compile();
 
     service = module.get<GroupService>(GroupService);
   });

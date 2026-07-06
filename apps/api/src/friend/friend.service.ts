@@ -22,9 +22,13 @@ export class FriendService {
   async sendFriendRequest(senderId: string, recipientEmailRaw: string) {
     // Normalize casing — emails are stored lowercase server-side.
     const recipientEmail = recipientEmailRaw.toLowerCase().trim();
-    this.logger.log(`Sending friend request from ${senderId} to ${recipientEmail}`);
+    this.logger.log(
+      `Sending friend request from ${senderId} to ${recipientEmail}`,
+    );
 
-    const sender = await this.prisma.user.findUnique({ where: { id: senderId } });
+    const sender = await this.prisma.user.findUnique({
+      where: { id: senderId },
+    });
 
     if (!sender) {
       throw new NotFoundException('Sender not found');
@@ -94,7 +98,10 @@ export class FriendService {
         this.logger.log(
           `Auto-accepted: ${senderId} and ${recipient.id} are now friends`,
         );
-        return { message: 'You were already requested by this user — you are now friends!' };
+        return {
+          message:
+            'You were already requested by this user — you are now friends!',
+        };
       }
     }
 
@@ -197,7 +204,9 @@ export class FriendService {
 
     // Idempotent: if already accepted, return success (friendship should already exist)
     if (request.status === 'ACCEPTED') {
-      this.logger.log(`Request ${requestId} already accepted — returning success`);
+      this.logger.log(
+        `Request ${requestId} already accepted — returning success`,
+      );
       return { message: 'Friend request already accepted' };
     }
 

@@ -5,7 +5,9 @@ import { OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
 export class ActivityService {
-  private readonly logger = new Logger(ActivityService.name, { timestamp: true });
+  private readonly logger = new Logger(ActivityService.name, {
+    timestamp: true,
+  });
 
   constructor(private readonly prismaService: PrismaService) {}
 
@@ -34,7 +36,8 @@ export class ActivityService {
         take: Math.min(take ?? 50, 100),
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'An unknown error occurred';
+      const message =
+        error instanceof Error ? error.message : 'An unknown error occurred';
       throw new HttpException(message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -59,7 +62,8 @@ export class ActivityService {
       });
     } catch (error) {
       if (error instanceof HttpException) throw error;
-      const message = error instanceof Error ? error.message : 'An unknown error occurred';
+      const message =
+        error instanceof Error ? error.message : 'An unknown error occurred';
       throw new HttpException(message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

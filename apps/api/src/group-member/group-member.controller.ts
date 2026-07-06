@@ -3,14 +3,12 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
-  Req
+  Req,
 } from '@nestjs/common';
 import { GroupMemberService } from './group-member.service';
 import { CreateGroupMemberDto } from './dto/create-group-member.dto';
-import { UpdateGroupMemberDto } from './dto/update-group-member.dto';
 import { ThrottleWrite } from 'src/common/throttle.decorators';
 
 @Controller('group-member')
@@ -19,7 +17,7 @@ export class GroupMemberController {
 
   @ThrottleWrite()
   @Post()
-  create(@Body() createGroupMemberDto: CreateGroupMemberDto, @Req() req ) {
+  create(@Body() createGroupMemberDto: CreateGroupMemberDto, @Req() req) {
     return this.groupMemberService.create(createGroupMemberDto, req.user.sub);
   }
 

@@ -12,7 +12,6 @@ import {
 } from 'lucide-react';
 
 import { cn } from '@web/lib/utils';
-import { BrandLogo } from '@web/components/ui/brand-logo';
 
 type NavItem = {
   title: string;

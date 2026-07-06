@@ -91,14 +91,7 @@ interface SplitCardProps {
   onClick: () => void;
 }
 
-function SplitCard({ split, filter, currentUserId, onClick }: SplitCardProps) {
-  const isOwedToMe =
-    filter === 'receivable' || split.expense.payeeId === currentUserId;
-  const owesTo = isOwedToMe
-    ? split.user.name
-    : split.expense.payee?.name || 'Unknown';
-  const owesFrom = isOwedToMe ? split.user.name : 'You';
-
+function SplitCard({ split, filter, onClick }: SplitCardProps) {
   return (
     <div
       onClick={onClick}

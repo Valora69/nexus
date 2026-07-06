@@ -84,11 +84,7 @@ export class ExpenseSplitController {
   }
 
   @Post(':id/mark-paid')
-  markAsPaid(
-    @Param('id') id: string,
-    @Body() body: MarkAsPaidDto,
-    @Req() req,
-  ) {
+  markAsPaid(@Param('id') id: string, @Body() body: MarkAsPaidDto, @Req() req) {
     return this.expenseSplitService.markAsPaid(
       id,
       req.user.sub,

@@ -205,8 +205,7 @@ export const Plasma = ({
       if (direction === 'pingpong') {
         const pingpongDuration = 10;
         const segmentTime = timeValue % pingpongDuration;
-        const isForward =
-          Math.floor(timeValue / pingpongDuration) % 2 === 0;
+        const isForward = Math.floor(timeValue / pingpongDuration) % 2 === 0;
         const u = segmentTime / pingpongDuration;
         const smooth = u * u * (3 - 2 * u);
         const pingpongTime = isForward

@@ -28,10 +28,7 @@ export class PersonalTransactionController {
   }
 
   @Get()
-  findAll(
-    @Req() req,
-    @Query('type') type?: PersonalTransactionType,
-  ) {
+  findAll(@Req() req, @Query('type') type?: PersonalTransactionType) {
     return this.service.findAll(req.user.sub, type);
   }
 

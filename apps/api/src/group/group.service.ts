@@ -152,10 +152,14 @@ export class GroupService {
 
   async update(id: string, updateGroupDto: UpdateGroupDto, userId: string) {
     try {
-      const { memberIds: _memberIds, ...groupData } = updateGroupDto;
+      // Only name/description are updatable here — memberIds is managed
+      // through the group-member endpoints, so it must not reach Prisma.
       const updatedGroup = await this.prisma.group.update({
         where: { id },
-        data: groupData,
+        data: {
+          name: updateGroupDto.name,
+          description: updateGroupDto.description,
+        },
         select: { id: true, name: true, description: true },
       });
 

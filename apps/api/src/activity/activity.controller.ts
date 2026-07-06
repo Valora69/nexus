@@ -10,15 +10,12 @@ export class ActivityController {
   create(@Body() createActivityDto: CreateActivityDto, @Req() req) {
     return this.activityService.create({
       ...createActivityDto,
-      createdByUserId: req.user.sub
-     });
+      createdByUserId: req.user.sub,
+    });
   }
 
   @Get()
-  findAll(
-    @Query('skip') skip?: string,
-    @Query('take') take?: string,
-  ) {
+  findAll(@Query('skip') skip?: string, @Query('take') take?: string) {
     return this.activityService.findAll(
       skip ? parseInt(skip, 10) : undefined,
       take ? parseInt(take, 10) : undefined,

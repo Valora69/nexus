@@ -1,9 +1,4 @@
-import {
-  IsNotEmpty,
-  IsUUID,
-  IsNumber,
-  IsPositive,
-} from 'class-validator';
+import { IsNotEmpty, IsUUID, IsNumber, IsPositive } from 'class-validator';
 
 export class CreateExpenseSplitDto {
   @IsNotEmpty()

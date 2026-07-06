@@ -10,9 +10,7 @@ interface ProfileHeaderProps {
 export function ProfileHeader({ onLogout }: ProfileHeaderProps) {
   return (
     <div className="flex items-center justify-between gap-3">
-      <p className="text-sm font-light text-muted">
-        Identity and connections.
-      </p>
+      <p className="text-sm font-light text-muted">Identity and connections.</p>
       <Button
         variant="destructive"
         size="sm"

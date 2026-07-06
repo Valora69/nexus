@@ -30,13 +30,6 @@ export default function AuthLayout({
   );
 }
 
-const CHIPS = [
-  { icon: '👥', label: 'Groups & friends' },
-  { icon: '⚡', label: 'Quick-capture' },
-  { icon: '🧮', label: 'Fair splits' },
-  { icon: '💸', label: 'One-tap settle' },
-];
-
 function MarketingPanel() {
   return (
     <aside className="relative hidden flex-col justify-between p-10 lg:flex xl:p-14">

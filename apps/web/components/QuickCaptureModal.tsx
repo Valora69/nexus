@@ -362,7 +362,9 @@ export function QuickCaptureModal({
             </kbd>{' '}
             to close
           </span>
-          {isPending && <span className="font-medium text-accent">Saving…</span>}
+          {isPending && (
+            <span className="font-medium text-accent">Saving…</span>
+          )}
         </div>
       </DialogContent>
     </Dialog>

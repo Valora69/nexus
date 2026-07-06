@@ -28,7 +28,9 @@ export function parseQuickCapture(raw: string): ParsedCapture {
   if (!trimmed) throw new Error('Input is empty');
 
   const isCredit = trimmed.startsWith('+');
-  const type = isCredit ? PersonalTransactionType.CREDIT : PersonalTransactionType.EXPENSE;
+  const type = isCredit
+    ? PersonalTransactionType.CREDIT
+    : PersonalTransactionType.EXPENSE;
 
   // Strip leading + then currency symbols, then split on whitespace
   const cleaned = trimmed.replace(/^\+/, '').replace(/^(PHP|php|\$|₱)\s*/i, '');

@@ -57,7 +57,11 @@ export class ExpenseController {
 
   @ThrottleWrite()
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateExpenseDto: UpdateExpenseDto, @Req() req) {
+  update(
+    @Param('id') id: string,
+    @Body() updateExpenseDto: UpdateExpenseDto,
+    @Req() req,
+  ) {
     return this.expenseService.update(id, updateExpenseDto, req.user.sub);
   }
 

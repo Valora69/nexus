@@ -41,7 +41,11 @@ export class EmailService implements OnModuleInit {
     }
 
     const subject = `${senderName} wants to connect with you on Money App`;
-    const html = this.buildFriendRequestHtml({ senderName, inviteUrl, isNewUser });
+    const html = this.buildFriendRequestHtml({
+      senderName,
+      inviteUrl,
+      isNewUser,
+    });
 
     try {
       const { data, error } = await this.resend.emails.send({

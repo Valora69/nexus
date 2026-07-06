@@ -10,7 +10,6 @@ import { QuickCaptureModal } from './QuickCaptureModal';
 import { ThemeToggle } from '@web/components/ui/theme-toggle';
 import { useCurrentUser } from '@web/lib/client/queries/userQueries';
 import { cn } from '@web/lib/utils';
-import { BrandLogo } from '@web/components/ui/brand-logo';
 
 const PAGE_TITLES: Record<string, string> = {
   '/home': 'Dashboard',

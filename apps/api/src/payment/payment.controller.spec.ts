@@ -9,7 +9,10 @@ describe('PaymentController', () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [PaymentController],
       providers: [PaymentService],
-    }).compile();
+    })
+      // Auto-mock every unresolved dependency (Prisma, JWT, event emitter…)
+      .useMocker(() => ({}))
+      .compile();
 
     controller = module.get<PaymentController>(PaymentController);
   });

@@ -6,7 +6,14 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/home', '/groups', '/expenses', '/payments', '/profile', '/friends'],
+        disallow: [
+          '/home',
+          '/groups',
+          '/expenses',
+          '/payments',
+          '/profile',
+          '/friends',
+        ],
       },
     ],
     sitemap: 'https://moneyapp.click/sitemap.xml',

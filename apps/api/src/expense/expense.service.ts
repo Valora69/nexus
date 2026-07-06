@@ -11,7 +11,12 @@ import {
 } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { ActivityNameEnum, ActivityOnEnum, PersonalTransactionType, Prisma } from '@prisma/client';
+import {
+  ActivityNameEnum,
+  ActivityOnEnum,
+  PersonalTransactionType,
+  Prisma,
+} from '@prisma/client';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 // Shared select for user fields on READ paths.
@@ -256,7 +261,13 @@ export class ExpenseService {
     }
   }
 
-  async findAll(userId?: string, type?: 'payable' | 'receivable', groupId?: string, skip?: number, take?: number) {
+  async findAll(
+    userId?: string,
+    type?: 'payable' | 'receivable',
+    groupId?: string,
+    skip?: number,
+    take?: number,
+  ) {
     this.logger.log('Retrieving Expenses...');
     try {
       let whereClause: Record<string, unknown> = {};
@@ -371,7 +382,12 @@ export class ExpenseService {
 
   private async updateWithSplits(
     id: string,
-    existing: { id: string; totalAmount: number; groupId: string; splits: Array<{ id: string; payments: Array<{ isVerified: boolean }> }> },
+    existing: {
+      id: string;
+      totalAmount: number;
+      groupId: string;
+      splits: Array<{ id: string; payments: Array<{ isVerified: boolean }> }>;
+    },
     dto: UpdateExpenseDto,
     userId: string,
   ) {
@@ -406,7 +422,9 @@ export class ExpenseService {
 
     const effectiveGroupId = groupId ?? existing.groupId;
     await Promise.all(
-      splits.map((s) => this.validateGroupMembership(s.userId, effectiveGroupId)),
+      splits.map((s) =>
+        this.validateGroupMembership(s.userId, effectiveGroupId),
+      ),
     );
 
     try {
