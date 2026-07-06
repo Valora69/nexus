@@ -1,7 +1,14 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { PlasmaBackdrop } from '@web/components/auth/auth-background';
 import { BrandLogo } from '@web/components/ui/brand-logo';
+
+// Auth pages (login, friend-accept) are gates, not content — keep them out
+// of Google's index so the homepage is the single canonical search result.
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default function AuthLayout({
   children,
