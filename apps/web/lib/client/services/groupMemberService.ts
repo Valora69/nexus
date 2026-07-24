@@ -1,4 +1,6 @@
-import { BASE_URL } from '../config';
+import { API_BASES } from '../config';
+
+const BASE = API_BASES.groupMember;
 import {
   CreateGroupMemberData,
   UpdateGroupMemberData,
@@ -9,7 +11,7 @@ const GROUP_URI = '/group-member';
 export const createGroupMember = async (
   groupMemberData: CreateGroupMemberData,
 ) => {
-  const data = await fetch(`${BASE_URL}${GROUP_URI}`, {
+  const data = await fetch(`${BASE}${GROUP_URI}`, {
     method: 'POST',
     body: JSON.stringify(groupMemberData),
     credentials: 'include',
@@ -26,7 +28,7 @@ export const createGroupMember = async (
   return response;
 };
 export const getAllGroupMembers = async () => {
-  const data = await fetch(`${BASE_URL}${GROUP_URI}`, {
+  const data = await fetch(`${BASE}${GROUP_URI}`, {
     method: 'GET',
     credentials: 'include',
     headers: {
@@ -43,7 +45,7 @@ export const getAllGroupMembers = async () => {
 };
 
 export const getGroupMemberById = async (id: string) => {
-  const data = await fetch(`${BASE_URL}${GROUP_URI}/${id}`, {
+  const data = await fetch(`${BASE}${GROUP_URI}/${id}`, {
     method: 'GET',
     credentials: 'include',
     headers: {
@@ -63,7 +65,7 @@ export const updateGroupMember = async (
   id: string,
   groupMemberData: UpdateGroupMemberData,
 ) => {
-  const data = await fetch(`${BASE_URL}${GROUP_URI}/${id}`, {
+  const data = await fetch(`${BASE}${GROUP_URI}/${id}`, {
     method: 'PATCH',
     body: JSON.stringify(groupMemberData),
     credentials: 'include',
@@ -93,7 +95,7 @@ export class RemoveMemberConflictError extends Error {
 }
 
 export const removeGroupMember = async (id: string) => {
-  const data = await fetch(`${BASE_URL}${GROUP_URI}/${id}`, {
+  const data = await fetch(`${BASE}${GROUP_URI}/${id}`, {
     method: 'DELETE',
     credentials: 'include',
     headers: {

@@ -1,4 +1,6 @@
-import { BASE_URL } from '../config';
+import { API_BASES } from '../config';
+
+const BASE = API_BASES.friend;
 import type { Friend, FriendRequestWithRelations } from '../../types/entities';
 import type {
   SendFriendRequestData,
@@ -10,7 +12,7 @@ const FRIEND_URI = '/friend';
 export const sendFriendRequest = async (
   data: SendFriendRequestData,
 ): Promise<{ message: string }> => {
-  const response = await fetch(`${BASE_URL}${FRIEND_URI}/request`, {
+  const response = await fetch(`${BASE}${FRIEND_URI}/request`, {
     method: 'POST',
     body: JSON.stringify(data),
     credentials: 'include',
@@ -30,7 +32,7 @@ export const sendFriendRequest = async (
 export const getPendingRequests = async (): Promise<
   FriendRequestWithRelations[]
 > => {
-  const response = await fetch(`${BASE_URL}${FRIEND_URI}/requests`, {
+  const response = await fetch(`${BASE}${FRIEND_URI}/requests`, {
     method: 'GET',
     credentials: 'include',
     headers: {
@@ -48,7 +50,7 @@ export const getPendingRequests = async (): Promise<
 export const getSentRequests = async (): Promise<
   FriendRequestWithRelations[]
 > => {
-  const response = await fetch(`${BASE_URL}${FRIEND_URI}/requests/sent`, {
+  const response = await fetch(`${BASE}${FRIEND_URI}/requests/sent`, {
     method: 'GET',
     credentials: 'include',
     headers: {
@@ -67,7 +69,7 @@ export const acceptFriendRequest = async (
   requestId: string,
 ): Promise<{ message: string }> => {
   const response = await fetch(
-    `${BASE_URL}${FRIEND_URI}/requests/${requestId}/accept`,
+    `${BASE}${FRIEND_URI}/requests/${requestId}/accept`,
     {
       method: 'POST',
       credentials: 'include',
@@ -89,7 +91,7 @@ export const acceptFriendRequestByToken = async (
   data: AcceptFriendRequestByTokenData,
 ): Promise<{ message: string }> => {
   const response = await fetch(
-    `${BASE_URL}${FRIEND_URI}/requests/accept-by-token`,
+    `${BASE}${FRIEND_URI}/requests/accept-by-token`,
     {
       method: 'POST',
       body: JSON.stringify(data),
@@ -112,7 +114,7 @@ export const declineFriendRequest = async (
   requestId: string,
 ): Promise<{ message: string }> => {
   const response = await fetch(
-    `${BASE_URL}${FRIEND_URI}/requests/${requestId}/decline`,
+    `${BASE}${FRIEND_URI}/requests/${requestId}/decline`,
     {
       method: 'POST',
       credentials: 'include',
@@ -131,7 +133,7 @@ export const declineFriendRequest = async (
 };
 
 export const getAllFriends = async (): Promise<Friend[]> => {
-  const response = await fetch(`${BASE_URL}${FRIEND_URI}`, {
+  const response = await fetch(`${BASE}${FRIEND_URI}`, {
     method: 'GET',
     credentials: 'include',
     headers: {
@@ -149,7 +151,7 @@ export const getAllFriends = async (): Promise<Friend[]> => {
 export const removeFriend = async (
   friendId: string,
 ): Promise<{ message: string }> => {
-  const response = await fetch(`${BASE_URL}${FRIEND_URI}/${friendId}`, {
+  const response = await fetch(`${BASE}${FRIEND_URI}/${friendId}`, {
     method: 'DELETE',
     credentials: 'include',
     headers: {

@@ -1,10 +1,12 @@
-import { BASE_URL } from '../config';
+import { API_BASES } from '../config';
+
+const BASE = API_BASES.group;
 import { CreateGroupData, UpdateGroupData } from '../../types/request';
 
 const GROUP_URI = '/group';
 
 export const createGroup = async (groupData: CreateGroupData) => {
-  const data = await fetch(`${BASE_URL}${GROUP_URI}`, {
+  const data = await fetch(`${BASE}${GROUP_URI}`, {
     method: 'POST',
     body: JSON.stringify(groupData),
     credentials: 'include',
@@ -22,7 +24,7 @@ export const createGroup = async (groupData: CreateGroupData) => {
 };
 
 export const getAllGroups = async () => {
-  const data = await fetch(`${BASE_URL}${GROUP_URI}`, {
+  const data = await fetch(`${BASE}${GROUP_URI}`, {
     method: 'GET',
     credentials: 'include',
     headers: {
@@ -39,7 +41,7 @@ export const getAllGroups = async () => {
 };
 
 export const getGroupById = async (id: string) => {
-  const data = await fetch(`${BASE_URL}${GROUP_URI}/${id}`, {
+  const data = await fetch(`${BASE}${GROUP_URI}/${id}`, {
     method: 'GET',
     credentials: 'include',
     headers: {
@@ -56,7 +58,7 @@ export const getGroupById = async (id: string) => {
 };
 
 export const updateGroup = async (id: string, groupData: UpdateGroupData) => {
-  const data = await fetch(`${BASE_URL}${GROUP_URI}/${id}`, {
+  const data = await fetch(`${BASE}${GROUP_URI}/${id}`, {
     method: 'PATCH',
     body: JSON.stringify(groupData),
     credentials: 'include',
@@ -74,7 +76,7 @@ export const updateGroup = async (id: string, groupData: UpdateGroupData) => {
 };
 
 export const removeGroup = async (id: string) => {
-  const data = await fetch(`${BASE_URL}${GROUP_URI}/${id}`, {
+  const data = await fetch(`${BASE}${GROUP_URI}/${id}`, {
     method: 'DELETE',
     credentials: 'include',
     headers: {

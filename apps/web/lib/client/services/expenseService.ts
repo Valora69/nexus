@@ -1,10 +1,12 @@
-import { BASE_URL } from '../config';
+import { API_BASES } from '../config';
+
+const BASE = API_BASES.expense;
 import { CreateExpenseData, UpdateExpenseData } from '../../types/request';
 
 const EXPENSE_URI = '/expenses';
 
 export const createExpense = async (expenseData: CreateExpenseData) => {
-  const data = await fetch(`${BASE_URL}${EXPENSE_URI}`, {
+  const data = await fetch(`${BASE}${EXPENSE_URI}`, {
     method: 'POST',
     body: JSON.stringify(expenseData),
     credentials: 'include',
@@ -29,7 +31,7 @@ export const getAllExpenses = async (
   if (type) query.set('type', type);
   if (groupId) query.set('groupId', groupId);
   const params = query.size ? `?${query.toString()}` : '';
-  const data = await fetch(`${BASE_URL}${EXPENSE_URI}${params}`, {
+  const data = await fetch(`${BASE}${EXPENSE_URI}${params}`, {
     method: 'GET',
     credentials: 'include',
     headers: {
@@ -46,7 +48,7 @@ export const getAllExpenses = async (
 };
 
 export const getExpenseById = async (id: string) => {
-  const data = await fetch(`${BASE_URL}${EXPENSE_URI}/${id}`, {
+  const data = await fetch(`${BASE}${EXPENSE_URI}/${id}`, {
     method: 'GET',
     credentials: 'include',
     headers: {
@@ -66,7 +68,7 @@ export const updateExpense = async (
   id: string,
   expenseData: UpdateExpenseData,
 ) => {
-  const data = await fetch(`${BASE_URL}${EXPENSE_URI}/${id}`, {
+  const data = await fetch(`${BASE}${EXPENSE_URI}/${id}`, {
     method: 'PATCH',
     body: JSON.stringify(expenseData),
     credentials: 'include',
@@ -84,7 +86,7 @@ export const updateExpense = async (
 };
 
 export const removeExpense = async (id: string) => {
-  const data = await fetch(`${BASE_URL}${EXPENSE_URI}/${id}`, {
+  const data = await fetch(`${BASE}${EXPENSE_URI}/${id}`, {
     method: 'DELETE',
     credentials: 'include',
     headers: {
