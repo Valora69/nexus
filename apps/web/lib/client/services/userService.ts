@@ -1,4 +1,6 @@
-import { BASE_URL } from '../config';
+import { API_BASES } from '../config';
+
+const BASE = API_BASES.user;
 import { CreateUserData, UpdateUserData } from '../../types/request';
 import { User } from '@/lib/types/entities';
 
@@ -6,7 +8,7 @@ const USER_URI = '/user';
 const CURRENT_USER_URI = '/user/currentuser';
 
 export const getAllUsers = async (): Promise<User[]> => {
-  const data = await fetch(`${BASE_URL}${USER_URI}`, {
+  const data = await fetch(`${BASE}${USER_URI}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -23,7 +25,7 @@ export const getAllUsers = async (): Promise<User[]> => {
 };
 
 export const getUserById = async (id: string): Promise<User> => {
-  const data = await fetch(`${BASE_URL}${USER_URI}/${id}`, {
+  const data = await fetch(`${BASE}${USER_URI}/${id}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -40,7 +42,7 @@ export const getUserById = async (id: string): Promise<User> => {
 };
 
 export const getCurrentUser = async (): Promise<User> => {
-  const data = await fetch(`${BASE_URL}${CURRENT_USER_URI}`, {
+  const data = await fetch(`${BASE}${CURRENT_USER_URI}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -57,7 +59,7 @@ export const getCurrentUser = async (): Promise<User> => {
 };
 
 export const createUser = async (userData: CreateUserData): Promise<User> => {
-  const data = await fetch(`${BASE_URL}${USER_URI}`, {
+  const data = await fetch(`${BASE}${USER_URI}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -78,7 +80,7 @@ export const updateUser = async (
   id: string,
   userData: UpdateUserData,
 ): Promise<User> => {
-  const data = await fetch(`${BASE_URL}${USER_URI}/${id}`, {
+  const data = await fetch(`${BASE}${USER_URI}/${id}`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -96,7 +98,7 @@ export const updateUser = async (
 };
 
 export const removeUser = async (id: string): Promise<void> => {
-  const data = await fetch(`${BASE_URL}${USER_URI}/${id}`, {
+  const data = await fetch(`${BASE}${USER_URI}/${id}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',

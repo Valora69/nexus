@@ -41,9 +41,7 @@ function AcceptFriendContent() {
 
     const checkAuth = async () => {
       try {
-        const apiUrl =
-          process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
-        const res = await fetch(`${apiUrl}/api/auth/profile`, {
+        const res = await fetch('/api/auth/profile', {
           credentials: 'include',
         });
 
@@ -68,9 +66,7 @@ function AcceptFriendContent() {
     if (token) {
       sessionStorage.setItem('friendRequestToken', token);
     }
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
-    const returnUrl = encodeURIComponent(`/friends/accept?token=${token}`);
-    window.location.href = `${apiUrl}/api/auth/google?redirect=${returnUrl}`;
+    window.location.href = '/api/auth/google';
   };
 
   return (

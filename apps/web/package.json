@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev --port 3000",
-    "build": "next build",
+    "build": "prisma generate --schema=../api/prisma/schema.prisma && next build",
+    "postinstall": "prisma generate --schema=../api/prisma/schema.prisma",
     "start": "next start",
     "lint": "eslint . --max-warnings 0",
     "test": "jest",
@@ -62,7 +63,11 @@
     "tailwind-merge": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^1.1.2",
-    "zod": "^4.2.1"
+    "zod": "^4.2.1",
+    "@prisma/client": "^6.13.0",
+    "@vercel/functions": "^2.0.0",
+    "jose": "^6.0.11",
+    "resend": "^6.12.3"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
@@ -82,6 +87,7 @@
     "jest-environment-jsdom": "^29.7.0",
     "postcss": "^8.5.6",
     "tailwindcss": "3",
+    "prisma": "^6.13.0",
     "typescript": "5.5.4"
   }
 }

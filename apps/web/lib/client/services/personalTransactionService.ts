@@ -1,11 +1,13 @@
-import { BASE_URL } from '../config';
+import { API_BASES } from '../config';
+
+const BASE = API_BASES.personalTransaction;
 import type { QuickCaptureData } from '../../types/request';
 import type { PersonalTransactionType } from '../../types/entities';
 
 const URI = '/personal-transactions';
 
 export const quickCapture = async (data: QuickCaptureData) => {
-  const res = await fetch(`${BASE_URL}${URI}/quick-capture`, {
+  const res = await fetch(`${BASE}${URI}/quick-capture`, {
     method: 'POST',
     body: JSON.stringify(data),
     credentials: 'include',
@@ -24,7 +26,7 @@ export const getAllPersonalTransactions = async (
   type?: PersonalTransactionType,
 ) => {
   const params = type ? `?type=${type}` : '';
-  const res = await fetch(`${BASE_URL}${URI}${params}`, {
+  const res = await fetch(`${BASE}${URI}${params}`, {
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
   });
@@ -34,7 +36,7 @@ export const getAllPersonalTransactions = async (
 };
 
 export const getPersonalTransactionSummary = async () => {
-  const res = await fetch(`${BASE_URL}${URI}/summary`, {
+  const res = await fetch(`${BASE}${URI}/summary`, {
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
   });

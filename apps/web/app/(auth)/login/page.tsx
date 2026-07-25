@@ -19,8 +19,7 @@ function LoginContent() {
   }, [searchParams, router]);
 
   const handleGoogleLogin = () => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
-    window.location.href = `${apiUrl}/api/auth/google`;
+    window.location.href = '/api/auth/google';
   };
 
   return (

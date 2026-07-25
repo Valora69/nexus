@@ -1,4 +1,6 @@
-import { BASE_URL } from '../config';
+import { API_BASES } from '../config';
+
+const BASE = API_BASES.payment;
 import { CreatePaymentData, UpdatePaymentData } from '../../types/request';
 import { Payment, PaymentWithRelations } from '@/lib/types/entities';
 
@@ -7,7 +9,7 @@ const PAYMENT_URI = '/payment';
 export const createPayment = async (
   paymentData: CreatePaymentData,
 ): Promise<Payment> => {
-  const data = await fetch(`${BASE_URL}${PAYMENT_URI}`, {
+  const data = await fetch(`${BASE}${PAYMENT_URI}`, {
     method: 'POST',
     body: JSON.stringify(paymentData),
     credentials: 'include',
@@ -25,7 +27,7 @@ export const createPayment = async (
 };
 
 export const getAllPayments = async (): Promise<PaymentWithRelations[]> => {
-  const data = await fetch(`${BASE_URL}${PAYMENT_URI}`, {
+  const data = await fetch(`${BASE}${PAYMENT_URI}`, {
     method: 'GET',
     credentials: 'include',
     headers: {
@@ -44,7 +46,7 @@ export const getAllPayments = async (): Promise<PaymentWithRelations[]> => {
 export const getPendingVerification = async (): Promise<
   PaymentWithRelations[]
 > => {
-  const data = await fetch(`${BASE_URL}${PAYMENT_URI}/pending-verification`, {
+  const data = await fetch(`${BASE}${PAYMENT_URI}/pending-verification`, {
     method: 'GET',
     credentials: 'include',
     headers: {
@@ -65,7 +67,7 @@ export const getPendingVerification = async (): Promise<
 export const getPendingConfirmation = async (): Promise<
   PaymentWithRelations[]
 > => {
-  const data = await fetch(`${BASE_URL}${PAYMENT_URI}/pending-confirmation`, {
+  const data = await fetch(`${BASE}${PAYMENT_URI}/pending-confirmation`, {
     method: 'GET',
     credentials: 'include',
     headers: {
@@ -84,7 +86,7 @@ export const getPendingConfirmation = async (): Promise<
 };
 
 export const getPaymentById = async (id: string): Promise<Payment> => {
-  const data = await fetch(`${BASE_URL}${PAYMENT_URI}/${id}`, {
+  const data = await fetch(`${BASE}${PAYMENT_URI}/${id}`, {
     method: 'GET',
     credentials: 'include',
     headers: {
@@ -104,7 +106,7 @@ export const updatePayment = async (
   id: string,
   paymentData: UpdatePaymentData,
 ): Promise<Payment> => {
-  const data = await fetch(`${BASE_URL}${PAYMENT_URI}/${id}`, {
+  const data = await fetch(`${BASE}${PAYMENT_URI}/${id}`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -122,7 +124,7 @@ export const updatePayment = async (
 };
 
 export const removePayment = async (id: string): Promise<void> => {
-  const data = await fetch(`${BASE_URL}${PAYMENT_URI}/${id}`, {
+  const data = await fetch(`${BASE}${PAYMENT_URI}/${id}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',

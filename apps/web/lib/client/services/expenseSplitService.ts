@@ -1,4 +1,6 @@
-import { BASE_URL } from '../config';
+import { API_BASES } from '../config';
+
+const BASE = API_BASES.expenseSplit;
 import type {
   ExpenseSplitWithRelations,
   PaymentMethod,
@@ -15,7 +17,7 @@ const EXPENSE_SPLIT_URI = '/expense-splits';
 export const getAllExpenseSplits = async (): Promise<
   ExpenseSplitWithRelations[]
 > => {
-  const response = await fetch(`${BASE_URL}${EXPENSE_SPLIT_URI}`, {
+  const response = await fetch(`${BASE}${EXPENSE_SPLIT_URI}`, {
     method: 'GET',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
@@ -31,7 +33,7 @@ export const getAllExpenseSplits = async (): Promise<
 export const getMyPayableSplits = async (): Promise<
   ExpenseSplitWithRelations[]
 > => {
-  const response = await fetch(`${BASE_URL}${EXPENSE_SPLIT_URI}/my-payables`, {
+  const response = await fetch(`${BASE}${EXPENSE_SPLIT_URI}/my-payables`, {
     method: 'GET',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
@@ -47,14 +49,11 @@ export const getMyPayableSplits = async (): Promise<
 export const getMyReceivableSplits = async (): Promise<
   ExpenseSplitWithRelations[]
 > => {
-  const response = await fetch(
-    `${BASE_URL}${EXPENSE_SPLIT_URI}/my-receivables`,
-    {
-      method: 'GET',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-    },
-  );
+  const response = await fetch(`${BASE}${EXPENSE_SPLIT_URI}/my-receivables`, {
+    method: 'GET',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+  });
 
   if (!response.ok) {
     throw new Error(
@@ -69,7 +68,7 @@ export const getSplitsByExpenseId = async (
   expenseId: string,
 ): Promise<ExpenseSplitWithRelations[]> => {
   const response = await fetch(
-    `${BASE_URL}${EXPENSE_SPLIT_URI}/expense/${expenseId}`,
+    `${BASE}${EXPENSE_SPLIT_URI}/expense/${expenseId}`,
     {
       method: 'GET',
       credentials: 'include',
@@ -89,14 +88,11 @@ export const getSplitsByExpenseId = async (
 export const getSplitsByUserId = async (
   userId: string,
 ): Promise<ExpenseSplitWithRelations[]> => {
-  const response = await fetch(
-    `${BASE_URL}${EXPENSE_SPLIT_URI}/user/${userId}`,
-    {
-      method: 'GET',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-    },
-  );
+  const response = await fetch(`${BASE}${EXPENSE_SPLIT_URI}/user/${userId}`, {
+    method: 'GET',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+  });
 
   if (!response.ok) {
     throw new Error(`Failed to fetch splits by user: ${response.statusText}`);
@@ -108,7 +104,7 @@ export const getSplitsByUserId = async (
 export const getExpenseSplitById = async (
   id: string,
 ): Promise<ExpenseSplitWithRelations> => {
-  const response = await fetch(`${BASE_URL}${EXPENSE_SPLIT_URI}/${id}`, {
+  const response = await fetch(`${BASE}${EXPENSE_SPLIT_URI}/${id}`, {
     method: 'GET',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
@@ -129,15 +125,12 @@ export const markSplitAsPaid = async (
     paymentProof?: string;
   },
 ): Promise<MarkAsPaidResponse> => {
-  const response = await fetch(
-    `${BASE_URL}${EXPENSE_SPLIT_URI}/${id}/mark-paid`,
-    {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    },
-  );
+  const response = await fetch(`${BASE}${EXPENSE_SPLIT_URI}/${id}/mark-paid`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
 
   if (!response.ok) {
     const errBody = await response.json().catch(() => null);
@@ -154,7 +147,7 @@ export const updateExpenseSplit = async (
   id: string,
   data: { amount?: number },
 ): Promise<ExpenseSplitWithRelations> => {
-  const response = await fetch(`${BASE_URL}${EXPENSE_SPLIT_URI}/${id}`, {
+  const response = await fetch(`${BASE}${EXPENSE_SPLIT_URI}/${id}`, {
     method: 'PATCH',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },

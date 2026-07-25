@@ -1,7 +1,8 @@
-import { BASE_URL } from '../config';
+import { API_BASES } from '../config';
 import type { LoginDTO } from '../../zod/loginSchema';
 
 const AUTH_URI = '/auth';
+const AUTH_BASE = API_BASES.auth;
 
 export interface LoginResponse {
   access_token: string;
@@ -11,7 +12,7 @@ export const loginUser = async (
   credentials: LoginDTO,
 ): Promise<LoginResponse> => {
   try {
-    const response = await fetch(`${BASE_URL}${AUTH_URI}/login`, {
+    const response = await fetch(`${AUTH_BASE}${AUTH_URI}/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -44,7 +45,7 @@ export interface LogoutResponse {
 
 export const logoutUser = async (): Promise<LogoutResponse> => {
   try {
-    const response = await fetch(`${BASE_URL}${AUTH_URI}/logout`, {
+    const response = await fetch(`${AUTH_BASE}${AUTH_URI}/logout`, {
       method: 'POST',
       credentials: 'include',
     });

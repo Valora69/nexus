@@ -3,6 +3,18 @@
   "globalDependencies": [
     "**/.env.*local"
   ],
+  "globalEnv": [
+    "NODE_ENV",
+    "DATABASE_URL",
+    "DIRECT_URL",
+    "JWT_SECRET",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "COOKIE_DOMAIN",
+    "RESEND_API_KEY",
+    "EMAIL_FROM",
+    "FRONTEND_URL"
+  ],
   "tasks": {
     "dev": {
       "cache": false,
