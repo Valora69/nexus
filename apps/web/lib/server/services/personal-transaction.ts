@@ -68,9 +68,9 @@ export async function findAll(
       createdAt: true,
       updatedAt: true,
       expenseSplit: {
-        include: {
+        select: {
           expense: {
-            include: {
+            select: {
               group: { select: { id: true, name: true } },
             },
           },
@@ -78,8 +78,8 @@ export async function findAll(
       },
     },
     orderBy: { date: 'desc' },
-    skip: skip ?? undefined,
-    take: Math.min(take ?? 100, 100),
+    skip: skip ?? 0,
+    take: Math.min(take ?? 50, 100),
   });
 }
 

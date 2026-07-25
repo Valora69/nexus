@@ -8,6 +8,11 @@ export const config = {
   transform: {
     '^.+\\.(t|j)s$': 'ts-jest',
   },
+  // Source uses absolute `src/...` imports (baseUrl-relative). rootDir is `src`,
+  // so map the `src/` prefix back onto it for Jest's resolver.
+  moduleNameMapper: {
+    '^src/(.*)$': '<rootDir>/$1',
+  },
   collectCoverageFrom: ['**/*.(t|j)s'],
   coverageDirectory: '../coverage',
   testEnvironment: 'node',

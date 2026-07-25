@@ -44,8 +44,8 @@ export async function getDashboard(userId: string, month?: string) {
       include: {
         expense: {
           include: {
-            payee: { select: { name: true } },
-            group: { select: { name: true } },
+            payee: { select: { id: true, name: true } },
+            group: { select: { id: true, name: true } },
           },
         },
         payments: {
@@ -61,10 +61,10 @@ export async function getDashboard(userId: string, month?: string) {
         expense: { payeeId: userId },
       },
       include: {
-        user: { select: { name: true } },
+        user: { select: { id: true, name: true } },
         expense: {
           include: {
-            group: { select: { name: true } },
+            group: { select: { id: true, name: true } },
           },
         },
         payments: {
@@ -90,7 +90,7 @@ export async function getDashboard(userId: string, month?: string) {
           include: {
             expense: {
               include: {
-                group: true,
+                group: { select: { id: true, name: true } },
               },
             },
           },
@@ -130,17 +130,17 @@ export async function getDashboard(userId: string, month?: string) {
   type PayableSplit = {
     amount: number;
     expense: {
-      payee: { name: string } | null;
-      group: { name: string };
+      payee: { id: string; name: string } | null;
+      group: { id: string; name: string };
     };
     payments: { amountPaid: number }[];
   };
 
   type ReceivableSplit = {
     amount: number;
-    user: { name: string };
+    user: { id: string; name: string } | null;
     expense: {
-      group: { name: string };
+      group: { id: string; name: string };
     };
     payments: { amountPaid: number }[];
   };
@@ -182,62 +182,63 @@ export async function getDashboard(userId: string, month?: string) {
     'allTimeExpenseAggregate',
   );
 
-  // Calculate payables
+  // Debt calculations — split.amount (the user's share) minus verified payments.
   const payables = payableSplits
     .map((s) => {
-      const verifiedPaid = s.payments.reduce((sum, p) => sum + p.amountPaid, 0);
+      const paid = s.payments.reduce((sum, p) => sum + p.amountPaid, 0);
       return {
-        amount: s.amount,
-        verifiedPaid,
-        remaining: s.amount - verifiedPaid,
-        payeeName: s.expense.payee?.name ?? 'Unknown',
-        groupName: s.expense.group.name,
+        to: s.expense.payee?.name ?? 'Unknown',
+        amount: Math.max(0, s.amount - paid),
+        group: s.expense.group.name,
       };
     })
-    .filter((p) => p.remaining > 0.01);
+    .filter((p) => p.amount > 0.01);
 
-  // Calculate receivables
   const receivables = receivableSplits
     .map((s) => {
-      const verifiedPaid = s.payments.reduce((sum, p) => sum + p.amountPaid, 0);
+      const paid = s.payments.reduce((sum, p) => sum + p.amountPaid, 0);
       return {
-        amount: s.amount,
-        verifiedPaid,
-        remaining: s.amount - verifiedPaid,
-        userName: s.user.name,
-        groupName: s.expense.group.name,
+        from: s.user?.name ?? 'Unknown',
+        amount: Math.max(0, s.amount - paid),
+        group: s.expense.group.name,
       };
     })
-    .filter((r) => r.remaining > 0.01);
+    .filter((r) => r.amount > 0.01);
 
-  const totalPayable = payables.reduce((sum, p) => sum + p.remaining, 0);
-  const totalReceivable = receivables.reduce((sum, r) => sum + r.remaining, 0);
-  const netBalance = totalReceivable - totalPayable;
+  const totalPayable = payables.reduce((sum, p) => sum + p.amount, 0);
+  const totalReceivable = receivables.reduce((sum, r) => sum + r.amount, 0);
+  // Net balance = all-time credits minus all-time expenses across personal transactions.
+  const netBalance =
+    (allTimeCreditAggregate._sum.amount ?? 0) -
+    (allTimeExpenseAggregate._sum.amount ?? 0);
 
-  // Build recent feed
+  // Recent activity feed
   const recentFeed = recentFeedRaw.map((item) => ({
     id: item.id,
-    label: item.description ?? item.category ?? item.source ?? 'Transaction',
+    label:
+      item.description ??
+      (item.type === PersonalTransactionType.CREDIT ? 'Cash in' : 'Expense'),
     sublabel: item.isFromGroup
-      ? (item.expenseSplit?.expense?.group?.name ?? 'Group')
-      : (item.category ?? item.source ?? null),
+      ? `Group: ${item.expenseSplit?.expense?.group?.name ?? 'Unknown'}`
+      : [item.category, item.source].filter(Boolean).join(' · '),
     amount: item.amount,
-    date: item.date,
+    date: item.date.toISOString(),
     isCredit: item.type === PersonalTransactionType.CREDIT,
     isFromGroup: item.isFromGroup,
   }));
 
   return {
-    monthLabel,
-    monthParam,
-    spentThisMonth: spentAggregate._sum.amount ?? 0,
-    allTimeCredits: allTimeCreditAggregate._sum.amount ?? 0,
-    allTimeExpenses: allTimeExpenseAggregate._sum.amount ?? 0,
+    // Debt tracking — all-time, not month-filtered
+    netBalance,
+    totalReceivable,
+    totalPayable,
     payables,
     receivables,
-    totalPayable,
-    totalReceivable,
-    netBalance,
+    // Monthly spending
+    spent: spentAggregate._sum.amount ?? 0,
+    monthLabel,
+    monthParam,
+    // Unified recent activity
     recentFeed,
   };
 }

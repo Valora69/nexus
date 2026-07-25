@@ -106,7 +106,9 @@ export async function sendFriendRequest(
         senderName: sender.name || sender.email,
         inviteUrl,
         isNewUser: !recipient,
-      }),
+      }).catch((err) =>
+        console.error('Failed to send friend request email:', err),
+      ),
     );
 
     return { message: 'Friend request sent!' };
