@@ -3,6 +3,10 @@ import { exchangeCode, fetchUserProfile } from '@/lib/server/google-oauth';
 import { signToken, setAuthCookie } from '@/lib/server/auth';
 import { prisma } from '@/lib/server/db';
 
+// Reads request query params (the OAuth code/state), so it can never be
+// statically rendered — mark it dynamic to skip Next.js's build-time probe.
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/auth/google/callback
  *
