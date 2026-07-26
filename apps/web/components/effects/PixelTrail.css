@@ -1,0 +1,16 @@
+.goo-filter-container {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* Full-viewport background: sits behind content and never blocks clicks.
+   Pointer tracking is driven via the R3F Canvas `eventSource`, not this
+   element, so pointer-events can stay off. */
+.pixel-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}

@@ -1,12 +1,21 @@
 import Link from 'next/link';
 
+import PixelTrail from '@web/components/effects/PixelTrail';
 import { buttonClasses } from '@web/components/ui/button';
 import { BrandLogo } from '@web/components/ui/brand-logo';
 import { cn } from '@web/lib/utils';
 
 export default function LandingPage() {
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-black">
+    <div className="relative isolate flex min-h-screen flex-col overflow-hidden bg-black">
+      <PixelTrail
+        gridSize={100}
+        trailSize={0.05}
+        maxAge={750}
+        interpolate={0.5}
+        color="#00ff41"
+        gooeyFilter={{ id: 'custom-goo-filter', strength: 2 }}
+      />
 
       <header className="relative z-10 mx-auto mt-4 flex w-[calc(100%-2rem)] max-w-6xl items-center justify-between rounded-full border border-border bg-card px-5 py-3 backdrop-blur-xl">
         <BrandMark />
