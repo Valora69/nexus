@@ -54,42 +54,54 @@ const PAYMENT_WRITE_SELECT = {
 
 export async function create(dto: CreatePaymentInput, userId: string) {
   try {
-    const split = await prisma.expenseSplit.findUnique({
-      where: { id: dto.expenseSplitId },
-      include: {
-        expense: true,
-        user: true,
-        payments: { select: { amountPaid: true } },
+    const { createdPayment, groupId } = await prisma.$transaction(
+      async (tx) => {
+        // Lock the split row so concurrent payments for the same split
+        // serialize here instead of each reading a stale payments snapshot
+        // and both passing the remaining-balance check (which would overpay).
+        await tx.$queryRaw`SELECT id FROM "ExpenseSplit" WHERE id = ${dto.expenseSplitId} FOR UPDATE`;
+
+        const split = await tx.expenseSplit.findUnique({
+          where: { id: dto.expenseSplitId },
+          include: {
+            expense: true,
+            user: true,
+            payments: { select: { amountPaid: true } },
+          },
+        });
+
+        if (!split) {
+          throw new ApiError(404, 'Expense split not found');
+        }
+
+        if (split.userId !== userId) {
+          throw new ApiError(
+            403,
+            'You can only create payments for your own splits',
+          );
+        }
+
+        const claimed = split.payments.reduce((s, p) => s + p.amountPaid, 0);
+        const remaining = split.amount - claimed;
+        if (dto.amountPaid > remaining + 0.01) {
+          throw new ApiError(
+            400,
+            `Payment exceeds remaining balance of ${remaining.toFixed(2)}`,
+          );
+        }
+
+        const createdPayment = await tx.payment.create({
+          data: dto,
+          select: PAYMENT_WRITE_SELECT,
+        });
+
+        return { createdPayment, groupId: split.expense.groupId };
       },
-    });
-
-    if (!split) {
-      throw new ApiError(404, 'Expense split not found');
-    }
-
-    if (split.userId !== userId) {
-      throw new ApiError(
-        403,
-        'You can only create payments for your own splits',
-      );
-    }
-
-    const claimed = split.payments.reduce((s, p) => s + p.amountPaid, 0);
-    const remaining = split.amount - claimed;
-    if (dto.amountPaid > remaining + 0.01) {
-      throw new ApiError(
-        400,
-        `Payment exceeds remaining balance of ${remaining.toFixed(2)}`,
-      );
-    }
-
-    const createdPayment = await prisma.payment.create({
-      data: dto,
-      select: PAYMENT_WRITE_SELECT,
-    });
+      { timeout: 10000 },
+    );
 
     await logActivity({
-      groupId: split.expense.groupId,
+      groupId,
       activityName: ActivityNameEnum.CREATED,
       activityOn: ActivityOnEnum.PAYMENT,
       createdByUserId: userId,
