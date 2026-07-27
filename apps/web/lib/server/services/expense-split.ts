@@ -207,41 +207,60 @@ export async function markAsPaid(
   amountPaid: number,
   paymentProof?: string,
 ) {
-  const split = await findOne(id);
-
-  if (split.userId !== userId) {
-    throw new ApiError(403, 'You can only record payments on your own splits');
-  }
-
-  if (!isFinite(amountPaid) || amountPaid <= 0) {
-    throw new ApiError(400, 'Payment amount must be greater than zero');
-  }
-
-  const claimed = sumPayments(split.payments, false);
-  const remaining = split.amount - claimed;
-  if (remaining <= 0.01) {
-    throw new ApiError(
-      400,
-      'This split is already fully paid (or has pending payments covering it)',
-    );
-  }
-  if (amountPaid > remaining + 0.01) {
-    throw new ApiError(
-      400,
-      `Payment exceeds remaining balance of ${remaining.toFixed(2)}`,
-    );
-  }
-
   try {
-    const payment = await prisma.payment.create({
-      data: {
-        amountPaid,
-        paymentMethod,
-        paymentProof,
-        isVerified: false,
-        expenseSplitId: id,
+    const payment = await prisma.$transaction(
+      async (tx) => {
+        // Lock the split row so concurrent payments for the same split
+        // serialize here instead of each reading a stale payments snapshot
+        // and both passing the remaining-balance check (which would overpay).
+        await tx.$queryRaw`SELECT id FROM "ExpenseSplit" WHERE id = ${id} FOR UPDATE`;
+
+        const split = await tx.expenseSplit.findUnique({
+          where: { id },
+          include: EXPENSE_SPLIT_INCLUDE,
+        });
+        if (!split) {
+          throw new ApiError(404, `Expense split with ID ${id} not found`);
+        }
+
+        if (split.userId !== userId) {
+          throw new ApiError(
+            403,
+            'You can only record payments on your own splits',
+          );
+        }
+
+        if (!isFinite(amountPaid) || amountPaid <= 0) {
+          throw new ApiError(400, 'Payment amount must be greater than zero');
+        }
+
+        const claimed = sumPayments(split.payments, false);
+        const remaining = split.amount - claimed;
+        if (remaining <= 0.01) {
+          throw new ApiError(
+            400,
+            'This split is already fully paid (or has pending payments covering it)',
+          );
+        }
+        if (amountPaid > remaining + 0.01) {
+          throw new ApiError(
+            400,
+            `Payment exceeds remaining balance of ${remaining.toFixed(2)}`,
+          );
+        }
+
+        return tx.payment.create({
+          data: {
+            amountPaid,
+            paymentMethod,
+            paymentProof,
+            isVerified: false,
+            expenseSplitId: id,
+          },
+        });
       },
-    });
+      { timeout: 10000 },
+    );
 
     const updatedSplit = await findOne(id);
 
