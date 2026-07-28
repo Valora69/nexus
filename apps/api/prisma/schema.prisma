@@ -207,3 +207,19 @@ model Friendship {
 
   @@unique([userId, friendId])
 }
+
+// One-time authorization code for the native (mobile) OAuth handoff.
+// The Google callback mints a row here and redirects to `moneyapp://auth?code=`;
+// the app exchanges the code (+ PKCE verifier) at /api/auth/mobile/exchange for
+// a JWT. Codes are short-lived (~60s) and single-use (consumedAt set on use).
+model MobileAuthCode {
+  id            String    @id @default(uuid())
+  code          String    @unique
+  userId        String
+  codeChallenge String // PKCE S256 challenge (base64url)
+  expiresAt     DateTime
+  consumedAt    DateTime?
+  createdAt     DateTime  @default(now())
+
+  @@index([expiresAt])
+}
