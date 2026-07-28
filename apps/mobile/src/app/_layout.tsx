@@ -7,6 +7,7 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { AuthProvider, useAuth } from '@/lib/auth-context';
 import '@/lib/api';
+import '@/global.css';
 
 export default function RootLayout() {
   return (

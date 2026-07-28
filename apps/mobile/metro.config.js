@@ -1,5 +1,6 @@
 // Learn more: https://docs.expo.dev/guides/monorepos/
 const { getDefaultConfig } = require('expo/metro-config');
+const { withNativeWind } = require('nativewind/metro');
 const path = require('path');
 
 const projectRoot = __dirname;
@@ -19,21 +20,16 @@ config.resolver.nodeModulesPaths = [
 // 3. Force a single React copy — this app's React 19 — even though `react-native`
 //    is hoisted to the monorepo root next to the web app's React 18. Without this,
 //    the hoisted react-native would resolve React 18 → invalid-hook / renderer
-//    mismatch. Only React needs pinning; react-native has a single (correct) copy.
-const reactSingletons = {
-  react: path.resolve(projectRoot, 'node_modules/react'),
-  'react-dom': path.resolve(projectRoot, 'node_modules/react-dom'),
-};
+//    mismatch. (Only bare `react`/`react/*` — never `react-native`.)
+const reactDir = path.resolve(projectRoot, 'node_modules/react');
 const defaultResolveRequest = config.resolver.resolveRequest;
 config.resolver.resolveRequest = (context, moduleName, platform) => {
-  for (const [name, dir] of Object.entries(reactSingletons)) {
-    if (moduleName === name || moduleName.startsWith(name + '/')) {
-      return context.resolveRequest(
-        context,
-        dir + moduleName.slice(name.length),
-        platform,
-      );
-    }
+  if (moduleName === 'react' || moduleName.startsWith('react/')) {
+    return context.resolveRequest(
+      context,
+      reactDir + moduleName.slice('react'.length),
+      platform,
+    );
   }
   return (defaultResolveRequest ?? context.resolveRequest)(
     context,
@@ -42,4 +38,4 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
   );
 };
 
-module.exports = config;
+module.exports = withNativeWind(config, { input: './src/global.css' });
