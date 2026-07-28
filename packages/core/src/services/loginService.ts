@@ -1,0 +1,66 @@
+import { http } from '../http/client';
+import type { LoginDTO } from '../zod/loginSchema';
+
+const AUTH_URI = '/auth';
+const AUTH_BASE = '';
+
+export interface LoginResponse {
+  access_token: string;
+}
+
+export const loginUser = async (
+  credentials: LoginDTO,
+): Promise<LoginResponse> => {
+  try {
+    const response = await http(`${AUTH_BASE}${AUTH_URI}/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(credentials),
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      if (response.status === 401) {
+        throw new Error('Invalid credentials');
+      }
+      throw new Error(errorData.message || 'Login failed');
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('An unexpected error occurred');
+  }
+};
+
+export interface LogoutResponse {
+  message: string;
+}
+
+export const logoutUser = async (): Promise<LogoutResponse> => {
+  try {
+    const response = await http(`${AUTH_BASE}${AUTH_URI}/logout`, {
+      method: 'POST',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Logout failed');
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('An unexpected error occurred during logout');
+  }
+};

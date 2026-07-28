@@ -44,6 +44,7 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "@react-three/drei": "^9.120.0",
     "@react-three/fiber": "^8.18.0",
+    "@repo/core": "*",
     "@repo/ui": "*",
     "@vercel/functions": "^2.0.0",
     "class-variance-authority": "^0.7.1",
