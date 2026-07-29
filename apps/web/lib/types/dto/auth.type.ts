@@ -1,4 +1,1 @@
-export interface ClientLoginRequest {
-  email?: string;
-  password?: string;
-}
+export * from '@repo/core/types/dto/auth.type';
