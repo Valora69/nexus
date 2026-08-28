@@ -105,6 +105,7 @@
         "@radix-ui/react-tooltip": "^1.2.8",
         "@react-three/drei": "^9.120.0",
         "@react-three/fiber": "^8.18.0",
+        "@repo/shared": "*",
         "@repo/ui": "*",
         "@vercel/functions": "^2.0.0",
         "class-variance-authority": "^0.7.1",
@@ -192,6 +193,15 @@
         "@jest/types": "^29.6.3",
         "jest": "^29.7.0",
         "next": "^14.1.1",
+      },
+    },
+    "packages/shared": {
+      "name": "@repo/shared",
+      "version": "0.0.0",
+      "devDependencies": {
+        "@repo/eslint-config": "*",
+        "@repo/typescript-config": "*",
+        "typescript": "5.5.4",
       },
     },
     "packages/typescript-config": {
@@ -617,6 +627,8 @@
     "@repo/eslint-config": ["@repo/eslint-config@workspace:packages/eslint-config"],
 
     "@repo/jest-config": ["@repo/jest-config@workspace:packages/jest-config"],
+
+    "@repo/shared": ["@repo/shared@workspace:packages/shared"],
 
     "@repo/typescript-config": ["@repo/typescript-config@workspace:packages/typescript-config"],
 
