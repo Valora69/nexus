@@ -1,0 +1,426 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Root page should match the snapshot 1`] = `
+<div>
+  <div
+    class="relative isolate flex min-h-screen flex-col overflow-hidden bg-black"
+  >
+    <header
+      class="relative z-10 mx-auto mt-4 flex w-[calc(100%-2rem)] max-w-6xl items-center justify-between rounded-full border border-border bg-card px-5 py-3 backdrop-blur-xl"
+    >
+      <a
+        class="flex items-center gap-2 text-base font-bold tracking-tight"
+        href="/"
+      >
+        <img
+          alt=""
+          aria-hidden="true"
+          class="h-7 w-7 shrink-0 select-none"
+          draggable="false"
+          height="28"
+          src="/icon.svg"
+          width="28"
+        />
+        Money
+        <span
+          class="text-accent"
+        >
+          App
+        </span>
+      </a>
+      <nav
+        class="hidden items-center gap-6 text-sm text-muted md:flex"
+      >
+        <a
+          class="transition hover:text-foreground"
+          href="#features"
+        >
+          Features
+        </a>
+        <a
+          class="transition hover:text-foreground"
+          href="#how-it-works"
+        >
+          How it works
+        </a>
+      </nav>
+      <div
+        class="flex items-center gap-2"
+      >
+        <a
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold tracking-tight transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 text-muted hover:bg-[var(--color-card)] hover:text-foreground hover:backdrop-blur-xl h-9 px-4 text-sm"
+          href="/login"
+        >
+          Sign In
+        </a>
+        <a
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold tracking-tight transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-accent text-background shadow-glow hover:shadow-lift h-9 px-4 text-sm"
+          href="/login"
+        >
+          Get Started
+        </a>
+      </div>
+    </header>
+    <main
+      class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6"
+    >
+      <section
+        class="mx-auto mt-16 max-w-3xl text-center sm:mt-24"
+      >
+        <h1
+          class="mt-6 text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl md:text-6xl"
+        >
+          Shared and missing expenses? We got you.
+        </h1>
+        <p
+          class="mx-auto mt-6 max-w-xl text-lg text-muted"
+        >
+          Track who paid for what, split fairly, and settle up in seconds. Designed for people who share money, not spreadsheets.
+        </p>
+        <div
+          class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row"
+        >
+          <a
+            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold tracking-tight transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-accent text-background shadow-glow hover:shadow-lift h-12 px-6 text-base"
+            href="/login"
+          >
+            Get Started
+          </a>
+          <a
+            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold tracking-tight transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 glass text-foreground hover:bg-[var(--color-card-hover)] hover:border-border-strong h-12 px-6 text-base"
+            href="#features"
+          >
+            See Features
+          </a>
+        </div>
+      </section>
+      <section
+        class="mt-24"
+      >
+        <div
+          class="mx-auto max-w-3xl rounded-4xl border border-border bg-card p-8 text-center backdrop-blur-xl sm:p-12"
+        >
+          <p
+            class="text-xs font-semibold uppercase tracking-[0.25em] text-accent"
+          >
+            The Problem
+          </p>
+          <h2
+            class="mt-3 text-2xl font-bold tracking-tight sm:text-3xl"
+          >
+            You shouldn't need a spreadsheet to split a pizza.
+          </h2>
+          <p
+            class="mt-4 text-base leading-relaxed text-muted"
+          >
+            Group expenses are a quiet kind of friction. Someone fronts the bill, others promise to pay later, and a week later nobody quite remembers who owed what. Money App keeps the math automatic and the receipts honest — so the friend chat stays a friend chat.
+          </p>
+        </div>
+      </section>
+      <section
+        class="mt-24"
+        id="features"
+      >
+        <div
+          class="mx-auto max-w-3xl text-center"
+        >
+          <p
+            class="text-xs font-semibold uppercase tracking-[0.25em] text-accent"
+          >
+            Features
+          </p>
+          <h2
+            class="mt-3 text-3xl font-bold tracking-tight sm:text-4xl"
+          >
+            Built tracking not just expenses, but the whole shared money experience.
+          </h2>
+        </div>
+        <div
+          class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
+        >
+          <article
+            class="glass-card hover-lift p-6 hover:border-border-strong"
+          >
+            <h3
+              class="mt-4 text-lg font-semibold tracking-tight"
+            >
+              Build for daily use
+            </h3>
+            <p
+              class="mt-2 text-sm leading-relaxed text-muted"
+            >
+              From morning coffee to monthly rent, track shared expenses as they happen — not a week later when nobody remembers.
+            </p>
+          </article>
+          <article
+            class="glass-card hover-lift p-6 hover:border-border-strong"
+          >
+            <h3
+              class="mt-4 text-lg font-semibold tracking-tight"
+            >
+              Quick Add expenses
+            </h3>
+            <p
+              class="mt-2 text-sm leading-relaxed text-muted"
+            >
+              Just press B from anywhere in the app. Add an expense in a single sentence!
+            </p>
+          </article>
+          <article
+            class="glass-card hover-lift p-6 hover:border-border-strong"
+          >
+            <h3
+              class="mt-4 text-lg font-semibold tracking-tight"
+            >
+              Groups that make sense
+            </h3>
+            <p
+              class="mt-2 text-sm leading-relaxed text-muted"
+            >
+              Friends, trips, lunch — every shared cost lives in the right place, with the right people.
+            </p>
+          </article>
+          <article
+            class="glass-card hover-lift p-6 hover:border-border-strong"
+          >
+            <h3
+              class="mt-4 text-lg font-semibold tracking-tight"
+            >
+              Fair splits, every time
+            </h3>
+            <p
+              class="mt-2 text-sm leading-relaxed text-muted"
+            >
+              Equal, percentage, or custom shares — math is calculated to the cent so nobody silently overpays.
+            </p>
+          </article>
+          <article
+            class="glass-card hover-lift p-6 hover:border-border-strong"
+          >
+            <h3
+              class="mt-4 text-lg font-semibold tracking-tight"
+            >
+              Settle up in one tap
+            </h3>
+            <p
+              class="mt-2 text-sm leading-relaxed text-muted"
+            >
+              Net balances per friend or per group. Mark a transfer as paid and the books reconcile instantly.
+            </p>
+          </article>
+          <article
+            class="glass-card hover-lift p-6 hover:border-border-strong"
+          >
+            <h3
+              class="mt-4 text-lg font-semibold tracking-tight"
+            >
+              Gentle confirmations
+            </h3>
+            <p
+              class="mt-2 text-sm leading-relaxed text-muted"
+            >
+              Payments wait on confirmation from both sides. Nothing gets missed and no awkward follow-up messages.
+            </p>
+          </article>
+        </div>
+      </section>
+      <section
+        class="mt-24"
+        id="how-it-works"
+      >
+        <div
+          class="mx-auto max-w-3xl"
+        >
+          <div
+            class="text-center"
+          >
+            <p
+              class="text-xs font-semibold uppercase tracking-[0.25em] text-accent"
+            >
+              How it works
+            </p>
+            <h2
+              class="mt-3 text-3xl font-bold tracking-tight sm:text-4xl"
+            >
+              Four steps. No tutorial required.
+            </h2>
+          </div>
+          <ol
+            class="mt-10 space-y-5"
+          >
+            <li
+              class="glass-card flex items-start gap-5 p-5 sm:p-6"
+            >
+              <span
+                class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-accent text-lg font-bold text-background shadow-glow"
+              >
+                1
+              </span>
+              <div
+                class="min-w-0"
+              >
+                <h3
+                  class="text-base font-semibold tracking-tight"
+                >
+                  Sign in with Google
+                </h3>
+                <p
+                  class="mt-1 text-sm leading-relaxed text-muted"
+                >
+                  One tap. No password to forget, no email to verify.
+                </p>
+              </div>
+            </li>
+            <li
+              class="glass-card flex items-start gap-5 p-5 sm:p-6"
+            >
+              <span
+                class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-accent text-lg font-bold text-background shadow-glow"
+              >
+                2
+              </span>
+              <div
+                class="min-w-0"
+              >
+                <h3
+                  class="text-base font-semibold tracking-tight"
+                >
+                  Log expenses as they happen
+                </h3>
+                <p
+                  class="mt-1 text-sm leading-relaxed text-muted"
+                >
+                  Quick-capture an expense from anywhere with the keyboard shortcut, or open a group and add it inline.
+                </p>
+              </div>
+            </li>
+            <li
+              class="glass-card flex items-start gap-5 p-5 sm:p-6"
+            >
+              <span
+                class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-accent text-lg font-bold text-background shadow-glow"
+              >
+                3
+              </span>
+              <div
+                class="min-w-0"
+              >
+                <h3
+                  class="text-base font-semibold tracking-tight"
+                >
+                  Add the people you share with
+                </h3>
+                <p
+                  class="mt-1 text-sm leading-relaxed text-muted"
+                >
+                  Invite friends by email or share a link. They join with one click.
+                </p>
+              </div>
+            </li>
+            <li
+              class="glass-card flex items-start gap-5 p-5 sm:p-6"
+            >
+              <span
+                class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-accent text-lg font-bold text-background shadow-glow"
+              >
+                4
+              </span>
+              <div
+                class="min-w-0"
+              >
+                <h3
+                  class="text-base font-semibold tracking-tight"
+                >
+                  Settle up when it suits you
+                </h3>
+                <p
+                  class="mt-1 text-sm leading-relaxed text-muted"
+                >
+                  Net balances tell you exactly what to send (or expect). Mark transfers as paid, both sides confirm, done.
+                </p>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
+      <section
+        class="mb-20 mt-24"
+      >
+        <div
+          class="mx-auto max-w-2xl text-center"
+        >
+          <h2
+            class="text-3xl font-bold tracking-tight sm:text-4xl"
+          >
+            No more guessing where money goes.
+          </h2>
+          <p
+            class="mt-4 text-base text-muted"
+          >
+            Free, forever. Sign in once and you're set.
+          </p>
+          <div
+            class="mt-8 flex justify-center"
+          >
+            <a
+              class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold tracking-tight transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-accent text-background shadow-glow hover:shadow-lift h-12 px-6 text-base"
+              href="/login"
+            >
+              Get Started
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer
+      class="relative z-10 mt-auto border-t border-border"
+    >
+      <div
+        class="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-3 px-4 py-6 sm:flex-row sm:px-6"
+      >
+        <a
+          class="flex items-center gap-2 font-bold tracking-tight text-sm"
+          href="/"
+        >
+          <img
+            alt=""
+            aria-hidden="true"
+            class="h-7 w-7 shrink-0 select-none"
+            draggable="false"
+            height="28"
+            src="/icon.svg"
+            width="28"
+          />
+          Money
+          <span
+            class="text-accent"
+          >
+            App
+          </span>
+        </a>
+        <div
+          class="flex items-center gap-6 text-xs text-muted"
+        >
+          <a
+            class="transition hover:text-foreground"
+            href="/terms"
+          >
+            Terms
+          </a>
+          <a
+            class="transition hover:text-foreground"
+            href="/privacy"
+          >
+            Privacy
+          </a>
+          <span>
+            © 
+            2026
+             Money App
+          </span>
+        </div>
+      </div>
+    </footer>
+  </div>
+</div>
+`;
