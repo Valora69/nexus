@@ -1,0 +1,22 @@
+node_modules/
+.expo/
+dist/
+web-build/
+
+# Native builds (managed workflow — generated via EAS)
+ios/
+android/
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Debug / logs
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+*.log
+
+# macOS
+.DS_Store
