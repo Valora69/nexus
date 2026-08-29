@@ -1,5 +1,23 @@
+/**
+ * Public sign-in screen. Layout is intentionally simple:
+ *
+ *   [ hero block: brand mark + tagline ]           — vertically centered
+ *   [ CTA block: Google button + error text ]      — pinned near bottom
+ *
+ * We anchor the CTA with `paddingBottom` inside a `SafeAreaView` bottom
+ * edge instead of relying on `flex-1 justify-between` on a
+ * `SafeAreaView`, which has been fragile in Expo Router + NativeWind
+ * combos (safe-area padding vs. flex distribution).
+ */
+
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, SafeAreaView, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  Text,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BrandMark } from '../../components/brand-logo';
 import { useAuth } from '../../lib/auth/auth-context';
@@ -21,12 +39,10 @@ export default function Login() {
     try {
       const idToken = await promptAsync();
       if (!idToken) {
-        // User cancelled or Google returned no id_token.
         setSubmitting(false);
         return;
       }
       await signIn(idToken);
-      // Layout guard redirects to (app) as soon as status flips.
     } catch (err) {
       const message =
         err instanceof ApiError
@@ -40,40 +56,41 @@ export default function Login() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <View className="flex-1 justify-between px-6 py-12">
-        <View className="items-center gap-4 mt-16">
-          <BrandMark size={72} fontSize={44} />
-          <Text className="text-muted font-sans-light text-base text-center">
-            Split expenses. Track cash. Zero fees.
+    <SafeAreaView className="flex-1 bg-background" edges={['top', 'bottom', 'left', 'right']}>
+      <View className="flex-1 items-center justify-center px-6">
+        <BrandMark size={64} fontSize={36} />
+        <Text className="text-muted font-sans-light text-base text-center mt-4">
+          Split expenses. Track cash. Zero fees.
+        </Text>
+      </View>
+
+      <View className="px-6 pb-8 gap-3">
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ disabled }}
+          onPress={onPress}
+          disabled={disabled}
+          className={`bg-accent rounded-full py-4 items-center justify-center min-h-14 ${
+            disabled ? 'opacity-50' : 'active:opacity-80'
+          }`}
+        >
+          {submitting ? (
+            <ActivityIndicator color="#000" />
+          ) : (
+            <Text className="text-accent-foreground font-sans-semibold text-base tracking-wide">
+              Continue with Google
+            </Text>
+          )}
+        </Pressable>
+
+        {configError ? (
+          <Text className="text-loss font-sans text-xs text-center">
+            {configError}
           </Text>
-        </View>
-
-        <View className="gap-4">
-          <Pressable
-            accessibilityRole="button"
-            onPress={onPress}
-            disabled={disabled}
-            className={`bg-accent rounded-full py-4 items-center justify-center min-h-14 ${
-              disabled ? 'opacity-50' : 'active:opacity-80'
-            }`}
-          >
-            {submitting ? (
-              <ActivityIndicator color="#000" />
-            ) : (
-              <Text className="text-background font-sans-semibold text-base tracking-wide">
-                Continue with Google
-              </Text>
-            )}
-          </Pressable>
-
-          {configError ? (
-            <Text className="text-loss font-sans text-sm text-center">{configError}</Text>
-          ) : null}
-          {error ? (
-            <Text className="text-loss font-sans text-sm text-center">{error}</Text>
-          ) : null}
-        </View>
+        ) : null}
+        {error ? (
+          <Text className="text-loss font-sans text-sm text-center">{error}</Text>
+        ) : null}
       </View>
     </SafeAreaView>
   );
