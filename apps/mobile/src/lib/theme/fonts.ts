@@ -1,8 +1,8 @@
 /**
- * Font loading hook — Inter for UI, JetBrains Mono for numerals.
- * Weight names mirror `fontWeights` from `@repo/shared` so components can
- * reference the same weight in one place and receive the right family
- * on mobile.
+ * Google Fonts loader for Inter (UI) and JetBrains Mono (numerals).
+ * The family names registered here (e.g. `Inter_400Regular`) are what
+ * `tailwind.config.js` maps `font-sans` / `font-sans-bold` / etc. to,
+ * so components reference weights via NativeWind classes only.
  */
 
 import {
@@ -18,21 +18,6 @@ import {
   JetBrainsMono_500Medium,
   JetBrainsMono_700Bold,
 } from '@expo-google-fonts/jetbrains-mono';
-
-export const fontFamilies = {
-  sans: {
-    light: 'Inter_300Light',
-    regular: 'Inter_400Regular',
-    medium: 'Inter_500Medium',
-    semibold: 'Inter_600SemiBold',
-    bold: 'Inter_700Bold',
-  },
-  mono: {
-    regular: 'JetBrainsMono_400Regular',
-    medium: 'JetBrainsMono_500Medium',
-    bold: 'JetBrainsMono_700Bold',
-  },
-} as const;
 
 export function useAppFonts() {
   const [loaded, error] = useInterFonts({
