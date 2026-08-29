@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { exchangeCode, fetchUserProfile } from '@/lib/server/google-oauth';
 import { signToken, setAuthCookie } from '@/lib/server/auth';
-import { prisma } from '@/lib/server/db';
+import { findOrCreateOAuthUser } from '@/lib/server/services/auth-user';
 
 // Reads request query params (the OAuth code/state), so it can never be
 // statically rendered — mark it dynamic to skip Next.js's build-time probe.
@@ -38,50 +38,12 @@ export async function GET(req: NextRequest) {
     const tokens = await exchangeCode(code, redirectUri);
     const profile = await fetchUserProfile(tokens.access_token);
 
-    // Normalize email — matches google.strategy.ts behaviour.
-    const email = profile.email.toLowerCase();
-    const googleId = profile.sub;
-    const name = profile.name;
-    const picture = profile.picture;
-
-    // ---- Find or create user (port of google.strategy.ts) ----
-
-    let user = await prisma.user.findUnique({
-      where: { googleId },
-    });
-
-    if (!user) {
-      // Fallback: find by email (user may exist from an old system).
-      user = await prisma.user.findUnique({
-        where: { email },
-      });
-
-      if (user) {
-        // Backfill Google ID + profile fields.
-        user = await prisma.user.update({
-          where: { email },
-          data: {
-            googleId,
-            picture: picture || user.picture,
-            name: user.name || name,
-          },
-        });
-      } else {
-        // Brand-new user.
-        user = await prisma.user.create({
-          data: { email, name, googleId, picture },
-        });
-      }
-    }
-
-    // Claim pending friend requests addressed to this email.
-    await prisma.friendRequest.updateMany({
-      where: {
-        recipientEmail: email,
-        recipientId: null,
-        status: 'PENDING',
-      },
-      data: { recipientId: user.id },
+    const user = await findOrCreateOAuthUser({
+      provider: 'google',
+      providerId: profile.sub,
+      email: profile.email,
+      name: profile.name,
+      picture: profile.picture,
     });
 
     // ---- Sign JWT & set cookie ----
