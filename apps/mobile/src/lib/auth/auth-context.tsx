@@ -21,6 +21,7 @@ import type { PropsWithChildren } from 'react';
 import { AppState, type AppStateStatus } from 'react-native';
 
 import { apiFetch, onUnauthorized, setAuthTokenGetter } from '../api/client';
+import { queryClient } from '../api/query-client';
 import {
   clearToken,
   clearUser,
@@ -63,6 +64,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
     tokenRef.current = null;
     setUser(null);
     setStatus('signedOut');
+    // Drop cached responses so the next user doesn't briefly see the
+    // previous one's data. Safe on cold-start (empty cache is a no-op).
+    queryClient.clear();
     await Promise.all([clearToken(), clearUser()]);
   }, []);
 

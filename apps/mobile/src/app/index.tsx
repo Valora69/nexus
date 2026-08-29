@@ -9,5 +9,7 @@ import { useAuth } from '../lib/auth/auth-context';
 export default function Index() {
   const { status } = useAuth();
   if (status === 'loading') return null;
-  return <Redirect href={status === 'signedIn' ? '/(app)' : '/(auth)/login'} />;
+  return (
+    <Redirect href={status === 'signedIn' ? '/(app)/(tabs)' : '/(auth)/login'} />
+  );
 }
