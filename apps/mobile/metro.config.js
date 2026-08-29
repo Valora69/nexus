@@ -1,5 +1,6 @@
 // Learn more: https://docs.expo.dev/guides/monorepos/
 const { getDefaultConfig } = require('expo/metro-config');
+const { withNativeWind } = require('nativewind/metro');
 const path = require('path');
 
 const projectRoot = __dirname;
@@ -17,4 +18,6 @@ config.resolver.nodeModulesPaths = [
   path.resolve(workspaceRoot, 'node_modules'),
 ];
 
-module.exports = config;
+// NativeWind rewrites `className` → RN style props via its own JSX
+// transformer and processes `global.css` to build the utility layer.
+module.exports = withNativeWind(config, { input: './global.css' });

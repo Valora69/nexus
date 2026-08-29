@@ -1,8 +1,7 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import Svg, { Path, Rect } from 'react-native-svg';
 
-import { fontFamilies } from '../lib/theme/fonts';
-import { BRAND_ACCENT_HEX, colors } from '../lib/theme';
+import { BRAND_ACCENT_HEX } from '../lib/theme';
 
 /**
  * Vector recreation of `apps/web/app/icon.svg` — a brand-green rounded
@@ -45,27 +44,14 @@ export function BrandMark({
   fontSize?: number;
 }) {
   return (
-    <View style={styles.row}>
+    <View className="flex-row items-center gap-2">
       <BrandLogo size={size} />
-      <Text style={[styles.text, { fontSize }]}>
-        Money<Text style={styles.accent}>App</Text>
+      <Text
+        className="font-sans-bold text-foreground tracking-tight"
+        style={{ fontSize, letterSpacing: -0.4 }}
+      >
+        Money<Text className="text-accent">App</Text>
       </Text>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  text: {
-    color: colors.foreground,
-    fontFamily: fontFamilies.sans.bold,
-    letterSpacing: -0.4,
-  },
-  accent: {
-    color: colors.accent,
-  },
-});

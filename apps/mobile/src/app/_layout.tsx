@@ -1,8 +1,11 @@
+import '../../global.css';
+
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 
+import { AuthProvider } from '../lib/auth/auth-context';
 import { colors } from '../lib/theme';
 import { useAppFonts } from '../lib/theme/fonts';
 
@@ -22,7 +25,7 @@ export default function RootLayout() {
   }
 
   return (
-    <>
+    <AuthProvider>
       <StatusBar style="light" />
       <Stack
         screenOptions={{
@@ -31,6 +34,6 @@ export default function RootLayout() {
           animation: 'fade',
         }}
       />
-    </>
+    </AuthProvider>
   );
 }
