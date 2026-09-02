@@ -28,8 +28,10 @@ import {
 
 import type {
   ExpenseSplitWithRelations,
+  ExpenseWithRelations,
   GroupWithRelations,
 } from '@repo/shared/types/entities';
+import { formatDateShort } from '@repo/shared/utils/formatters';
 import { verifiedPaid } from '@repo/shared/utils/splits';
 
 import {
@@ -49,6 +51,7 @@ import {
   useUpdateGroup,
 } from '../../../../lib/api/mutations/groupMutations';
 import { useGetGroupById } from '../../../../lib/api/queries/groupQueries';
+import { useGetAllExpenses } from '../../../../lib/api/queries/expenseQueries';
 import {
   useMyPayables,
   useMyReceivables,
@@ -63,6 +66,7 @@ export default function GroupDetailScreen() {
   const groupQuery = useGetGroupById(groupId);
   const payablesQuery = useMyPayables();
   const receivablesQuery = useMyReceivables();
+  const expensesQuery = useGetAllExpenses(undefined, groupId);
 
   const [editOpen, setEditOpen] = useState(false);
 
@@ -74,6 +78,15 @@ export default function GroupDetailScreen() {
   const goToMembers = () => {
     if (!groupId) return;
     router.push(`/(app)/groups/${groupId}/members`);
+  };
+
+  const goToExpense = (expenseId: string) => {
+    router.push(`/(app)/expenses/${expenseId}`);
+  };
+
+  const goToNewExpense = () => {
+    if (!groupId) return;
+    router.push(`/(app)/expenses/new?groupId=${groupId}`);
   };
 
   return (
@@ -106,6 +119,7 @@ export default function GroupDetailScreen() {
                 groupQuery.refetch();
                 payablesQuery.refetch();
                 receivablesQuery.refetch();
+                expensesQuery.refetch();
               }}
               tintColor={BRAND_ACCENT_HEX}
               colors={[BRAND_ACCENT_HEX]}
@@ -122,7 +136,13 @@ export default function GroupDetailScreen() {
             }
           />
           <MembersCard group={groupQuery.data} onManage={goToMembers} />
-          <ExpensesPlaceholder />
+          <ExpensesCard
+            expenses={expensesQuery.data}
+            isLoading={expensesQuery.isLoading}
+            error={expensesQuery.error as Error | null}
+            onAdd={goToNewExpense}
+            onOpen={goToExpense}
+          />
           <DeleteRow groupId={groupQuery.data.id} onDeleted={onBack} />
         </ScrollView>
       )}
@@ -319,19 +339,75 @@ function MembersCard({
   );
 }
 
-function ExpensesPlaceholder() {
+function ExpensesCard({
+  expenses,
+  isLoading,
+  error,
+  onAdd,
+  onOpen,
+}: {
+  expenses: ExpenseWithRelations[] | undefined;
+  isLoading: boolean;
+  error: Error | null;
+  onAdd: () => void;
+  onOpen: (expenseId: string) => void;
+}) {
   return (
     <GlassCard>
-      <View className="flex-row items-center gap-2">
-        <Ionicons name="receipt-outline" size={18} color={colors.muted} />
-        <Text className="text-foreground font-sans-semibold text-base">
-          Expenses
-        </Text>
+      <View className="flex-row items-center justify-between">
+        <View className="flex-row items-center gap-2">
+          <Ionicons name="receipt-outline" size={18} color={BRAND_ACCENT_HEX} />
+          <Text className="text-foreground font-sans-semibold text-base">
+            Expenses ({expenses?.length ?? 0})
+          </Text>
+        </View>
+        <PillButton label="Add" variant="primary" size="sm" onPress={onAdd} />
       </View>
-      <Text className="text-muted font-sans-light text-sm mt-2">
-        Splitting expenses inside groups is coming next. Head to Home for a
-        summary of your cross-group payables and receivables.
-      </Text>
+      {isLoading ? (
+        <Text className="text-muted font-sans text-sm mt-3">Loading…</Text>
+      ) : error ? (
+        <Text className="text-loss font-sans text-sm mt-3">
+          {error.message}
+        </Text>
+      ) : !expenses || expenses.length === 0 ? (
+        <Text className="text-muted font-sans text-sm mt-3">
+          No expenses yet. Tap Add to record one.
+        </Text>
+      ) : (
+        <View className="mt-3 gap-2">
+          {expenses.map((expense) => {
+            const paidBy =
+              expense.payee?.name ?? expense.payer?.name ?? 'Unknown';
+            const splitCount = expense.splits?.length ?? 0;
+            return (
+              <Pressable
+                key={expense.id}
+                accessibilityRole="button"
+                accessibilityLabel={`Open expense ${expense.name}`}
+                onPress={() => onOpen(expense.id)}
+                className="flex-row items-center justify-between gap-3 p-3 rounded-xl bg-card active:bg-card-hover"
+              >
+                <View className="flex-1">
+                  <Text
+                    className="text-foreground font-sans-medium text-sm"
+                    numberOfLines={1}
+                  >
+                    {expense.name}
+                  </Text>
+                  <Text
+                    className="text-muted font-sans text-xs mt-0.5"
+                    numberOfLines={1}
+                  >
+                    {paidBy} · {formatDateShort(expense.date)}
+                    {splitCount > 0 ? ` · ${splitCount} splits` : ''}
+                  </Text>
+                </View>
+                <Amount value={expense.totalAmount} size="sm" tone="neutral" />
+              </Pressable>
+            );
+          })}
+        </View>
+      )}
     </GlassCard>
   );
 }
