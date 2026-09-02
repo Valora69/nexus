@@ -10,6 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   getMyPayableSplits,
   getMyReceivableSplits,
+  getSplitsByExpenseId,
 } from '../services/expenseSplitService';
 
 export function useMyPayables() {
@@ -25,5 +26,14 @@ export function useMyReceivables() {
     queryKey: queryKeys.expenseSplits.myReceivables(),
     queryFn: getMyReceivableSplits,
     staleTime: 60 * 1000,
+  });
+}
+
+export function useSplitsByExpenseId(id: string | undefined, enabled = true) {
+  return useQuery({
+    queryKey: queryKeys.expenseSplits.byExpenseId(id ?? ''),
+    queryFn: () => getSplitsByExpenseId(id as string),
+    staleTime: 60 * 1000,
+    enabled: enabled && !!id,
   });
 }

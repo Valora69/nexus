@@ -60,6 +60,7 @@ const config: ExpoConfig = {
         imageWidth: 96,
       },
     ],
+    '@react-native-community/datetimepicker',
   ],
   experiments: {
     typedRoutes: true,
