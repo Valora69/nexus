@@ -41,24 +41,23 @@ web client is only accepted as an audience server-side). One-time setup:
    `app.json`).
 3. Save. Copy the **Client ID** into
    `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID` in `.env`.
-4. Copy the **iOS URL scheme** (the reversed client ID, e.g.
-   `com.googleusercontent.apps.1234567890-abcdef`) and add it to
-   `app.json` under `ios.infoPlist.CFBundleURLTypes`:
-
-   ```json
-   "ios": {
-     "bundleIdentifier": "click.moneyapp.mobile",
-     "supportsTablet": false,
-     "infoPlist": {
-       "CFBundleURLTypes": [
-         { "CFBundleURLSchemes": ["com.googleusercontent.apps.XXXXXX"] }
-       ]
-     }
-   }
-   ```
+4. The **iOS URL scheme** (the reversed client ID, e.g.
+   `com.googleusercontent.apps.1234567890-abcdef`) is injected
+   automatically by [`app.config.ts`](./app.config.ts) from
+   `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID` — no manual edit to a plist or
+   `app.json` needed. If you change the env var, rebuild the dev client
+   (`bunx expo prebuild --clean` then `expo run:ios`) so the new scheme
+   lands in the app binary.
 
 5. On the backend (Vercel env), set `GOOGLE_IOS_CLIENT_ID` to the same iOS
    client ID so `/api/auth/google/mobile` accepts idTokens issued to it.
+
+> **Why the auto-injection matters.** Missing (or stale) reversed-scheme
+> is the classic silent-failure mode: the account chooser opens, the user
+> picks an account, and the redirect back into the app never fires. iOS
+> then resolves the auth session as `dismiss` and the login button just
+> re-arms — no error, no navigation. Deriving the scheme from the env
+> keeps the two halves impossible to drift apart.
 
 ## Running
 
