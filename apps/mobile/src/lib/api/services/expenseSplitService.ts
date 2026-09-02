@@ -16,3 +16,11 @@ export function getMyPayableSplits(): Promise<ExpenseSplitWithRelations[]> {
 export function getMyReceivableSplits(): Promise<ExpenseSplitWithRelations[]> {
   return apiFetch<ExpenseSplitWithRelations[]>('/api/expense-splits/my-receivables');
 }
+
+export function getSplitsByExpenseId(
+  expenseId: string,
+): Promise<ExpenseSplitWithRelations[]> {
+  return apiFetch<ExpenseSplitWithRelations[]>(
+    `/api/expense-splits/expense/${expenseId}`,
+  );
+}
