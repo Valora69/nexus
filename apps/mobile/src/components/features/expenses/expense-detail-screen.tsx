@@ -18,6 +18,7 @@ import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native'
 import { ErrorState, LoadingState, Screen } from '../../ui';
 import { useGetExpenseById } from '../../../lib/api/queries/expenseQueries';
 import { useSplitsByExpenseId } from '../../../lib/api/queries/expenseSplitQueries';
+import { useCurrentUser } from '../../../lib/api/queries/userQueries';
 import { BRAND_ACCENT_HEX, colors } from '../../../lib/theme';
 import { DeleteExpenseButton } from './delete-expense-button';
 import { EditExpenseSheet } from './edit-expense-sheet';
@@ -29,6 +30,7 @@ export function ExpenseDetailScreen({ id }: { id: string | undefined }) {
   const router = useRouter();
   const expenseQuery = useGetExpenseById(id);
   const splitsQuery = useSplitsByExpenseId(id);
+  const currentUserQuery = useCurrentUser();
 
   const [editOpen, setEditOpen] = useState(false);
 
@@ -78,6 +80,7 @@ export function ExpenseDetailScreen({ id }: { id: string | undefined }) {
             splits={splitsQuery.data}
             isLoading={splitsQuery.isLoading}
             error={splitsQuery.error as Error | null}
+            currentUserId={currentUserQuery.data?.id}
           />
           <ExpenseMetaCard expense={expenseQuery.data} />
           <DeleteExpenseButton id={expenseQuery.data.id} onDeleted={onBack} />
