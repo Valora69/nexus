@@ -7,10 +7,16 @@ import { useEffect } from 'react';
 
 import { QueryProvider } from '../lib/api/query-client';
 import { AuthProvider } from '../lib/auth/auth-context';
+import { installOnlineManager } from '../lib/network';
 import { colors } from '../lib/theme';
 import { useAppFonts } from '../lib/theme/fonts';
 
 SplashScreen.preventAutoHideAsync();
+
+// Wire NetInfo → onlineManager and AppState → focusManager once, at the
+// module boundary — before the first component renders and before the
+// query cache is restored. Idempotent under Fast Refresh.
+installOnlineManager();
 
 export default function RootLayout() {
   const { loaded, error } = useAppFonts();
