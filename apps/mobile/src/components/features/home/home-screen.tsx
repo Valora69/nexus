@@ -8,6 +8,8 @@
  * `YYYY-MM`.
  */
 
+import { queryKeys } from '@repo/shared/queryKeys';
+import { useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 
@@ -16,6 +18,10 @@ import type { DashboardResponse } from '@repo/shared/types/entities';
 import { useDashboard } from '../../../lib/api/queries/dashboardQueries';
 import { ErrorState, LoadingState, Screen } from '../../ui';
 import { BRAND_ACCENT_HEX } from '../../../lib/theme';
+import {
+  AwaitingConfirmationList,
+  PendingVerificationList,
+} from '../payments';
 import { BalanceHero } from './balance-hero';
 import {
   DashboardHeader,
@@ -30,6 +36,15 @@ import { RecentExpensesList } from './recent-expenses-list';
 export function HomeScreen() {
   const [month, setMonth] = useState<string>(() => currentMonthParam());
   const dashboard = useDashboard(month);
+  const queryClient = useQueryClient();
+
+  // Pull-to-refresh also re-fetches the pending-payment sections. Those
+  // are separate queries, so we invalidate their shared prefix so both
+  // fire in parallel without knowing the exact keys here.
+  const onRefresh = () => {
+    dashboard.refetch();
+    queryClient.invalidateQueries({ queryKey: queryKeys.payments.all() });
+  };
 
   const monthLabel = useMemo(() => {
     if (dashboard.data?.monthLabel) return dashboard.data.monthLabel;
@@ -47,7 +62,7 @@ export function HomeScreen() {
         refreshControl={
           <RefreshControl
             refreshing={dashboard.isFetching && !dashboard.isLoading}
-            onRefresh={() => dashboard.refetch()}
+            onRefresh={onRefresh}
             tintColor={BRAND_ACCENT_HEX}
             colors={[BRAND_ACCENT_HEX]}
           />
@@ -97,6 +112,8 @@ function DashboardBody({ data }: { data: DashboardResponse | undefined }) {
         totalPayable={safe.totalPayable}
         spent={safe.spent}
       />
+      <PendingVerificationList />
+      <AwaitingConfirmationList />
       <PayablesList payables={safe.payables} />
       <ReceivablesList receivables={safe.receivables} />
       <RecentExpensesList feed={safe.recentFeed} />

@@ -1,21 +1,25 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useRouter } from 'expo-router';
 import { Text, View } from 'react-native';
 
 import type { ExpenseSplitWithRelations } from '@repo/shared/types/entities';
 import { isSplitSettled, verifiedPaid } from '@repo/shared/utils/splits';
 
-import { Amount, Avatar, GlassCard } from '../../ui';
+import { Amount, Avatar, GlassCard, PillButton } from '../../ui';
 import { BRAND_ACCENT_HEX } from '../../../lib/theme';
 
 export function ExpenseSplitsCard({
   splits,
   isLoading,
   error,
+  currentUserId,
 }: {
   splits: ExpenseSplitWithRelations[] | undefined;
   isLoading: boolean;
   error: Error | null;
+  currentUserId?: string;
 }) {
+  const router = useRouter();
   return (
     <GlassCard>
       <View className="flex-row items-center gap-2">
@@ -38,43 +42,61 @@ export function ExpenseSplitsCard({
             const paid = verifiedPaid(s.payments);
             const settled = isSplitSettled(s);
             const remaining = Math.max(0, s.amount - paid);
+            const isMine = !!currentUserId && s.userId === currentUserId;
+            const canPay = isMine && !settled;
             return (
               <View
                 key={s.id}
-                className="flex-row items-center gap-3 p-3 rounded-xl bg-card"
+                className="p-3 rounded-xl bg-card gap-3"
               >
-                <Avatar name={s.user?.name ?? '?'} size={32} />
-                <View className="flex-1">
-                  <Text
-                    className="text-foreground font-sans-medium text-sm"
-                    numberOfLines={1}
-                  >
-                    {s.user?.name ?? 'Unknown'}
-                  </Text>
-                  <Text className="text-muted font-sans text-xs" numberOfLines={1}>
-                    {settled
-                      ? 'Settled'
-                      : paid > 0
-                        ? `₱${paid.toFixed(2)} paid · ₱${remaining.toFixed(2)} left`
-                        : `₱${s.amount.toFixed(2)} owed`}
-                  </Text>
-                </View>
-                <View className="items-end">
-                  <Amount value={s.amount} size="sm" tone="neutral" />
-                  <View
-                    className={`mt-1 px-2 py-0.5 rounded-full ${
-                      settled ? 'bg-gain/20' : 'bg-border/30'
-                    }`}
-                  >
+                <View className="flex-row items-center gap-3">
+                  <Avatar name={s.user?.name ?? '?'} size={32} />
+                  <View className="flex-1">
                     <Text
-                      className={`text-[10px] font-sans-semibold uppercase tracking-wider ${
-                        settled ? 'text-gain' : 'text-muted'
-                      }`}
+                      className="text-foreground font-sans-medium text-sm"
+                      numberOfLines={1}
                     >
-                      {settled ? 'Settled' : 'Unsettled'}
+                      {s.user?.name ?? 'Unknown'}
+                      {isMine ? ' (you)' : ''}
+                    </Text>
+                    <Text className="text-muted font-sans text-xs" numberOfLines={1}>
+                      {settled
+                        ? 'Settled'
+                        : paid > 0
+                          ? `₱${paid.toFixed(2)} paid · ₱${remaining.toFixed(2)} left`
+                          : `₱${s.amount.toFixed(2)} owed`}
                     </Text>
                   </View>
+                  <View className="items-end">
+                    <Amount value={s.amount} size="sm" tone="neutral" />
+                    <View
+                      className={`mt-1 px-2 py-0.5 rounded-full ${
+                        settled ? 'bg-gain/20' : 'bg-border/30'
+                      }`}
+                    >
+                      <Text
+                        className={`text-[10px] font-sans-semibold uppercase tracking-wider ${
+                          settled ? 'text-gain' : 'text-muted'
+                        }`}
+                      >
+                        {settled ? 'Settled' : 'Unsettled'}
+                      </Text>
+                    </View>
+                  </View>
                 </View>
+                {canPay ? (
+                  <PillButton
+                    label="Record payment"
+                    variant="primary"
+                    size="sm"
+                    onPress={() =>
+                      router.push({
+                        pathname: '/(app)/payments/new',
+                        params: { splitId: s.id },
+                      })
+                    }
+                  />
+                ) : null}
               </View>
             );
           })}
