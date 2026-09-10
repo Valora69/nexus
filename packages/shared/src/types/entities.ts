@@ -88,6 +88,8 @@ export type Activity = {
   createdByUserId: string;
   activityName: ActivityNameEnum;
   activityOn: ActivityOnEnum;
+  createdAt: string;
+  updatedAt: string;
 };
 
 // Extended types with relations (for API responses)
