@@ -76,6 +76,28 @@ bunx --cwd apps/mobile expo run:ios
 Physical-device builds and TestFlight distribution go through EAS Build —
 covered in a later stage.
 
+## Architecture
+
+Expo Router routes UP layer by layer: **every file under `src/app/**` becomes
+a route**, so UI cannot live there. This produces a three-layer split that
+looks different from web (`page.tsx` owns queries) by design, not by accident.
+
+- **`src/app/**` — thin route adapters.** A route file parses
+  `useLocalSearchParams`, then renders exactly one
+  `features/<domain>/*-screen.tsx`. 5–10 lines is correct, not a smell.
+- **`src/components/features/<domain>/*-screen.tsx` — screen containers.**
+  The mobile equivalent of web's `page.tsx`: owns data queries, screen
+  state, and submit handlers; composes presentational leaves that take
+  props only (no data hooks).
+- **Action components (sheets, delete buttons) MAY own their own mutation
+  hooks** (colocation with the trigger). They must, however, reuse shared
+  presentational pieces (e.g. `SplitEditor`) rather than re-rolling UI.
+- **`src/lib/api/`** — services / queries / mutations. Never imported from
+  `src/app/**`.
+
+Grep sanity check: `grep -R "useQuery\|useMutation" apps/mobile/src/app`
+should return nothing.
+
 ## Styling
 
 NativeWind v4. Tailwind classes on `className`; config in

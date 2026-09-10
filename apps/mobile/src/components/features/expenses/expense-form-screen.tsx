@@ -9,31 +9,21 @@
  *   - Equal: divide total across selected members
  *   - Custom: per-member overrides; zero / empty amounts silently drop
  *     the member from the splits array (matches web's `buildSplits`)
- *
- * Dates use `@react-native-community/datetimepicker` in `spinner` mode on
- * iOS. Android is out of scope for stage 8; the picker still renders
- * acceptably there via the default calendar.
  */
 
 import Ionicons from '@expo/vector-icons/Ionicons';
-import DateTimePicker, {
-  type DateTimePickerEvent,
-} from '@react-native-community/datetimepicker';
 import * as Crypto from 'expo-crypto';
 import { useRouter, Stack } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Platform, Pressable, ScrollView, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
 
 import type { GroupWithRelations } from '@repo/shared/types/entities';
-import { formatDate } from '@repo/shared/utils/formatters';
 
 import {
   ErrorState,
-  GlassCard,
   LoadingState,
   PillButton,
   Screen,
-  TextField,
 } from '../../ui';
 import { ApiError } from '../../../lib/api/client';
 import { useCreateExpense } from '../../../lib/api/mutations/expenseMutation';
@@ -45,6 +35,7 @@ import {
   type SplitMode,
 } from '../../../lib/expenses/split-form';
 import { colors } from '../../../lib/theme';
+import { ExpenseFormFields } from './expense-form-fields';
 import { SplitEditor, isCustomSplitValid } from './split-editor';
 
 export function ExpenseFormScreen({ groupId }: { groupId: string | undefined }) {
@@ -122,7 +113,6 @@ function NewExpenseForm({
   const [amount, setAmount] = useState('');
   const [notes, setNotes] = useState('');
   const [date, setDate] = useState<Date>(new Date());
-  const [showPicker, setShowPicker] = useState(Platform.OS === 'ios');
   const [selectedIds, setSelectedIds] = useState<string[]>(
     members.map((m) => m.userId),
   );
@@ -151,14 +141,6 @@ function NewExpenseForm({
         ? prev.filter((id) => id !== userId)
         : [...prev, userId],
     );
-  };
-
-  const onDateChange = (
-    _event: DateTimePickerEvent,
-    picked: Date | undefined,
-  ) => {
-    if (Platform.OS !== 'ios') setShowPicker(false);
-    if (picked) setDate(picked);
   };
 
   const handleSubmit = () => {
@@ -222,57 +204,16 @@ function NewExpenseForm({
       contentContainerStyle={{ padding: 24, gap: 16, paddingBottom: 40 }}
       keyboardShouldPersistTaps="handled"
     >
-      <GlassCard>
-        <View className="gap-4">
-          <TextField
-            label="Name"
-            placeholder="e.g. Lunch, Ferry ride"
-            value={name}
-            onChangeText={setName}
-            autoCapitalize="sentences"
-            maxLength={100}
-          />
-          <TextField
-            label="Total amount (₱)"
-            placeholder="0.00"
-            value={amount}
-            onChangeText={setAmount}
-            keyboardType="decimal-pad"
-          />
-          <View className="gap-1.5">
-            <Text className="text-muted font-sans-medium text-xs uppercase tracking-wider">
-              Date
-            </Text>
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => setShowPicker(true)}
-              className="bg-card border border-border-strong rounded-xl px-4 py-3"
-            >
-              <Text className="text-foreground font-sans text-base">
-                {formatDate(date)}
-              </Text>
-            </Pressable>
-            {showPicker ? (
-              <DateTimePicker
-                value={date}
-                mode="date"
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                onChange={onDateChange}
-                maximumDate={new Date()}
-                themeVariant="dark"
-              />
-            ) : null}
-          </View>
-          <TextField
-            label="Notes (optional)"
-            placeholder="Anything worth remembering"
-            value={notes}
-            onChangeText={setNotes}
-            multiline
-            maxLength={2000}
-          />
-        </View>
-      </GlassCard>
+      <ExpenseFormFields
+        name={name}
+        amount={amount}
+        notes={notes}
+        date={date}
+        onNameChange={setName}
+        onAmountChange={setAmount}
+        onNotesChange={setNotes}
+        onDateChange={setDate}
+      />
 
       <SplitEditor
         members={members}

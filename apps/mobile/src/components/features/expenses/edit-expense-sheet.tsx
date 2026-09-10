@@ -1,7 +1,7 @@
 import DateTimePicker, {
   type DateTimePickerEvent,
 } from '@react-native-community/datetimepicker';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Platform, Pressable, ScrollView, Text, View } from 'react-native';
 
 import type {
@@ -10,12 +10,7 @@ import type {
 } from '@repo/shared/types/entities';
 import { formatDate } from '@repo/shared/utils/formatters';
 
-import {
-  Amount,
-  ModalSheet,
-  PillButton,
-  TextField,
-} from '../../ui';
+import { ModalSheet, PillButton, TextField } from '../../ui';
 import { ApiError } from '../../../lib/api/client';
 import { useUpdateExpense } from '../../../lib/api/mutations/expenseMutation';
 import { useGetGroupById } from '../../../lib/api/queries/groupQueries';
@@ -25,6 +20,7 @@ import {
   validateSplits,
   type SplitMode,
 } from '../../../lib/expenses/split-form';
+import { SplitEditor, isCustomSplitValid } from './split-editor';
 
 export function EditExpenseSheet({
   visible,
@@ -89,28 +85,6 @@ export function EditExpenseSheet({
 
   const members = groupQuery.data?.members ?? [];
   const totalAmount = parseFloat(amount || '0');
-  const equalShare = selectedIds.length ? totalAmount / selectedIds.length : 0;
-
-  const activeCustomIds = useMemo(() => {
-    if (splitMode !== 'custom') return selectedIds;
-    return selectedIds.filter((id) => {
-      const v = parseFloat(customSplits[id] || '0');
-      return Number.isFinite(v) && v > 0;
-    });
-  }, [splitMode, selectedIds, customSplits]);
-
-  const customTotal = useMemo(
-    () =>
-      activeCustomIds.reduce(
-        (sum, id) => sum + (parseFloat(customSplits[id] || '0') || 0),
-        0,
-      ),
-    [activeCustomIds, customSplits],
-  );
-  const customValid =
-    splitMode !== 'custom' ||
-    (activeCustomIds.length > 0 &&
-      Math.abs(customTotal - totalAmount) <= 0.01);
 
   const toggleMember = (userId: string) => {
     setSelectedIds((prev) =>
@@ -165,6 +139,13 @@ export function EditExpenseSheet({
       },
     });
   };
+
+  const customValid = isCustomSplitValid({
+    splitMode,
+    selectedIds,
+    customSplits,
+    totalAmount,
+  });
 
   const canSave =
     !!name.trim() &&
@@ -252,111 +233,24 @@ export function EditExpenseSheet({
           maxLength={2000}
         />
 
-        <View>
-          <Text className="text-muted font-sans-medium text-xs uppercase tracking-wider mb-2">
-            Split with
+        {members.length === 0 ? (
+          <Text className="text-muted font-sans text-sm">
+            {groupQuery.isLoading ? 'Loading members…' : 'No members.'}
           </Text>
-          {members.length === 0 ? (
-            <Text className="text-muted font-sans text-sm">
-              {groupQuery.isLoading ? 'Loading members…' : 'No members.'}
-            </Text>
-          ) : (
-            <View className="flex-row flex-wrap gap-2">
-              {members.map((m) => {
-                const active = selectedIds.includes(m.userId);
-                return (
-                  <Pressable
-                    key={m.userId}
-                    accessibilityRole="button"
-                    accessibilityState={{ selected: active }}
-                    onPress={() => toggleMember(m.userId)}
-                    className={`px-3 py-1.5 rounded-full border ${
-                      active
-                        ? 'bg-accent border-accent'
-                        : 'bg-card border-border-strong'
-                    }`}
-                  >
-                    <Text
-                      className={`text-xs font-sans-medium ${
-                        active ? 'text-accent-foreground' : 'text-foreground'
-                      }`}
-                    >
-                      {m.user?.name ?? 'Unknown'}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-          )}
-        </View>
-
-        <View className="flex-row gap-2">
-          <View className="flex-1">
-            <PillButton
-              label="Equal"
-              variant={splitMode === 'equal' ? 'primary' : 'ghost'}
-              onPress={() => setSplitMode('equal')}
-            />
-          </View>
-          <View className="flex-1">
-            <PillButton
-              label="Custom"
-              variant={splitMode === 'custom' ? 'primary' : 'ghost'}
-              onPress={() => setSplitMode('custom')}
-            />
-          </View>
-        </View>
-
-        {selectedIds.length > 0 && amount ? (
-          <View className="gap-2">
-            {selectedIds.map((userId) => {
-              const member = members.find((m) => m.userId === userId);
-              const custom = parseFloat(customSplits[userId] || '0');
-              const isZeroCustom =
-                splitMode === 'custom' &&
-                (!Number.isFinite(custom) || custom <= 0);
-              return (
-                <View
-                  key={userId}
-                  className={`flex-row items-center justify-between gap-3 p-3 rounded-xl bg-card ${
-                    isZeroCustom ? 'opacity-60' : ''
-                  }`}
-                >
-                  <Text
-                    className="flex-1 text-foreground font-sans text-sm"
-                    numberOfLines={1}
-                  >
-                    {member?.user?.name ?? 'Unknown'}
-                    {isZeroCustom ? ' — excluded' : ''}
-                  </Text>
-                  {splitMode === 'equal' ? (
-                    <Amount value={equalShare} size="sm" tone="neutral" />
-                  ) : (
-                    <TextField
-                      placeholder="0.00"
-                      value={customSplits[userId] ?? ''}
-                      keyboardType="decimal-pad"
-                      onChangeText={(v) =>
-                        setCustomSplits((prev) => ({ ...prev, [userId]: v }))
-                      }
-                      containerClassName="w-28"
-                    />
-                  )}
-                </View>
-              );
-            })}
-            {splitMode === 'custom' ? (
-              <Text
-                className={`text-xs font-sans ${
-                  customValid ? 'text-muted' : 'text-loss font-sans-semibold'
-                }`}
-              >
-                Assigned ₱{customTotal.toFixed(2)} of ₱{totalAmount.toFixed(2)}
-                {customValid ? '' : ' — must match'}
-              </Text>
-            ) : null}
-          </View>
-        ) : null}
+        ) : (
+          <SplitEditor
+            members={members}
+            currentUserId={currentUserQuery.data?.id ?? ''}
+            selectedIds={selectedIds}
+            onToggleMember={toggleMember}
+            splitMode={splitMode}
+            onSplitModeChange={setSplitMode}
+            customSplits={customSplits}
+            onCustomSplitsChange={setCustomSplits}
+            amount={amount}
+            totalAmount={totalAmount}
+          />
+        )}
 
         {error ? (
           <Text className="text-loss font-sans text-sm">{error}</Text>
