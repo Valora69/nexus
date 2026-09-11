@@ -19,9 +19,10 @@ function AcceptFriendContent() {
   const hasFiredRef = useRef(false);
 
   const acceptMutation = useAcceptFriendRequestByToken({
-    onSuccess: () => {
+    onSuccess: ({ message }) => {
       setStatus('success');
-      toast.success('Friend added successfully!');
+      // "Friend request accepted!" or, on a reopened link, "already accepted".
+      toast.success(message);
       setTimeout(() => router.push('/friends'), 2000);
     },
     onError: (error) => {
@@ -63,10 +64,13 @@ function AcceptFriendContent() {
   }, [token]);
 
   const handleLogin = () => {
-    if (token) {
-      sessionStorage.setItem('friendRequestToken', token);
-    }
-    window.location.href = '/api/auth/google';
+    // Come back here after sign-in so the invite is actually accepted.
+    // (Previously the token was parked in sessionStorage and never read, so
+    // signed-out users landed on the dashboard with the request still pending.)
+    const returnTo = token
+      ? `/friends/accept?token=${encodeURIComponent(token)}`
+      : '/friends';
+    window.location.href = `/api/auth/google?returnTo=${encodeURIComponent(returnTo)}`;
   };
 
   return (
