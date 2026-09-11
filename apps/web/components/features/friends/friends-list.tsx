@@ -38,7 +38,7 @@ export function FriendsList({
           {friends.map((friend) => (
             <Card
               key={friend.id}
-              className="border-border hover:bg-muted/10 transition-colors"
+              className="border-border hover:bg-card-hover transition-colors"
             >
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">

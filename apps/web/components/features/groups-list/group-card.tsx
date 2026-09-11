@@ -20,7 +20,7 @@ export function GroupCard({ group, onClick }: GroupCardProps) {
 
   return (
     <Card
-      className="cursor-pointer hover:bg-muted/20 hover:border-primary/30 transition-colors"
+      className="cursor-pointer hover:bg-card-hover hover:border-primary/30 transition-colors"
       onClick={onClick}
     >
       <CardHeader>

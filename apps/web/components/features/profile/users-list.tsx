@@ -43,7 +43,7 @@ export function UsersList({
           {filteredUsers.slice(0, 10).map((user) => (
             <div
               key={user.id}
-              className="flex items-center justify-between p-2 rounded hover:bg-muted/30 transition-colors"
+              className="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-card-hover transition-colors"
             >
               <div
                 className="flex items-center gap-3 cursor-pointer"

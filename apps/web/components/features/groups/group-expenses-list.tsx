@@ -62,7 +62,7 @@ export function GroupExpensesList({
             return (
               <Card
                 key={expense.id}
-                className="border-border cursor-pointer hover:bg-muted/20 transition-colors"
+                className="border-border cursor-pointer hover:bg-card-hover transition-colors"
                 onClick={() => onViewExpense(expense)}
               >
                 <CardContent className="py-4 flex items-center justify-between">

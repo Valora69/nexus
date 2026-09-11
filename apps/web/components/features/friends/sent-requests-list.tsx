@@ -33,7 +33,7 @@ export function SentRequestsList({ requests }: SentRequestsListProps) {
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10">
                       <AvatarImage src={request.recipient?.picture} />
-                      <AvatarFallback className="bg-muted">
+                      <AvatarFallback className="bg-card">
                         {request.recipient?.name?.charAt(0).toUpperCase() ||
                           request.recipientEmail.charAt(0).toUpperCase()}
                       </AvatarFallback>

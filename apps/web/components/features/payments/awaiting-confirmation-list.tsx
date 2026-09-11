@@ -21,10 +21,10 @@ export function AwaitingConfirmationList({
   if (payments.length === 0) return null;
 
   return (
-    <Card className="border-blue-500/30">
+    <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
-          <Clock className="h-5 w-5" />
+        <CardTitle className="flex items-center gap-2">
+          <Clock className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
           Awaiting Confirmation ({payments.length})
         </CardTitle>
         <p className="text-sm text-muted-foreground mt-1">
@@ -37,7 +37,7 @@ export function AwaitingConfirmationList({
           {payments.map((payment) => (
             <div
               key={payment.id}
-              className="flex flex-col md:flex-row md:items-center justify-between p-4 border border-blue-500/20 rounded-lg bg-blue-500/5"
+              className="flex flex-col md:flex-row md:items-center justify-between rounded-2xl border border-border bg-card p-4"
             >
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
@@ -47,10 +47,7 @@ export function AwaitingConfirmationList({
                       payment.expenseSplit?.expense?.payer?.name ||
                       'someone'}
                   </p>
-                  <Badge
-                    variant="outline"
-                    className="gap-1 border-blue-500/30 text-blue-700 dark:text-blue-400"
-                  >
+                  <Badge variant="outline" className="gap-1">
                     {payment.paymentMethod === 'GCASH' ? (
                       <Smartphone className="h-3 w-3" />
                     ) : (

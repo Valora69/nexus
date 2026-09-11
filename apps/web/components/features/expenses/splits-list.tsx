@@ -99,7 +99,7 @@ function SplitCard({ split, filter, currentUserId, onClick }: SplitCardProps) {
   return (
     <div
       onClick={onClick}
-      className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border border-border rounded hover:border-primary/50 hover:bg-muted/20 transition-all cursor-pointer"
+      className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 rounded-2xl border border-border hover:border-primary/50 hover:bg-card-hover transition-all cursor-pointer"
     >
       <div>
         <p className="font-medium">{split.expense.name}</p>
