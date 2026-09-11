@@ -10,10 +10,12 @@ import {
   getExpenseSplitById,
 } from '../services/expenseSplitService';
 import { queryKeys } from '../queryKeys';
+import { LIVE_REFETCH } from '../live';
 
 export const useGetAllExpenseSplits = () => {
   return useQuery({
     queryKey: queryKeys.expenseSplits.all(),
+    ...LIVE_REFETCH,
     queryFn: () => getAllExpenseSplits(),
     staleTime: 3 * 60 * 1000,
   });
@@ -23,6 +25,7 @@ export const useGetAllExpenseSplits = () => {
 export const useGetMyPayableSplits = () => {
   return useQuery({
     queryKey: queryKeys.expenseSplits.myPayables(),
+    ...LIVE_REFETCH,
     queryFn: () => getMyPayableSplits(),
     staleTime: 1 * 60 * 1000,
     refetchOnMount: 'always',
@@ -34,6 +37,7 @@ export const useGetMyPayableSplits = () => {
 export const useGetMyReceivableSplits = () => {
   return useQuery({
     queryKey: queryKeys.expenseSplits.myReceivables(),
+    ...LIVE_REFETCH,
     queryFn: () => getMyReceivableSplits(),
     staleTime: 1 * 60 * 1000,
     refetchOnMount: 'always',
@@ -44,6 +48,7 @@ export const useGetMyReceivableSplits = () => {
 export const useGetSplitsByExpenseId = (expenseId: string) => {
   return useQuery({
     queryKey: queryKeys.expenseSplits.byExpenseId(expenseId),
+    ...LIVE_REFETCH,
     queryFn: () => getSplitsByExpenseId(expenseId),
     enabled: !!expenseId,
     staleTime: 2 * 60 * 1000,

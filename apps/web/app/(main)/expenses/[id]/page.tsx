@@ -19,7 +19,7 @@ import {
   useUpdateExpense,
   useRemoveExpense,
 } from '@web/lib/client/mutations/expenseMutation';
-import type { Expense } from '@web/lib/types/entities';
+import type { ExpenseWithRelations } from '@web/lib/types/entities';
 
 interface ExpenseDetailsPageProps {
   params: {
@@ -190,7 +190,7 @@ export default function ExpenseDetailsPage({
     );
   }
 
-  const typedExpense = expense as Expense;
+  const typedExpense = expense as ExpenseWithRelations;
 
   return (
     <div className="min-h-screen">
@@ -215,7 +215,9 @@ export default function ExpenseDetailsPage({
         />
 
         <ExpenseMetaInfo
-          payerId={typedExpense.payerId}
+          paidByName={
+            typedExpense.payee?.name || typedExpense.payer?.name || 'Unknown'
+          }
           createdAt={typedExpense.createdAt}
           updatedAt={typedExpense.updatedAt}
         />

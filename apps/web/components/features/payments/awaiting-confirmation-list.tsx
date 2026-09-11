@@ -43,7 +43,9 @@ export function AwaitingConfirmationList({
                 <div className="flex items-center gap-2">
                   <p className="font-medium">
                     Paid to{' '}
-                    {payment.expenseSplit?.expense?.payer?.name || 'someone'}
+                    {payment.expenseSplit?.expense?.payee?.name ||
+                      payment.expenseSplit?.expense?.payer?.name ||
+                      'someone'}
                   </p>
                   <Badge
                     variant="outline"

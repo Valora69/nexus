@@ -8,18 +8,18 @@ type Ctx = { params: Promise<{ id: string }> };
 
 /**
  * GET /api/payment/:id  [Auth]
- * Find a single payment by ID.
+ * Find a single payment by ID. Split owner or expense payee only.
  */
-export const GET = withAuth<Ctx>(async (_req: NextRequest, ctx, _user) => {
+export const GET = withAuth<Ctx>(async (_req: NextRequest, ctx, user) => {
   const { id } = await ctx.params;
-  const payment = await findOne(id);
+  const payment = await findOne(id, user.sub);
   return NextResponse.json(payment);
 });
 
 /**
  * PATCH /api/payment/:id  [Auth]
- * Update a payment. Allowed if user is split owner or expense payee.
- * When isVerified is set to true, verifiedAt is auto-populated.
+ * Update a payment. Payee may set isVerified (verifiedAt auto-populated);
+ * split owner may edit method/proof. Verified payments are immutable.
  */
 export const PATCH = withAuth<Ctx>(async (req: NextRequest, ctx, user) => {
   const { id } = await ctx.params;
@@ -31,7 +31,7 @@ export const PATCH = withAuth<Ctx>(async (req: NextRequest, ctx, user) => {
 
 /**
  * DELETE /api/payment/:id  [Auth]
- * Delete a payment. Only the split owner (who made the payment) can delete.
+ * Delete a payment. Only the split owner, and only while unverified.
  */
 export const DELETE = withAuth<Ctx>(async (_req: NextRequest, ctx, user) => {
   const { id } = await ctx.params;

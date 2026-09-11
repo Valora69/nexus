@@ -20,11 +20,11 @@ export const useCreateUser = (
 
   return useMutation<unknown, Error, { userData: CreateUserData }>({
     mutationFn: ({ userData }) => createUser(userData),
+    ...mutationOptions,
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.user.all() });
       mutationOptions?.onSuccess?.(...args);
     },
-    ...mutationOptions,
   });
 };
 
@@ -39,12 +39,12 @@ export const useUpdateUser = (
 
   return useMutation<unknown, Error, { id: string; userData: UpdateUserData }>({
     mutationFn: ({ id, userData }) => updateUser(id, userData),
+    ...mutationOptions,
     onSuccess: (...args) => {
       // Name and gcashNumber are denormalized across many payloads.
       invalidateUserDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
-    ...mutationOptions,
   });
 };
 
@@ -55,10 +55,10 @@ export const useRemoveUser = (
 
   return useMutation<unknown, Error, { id: string }>({
     mutationFn: ({ id }) => removeUser(id),
+    ...mutationOptions,
     onSuccess: (...args) => {
       invalidateUserDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
-    ...mutationOptions,
   });
 };

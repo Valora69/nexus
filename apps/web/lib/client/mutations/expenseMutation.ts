@@ -23,11 +23,11 @@ export const useCreateExpense = (
 
   return useMutation<unknown, Error, { expenseData: CreateExpenseData }>({
     mutationFn: ({ expenseData }) => createExpense(expenseData),
+    ...mutationOptions,
     onSuccess: (...args) => {
       invalidateExpenseDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
-    ...mutationOptions,
   });
 };
 
@@ -46,12 +46,12 @@ export const useUpdateExpense = (
     { id: string; expenseData: UpdateExpenseData }
   >({
     mutationFn: ({ id, expenseData }) => updateExpense(id, expenseData),
+    ...mutationOptions,
     onSuccess: (...args) => {
       // Split replacement cascade-deletes pending payments — payments cache must refresh.
       invalidateExpenseDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
-    ...mutationOptions,
   });
 };
 
@@ -62,10 +62,10 @@ export const useRemoveExpense = (
 
   return useMutation<unknown, Error, { id: string }>({
     mutationFn: ({ id }) => removeExpense(id),
+    ...mutationOptions,
     onSuccess: (...args) => {
       invalidateExpenseDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
-    ...mutationOptions,
   });
 };

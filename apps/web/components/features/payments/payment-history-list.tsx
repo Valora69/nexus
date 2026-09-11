@@ -7,7 +7,13 @@ import {
   CardTitle,
 } from '@web/components/ui/card';
 import { Badge } from '@web/components/ui/badge';
-import { DollarSign, CheckCircle, Smartphone, Banknote } from 'lucide-react';
+import {
+  DollarSign,
+  CheckCircle,
+  Smartphone,
+  Banknote,
+  Lock,
+} from 'lucide-react';
 import type { PaymentWithRelations } from '@web/lib/types/entities';
 import { formatCurrency, formatDateShort } from '@web/lib/utils';
 
@@ -41,11 +47,25 @@ export function PaymentHistoryList({ payments }: PaymentHistoryListProps) {
                   <div className="flex items-center gap-2">
                     <p className="font-medium">
                       {payment.expenseSplit?.user?.name || 'Unknown'} &rarr;{' '}
-                      {payment.expenseSplit?.expense?.payer?.name || 'Unknown'}
+                      {/* payee = who fronted the expense (the recipient);
+                          payer is the legacy "first owing member". */}
+                      {payment.expenseSplit?.expense?.payee?.name ||
+                        payment.expenseSplit?.expense?.payer?.name ||
+                        'Unknown'}
                     </p>
                     <Badge variant="default" className="gap-1">
                       <CheckCircle className="h-3 w-3" />
                       Verified
+                    </Badge>
+                    {/* Verified payments are immutable server-side
+                        (PATCH/DELETE → 409); say so instead of offering edits. */}
+                    <Badge
+                      variant="outline"
+                      className="gap-1 text-muted-foreground"
+                      title="Verified payments can no longer be changed"
+                    >
+                      <Lock className="h-3 w-3" />
+                      Locked
                     </Badge>
                     <Badge variant="outline" className="gap-1">
                       {payment.paymentMethod === 'GCASH' ? (
@@ -57,8 +77,11 @@ export function PaymentHistoryList({ payments }: PaymentHistoryListProps) {
                     </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {payment.expenseSplit?.expense?.name || 'No expense'} &bull;{' '}
-                    {formatDateShort(payment.paidAt)}
+                    {payment.expenseSplit?.expense?.name || 'No expense'}
+                    {payment.expenseSplit?.expense?.group?.name && (
+                      <> &middot; {payment.expenseSplit.expense.group.name}</>
+                    )}{' '}
+                    &bull; {formatDateShort(payment.paidAt)}
                     {payment.verifiedAt && (
                       <>
                         {' '}

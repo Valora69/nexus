@@ -1,4 +1,5 @@
 import { API_BASES } from '../config';
+import { responseError } from './errors';
 
 const BASE = API_BASES.expense;
 import { CreateExpenseData, UpdateExpenseData } from '../../types/request';
@@ -16,7 +17,7 @@ export const createExpense = async (expenseData: CreateExpenseData) => {
   });
 
   if (!data.ok) {
-    throw new Error(`Failed to create expense: ${data.statusText}`);
+    throw await responseError(data, 'Failed to create expense');
   }
 
   const response = await data.json();
@@ -78,7 +79,7 @@ export const updateExpense = async (
   });
 
   if (!data.ok) {
-    throw new Error(`Failed to update expense: ${data.statusText}`);
+    throw await responseError(data, 'Failed to update expense');
   }
 
   const response = await data.json();
@@ -95,6 +96,6 @@ export const removeExpense = async (id: string) => {
   });
 
   if (!data.ok) {
-    throw new Error(`Failed to remove expense: ${data.statusText}`);
+    throw await responseError(data, 'Failed to remove expense');
   }
 };

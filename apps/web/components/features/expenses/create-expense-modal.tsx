@@ -163,7 +163,8 @@ export function CreateExpenseModal({
         name: expenseName,
         amount: expenseAmount,
         groupId,
-        paidByUserId: currentUserId,
+        // Editing must not reassign who fronted the money.
+        paidByUserId: expense?.payeeId ?? currentUserId,
         selectedMembers,
         splitMode,
         customSplits,
@@ -194,11 +195,10 @@ export function CreateExpenseModal({
         'No participants',
       ]);
       if (!knownLocalErrors.has(msg)) {
-        // Server-side conflicts (e.g. verified-payments lock) bubble here.
+        // Server messages (e.g. the payment lock) come through verbatim via
+        // `responseError`; fall back to a generic line otherwise.
         toast.error(
-          msg.includes('verified payments')
-            ? msg
-            : `Failed to ${isEditMode ? 'update' : 'add'} expense`,
+          msg || `Failed to ${isEditMode ? 'update' : 'add'} expense`,
         );
       }
     }

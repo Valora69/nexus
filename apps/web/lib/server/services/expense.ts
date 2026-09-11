@@ -28,6 +28,18 @@ const EXPENSE_READ_INCLUDE = {
   splits: {
     include: {
       user: { select: USER_SELECT },
+      // Drives per-member paid badges and the edit lock in the UI.
+      payments: {
+        select: {
+          id: true,
+          amountPaid: true,
+          paymentMethod: true,
+          isVerified: true,
+          verifiedAt: true,
+          paidAt: true,
+          expenseSplitId: true,
+        },
+      },
     },
   },
 } as const;
@@ -78,6 +90,25 @@ async function findNonMembers(groupId: string, userIds: string[]) {
   } catch {
     console.error('Failed to validate group membership');
     throw new ApiError(500, 'Failed to validate group membership');
+  }
+}
+
+/** Payer, payee, or any member of the expense's group may modify it. */
+async function assertCanModifyExpense(
+  expense: { groupId: string; payerId: string; payeeId: string | null },
+  userId: string,
+  action: 'update' | 'delete',
+) {
+  if (expense.payerId === userId || expense.payeeId === userId) return;
+  const member = await prisma.groupMember.findUnique({
+    where: { GroupMemberUnique: { userId, groupId: expense.groupId } },
+    select: { id: true },
+  });
+  if (!member) {
+    throw new ApiError(
+      403,
+      `You do not have permission to ${action} this expense`,
+    );
   }
 }
 
@@ -379,16 +410,7 @@ async function updateWithSplits(
 ) {
   const { splits, payeeId, payerId, groupId, ...rest } = dto;
 
-  // Settlement-safety: any verified payment locks the expense from split edits.
-  const hasVerifiedPayments = existing.splits.some((s) =>
-    s.payments.some((p) => p.isVerified),
-  );
-  if (hasVerifiedPayments) {
-    throw new ApiError(
-      409,
-      'Cannot edit splits: this expense has verified payments. Delete and recreate it instead.',
-    );
-  }
+  // Payment lock is enforced by updateExpense before we get here.
 
   if (!splits || splits.length === 0) {
     throw new ApiError(
@@ -500,6 +522,34 @@ export async function updateExpense(
     throw new ApiError(404, 'Expense not found');
   }
 
+  await assertCanModifyExpense(existing, userId, 'update');
+
+  // Settlement-safety: once anyone has recorded a payment (pending or
+  // verified), amounts/splits/payee are frozen. Replacing splits would
+  // cascade-delete those payments. Notes stay editable — they don't move money.
+  const changedFields = Object.entries(dto)
+    .filter(([, value]) => value !== undefined)
+    .map(([key]) => key);
+  const isNotesOnly =
+    changedFields.length > 0 && changedFields.every((k) => k === 'notes');
+  const hasPayments = existing.splits.some((s) => s.payments.length > 0);
+  if (hasPayments && !isNotesOnly) {
+    throw new ApiError(
+      409,
+      'This expense has recorded payments and can no longer be edited.',
+    );
+  }
+
+  if (dto.groupId && dto.groupId !== existing.groupId) {
+    const member = await prisma.groupMember.findUnique({
+      where: { GroupMemberUnique: { userId, groupId: dto.groupId } },
+      select: { id: true },
+    });
+    if (!member) {
+      throw new ApiError(403, 'You are not a member of the target group');
+    }
+  }
+
   const { splits, payeeId, payerId, groupId, ...rest } = dto;
 
   // If splits are provided, perform a full atomic replace with safety checks.
@@ -547,25 +597,31 @@ export async function updateExpense(
 export async function removeExpense(id: string, userId: string) {
   const expense = await prisma.expense.findUnique({
     where: { id },
-    select: { id: true, groupId: true, payerId: true, payeeId: true },
+    select: {
+      id: true,
+      groupId: true,
+      payerId: true,
+      payeeId: true,
+      splits: {
+        select: {
+          payments: { where: { isVerified: true }, select: { id: true } },
+        },
+      },
+    },
   });
   if (!expense) {
     throw new ApiError(404, 'Expense not found');
   }
 
-  // Authorization: payer, payee, or any group member may delete.
-  const isPrincipal = expense.payerId === userId || expense.payeeId === userId;
-  if (!isPrincipal) {
-    const member = await prisma.groupMember.findUnique({
-      where: { GroupMemberUnique: { userId, groupId: expense.groupId } },
-      select: { id: true },
-    });
-    if (!member) {
-      throw new ApiError(
-        403,
-        'You do not have permission to delete this expense',
-      );
-    }
+  await assertCanModifyExpense(expense, userId, 'delete');
+
+  // Deleting would cascade away verified payments and erase settled history.
+  // Pending-only expenses can still be removed (their claims go with them).
+  if (expense.splits.some((s) => s.payments.length > 0)) {
+    throw new ApiError(
+      409,
+      'This expense has verified payments and cannot be deleted.',
+    );
   }
 
   try {

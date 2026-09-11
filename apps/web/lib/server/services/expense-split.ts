@@ -230,6 +230,13 @@ export async function markAsPaid(
           );
         }
 
+        if (split.userId === split.expense.payeeId) {
+          throw new ApiError(
+            400,
+            'You fronted this expense — your own share is not owed to anyone',
+          );
+        }
+
         if (!isFinite(amountPaid) || amountPaid <= 0) {
           throw new ApiError(400, 'Payment amount must be greater than zero');
         }

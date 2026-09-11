@@ -30,11 +30,11 @@ export const useCreateGroupMember = (
     { groupMemberData: CreateGroupMemberData }
   >({
     mutationFn: ({ groupMemberData }) => createGroupMember(groupMemberData),
+    ...mutationOptions,
     onSuccess: (...args) => {
       invalidateGroupDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
-    ...mutationOptions,
   });
 };
 
@@ -54,11 +54,11 @@ export const useUpdateGroupMember = (
   >({
     mutationFn: ({ id, groupMemberData }) =>
       updateGroupMember(id, groupMemberData),
+    ...mutationOptions,
     onSuccess: (...args) => {
       invalidateGroupDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
-    ...mutationOptions,
   });
 };
 
@@ -69,10 +69,10 @@ export const useRemoveGroupMember = (
 
   return useMutation<unknown, Error, { id: string }>({
     mutationFn: ({ id }) => removeGroupMember(id),
+    ...mutationOptions,
     onSuccess: (...args) => {
       invalidateGroupDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
-    ...mutationOptions,
   });
 };

@@ -39,12 +39,12 @@ export const useMarkSplitAsPaid = (
   return useMutation<MarkAsPaidResponse, Error, MarkAsPaidInput>({
     mutationFn: ({ id, paymentMethod, amountPaid, paymentProof }) =>
       markSplitAsPaid(id, { paymentMethod, amountPaid, paymentProof }),
+    ...mutationOptions,
     onSuccess: (...args) => {
       // Mark-as-paid produces a Payment row — payment domain covers all surfaces.
       invalidatePaymentDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
-    ...mutationOptions,
   });
 };
 
@@ -63,10 +63,10 @@ export const useUpdateExpenseSplit = (
     { id: string; data: { amount?: number } }
   >({
     mutationFn: ({ id, data }) => updateExpenseSplit(id, data),
+    ...mutationOptions,
     onSuccess: (...args) => {
       invalidatePaymentDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
-    ...mutationOptions,
   });
 };

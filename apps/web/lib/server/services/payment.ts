@@ -32,6 +32,7 @@ const PAYMENT_INCLUDE = {
 
 const PAYMENT_AUTH_SELECT = {
   id: true,
+  isVerified: true,
   expenseSplit: {
     select: {
       userId: true,
@@ -103,6 +104,13 @@ export async function create(
           );
         }
 
+        if (split.userId === split.expense.payeeId) {
+          throw new ApiError(
+            400,
+            'You fronted this expense — your own share is not owed to anyone',
+          );
+        }
+
         const claimed = split.payments.reduce((s, p) => s + p.amountPaid, 0);
         const remaining = split.amount - claimed;
         if (dto.amountPaid > remaining + 0.01) {
@@ -115,6 +123,8 @@ export async function create(
         const createdPayment = await tx.payment.create({
           data: {
             ...dto,
+            // Always starts unverified; only the payee can verify via PATCH.
+            isVerified: false,
             ...(clientRequestId ? { clientRequestId } : {}),
           },
           select: PAYMENT_WRITE_SELECT,
@@ -166,6 +176,9 @@ export async function findAll(userId: string, skip?: number, take?: number) {
       where: {
         OR: [
           { expenseSplit: { userId } },
+          // payee = recipient of the payment. payerId is kept so rows that
+          // matched before (legacy "first owing member") don't disappear.
+          { expenseSplit: { expense: { payeeId: userId } } },
           { expenseSplit: { expense: { payerId: userId } } },
         ],
       },
@@ -234,7 +247,7 @@ export async function findPendingConfirmation(
   }
 }
 
-export async function findOne(id: string) {
+export async function findOne(id: string, userId: string) {
   try {
     const payment = await prisma.payment.findUnique({
       where: { id },
@@ -243,6 +256,17 @@ export async function findOne(id: string) {
 
     if (!payment) {
       throw new ApiError(404, 'Payment not found');
+    }
+
+    // Only the two parties to the payment may read it.
+    const canView =
+      payment.expenseSplit.userId === userId ||
+      payment.expenseSplit.expense.payeeId === userId;
+    if (!canView) {
+      throw new ApiError(
+        403,
+        'You do not have permission to view this payment',
+      );
     }
 
     return payment;
@@ -266,14 +290,39 @@ export async function updatePayment(
     throw new ApiError(404, 'Payment not found');
   }
 
-  const canUpdate =
-    payment.expenseSplit.userId === userId ||
-    payment.expenseSplit.expense.payeeId === userId;
-  if (!canUpdate) {
+  const isSplitOwner = payment.expenseSplit.userId === userId;
+  const isPayee = payment.expenseSplit.expense.payeeId === userId;
+  if (!isSplitOwner && !isPayee) {
     throw new ApiError(
       403,
       'You do not have permission to update this payment',
     );
+  }
+
+  // Only the recipient can confirm receipt; the payer can't self-verify.
+  if (dto.isVerified !== undefined && !isPayee) {
+    throw new ApiError(403, 'Only the payee can verify this payment');
+  }
+  if (
+    (dto.paymentMethod !== undefined || dto.paymentProof !== undefined) &&
+    !isSplitOwner
+  ) {
+    throw new ApiError(403, 'Only the payer can edit payment details');
+  }
+
+  if (payment.isVerified) {
+    // Re-verifying (double-click, retry) is a harmless no-op.
+    const isReverify =
+      dto.isVerified === true &&
+      dto.paymentMethod === undefined &&
+      dto.paymentProof === undefined;
+    if (isReverify) {
+      return prisma.payment.findUniqueOrThrow({
+        where: { id },
+        select: PAYMENT_WRITE_SELECT,
+      });
+    }
+    throw new ApiError(409, 'Verified payments can no longer be changed');
   }
 
   try {
@@ -311,6 +360,9 @@ export async function remove(id: string, userId: string) {
   }
   if (payment.expenseSplit.userId !== userId) {
     throw new ApiError(403, 'You can only delete your own payments');
+  }
+  if (payment.isVerified) {
+    throw new ApiError(409, 'Verified payments cannot be deleted');
   }
 
   const groupId = payment.expenseSplit.expense.groupId;

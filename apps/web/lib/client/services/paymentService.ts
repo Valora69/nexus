@@ -1,4 +1,5 @@
 import { API_BASES } from '../config';
+import { responseError } from './errors';
 
 const BASE = API_BASES.payment;
 import { CreatePaymentData, UpdatePaymentData } from '../../types/request';
@@ -19,7 +20,7 @@ export const createPayment = async (
   });
 
   if (!data.ok) {
-    throw new Error(`Failed to create payment: ${data.statusText}`);
+    throw await responseError(data, 'Failed to create payment');
   }
 
   const response = await data.json();
@@ -116,7 +117,7 @@ export const updatePayment = async (
   });
 
   if (!data.ok) {
-    throw new Error(`Failed to update payment: ${data.statusText}`);
+    throw await responseError(data, 'Failed to update payment');
   }
 
   const response = await data.json();
@@ -133,6 +134,6 @@ export const removePayment = async (id: string): Promise<void> => {
   });
 
   if (!data.ok) {
-    throw new Error(`Failed to remove payment: ${data.statusText}`);
+    throw await responseError(data, 'Failed to remove payment');
   }
 };

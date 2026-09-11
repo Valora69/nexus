@@ -10,7 +10,11 @@ import {
   removePayment,
 } from '../services/paymentService';
 import { CreatePaymentData, UpdatePaymentData } from '../../types/request';
-import { invalidatePaymentDomain } from '../invalidations';
+import type { Payment } from '../../types/entities';
+import {
+  applyVerifiedPayment,
+  invalidatePaymentDomain,
+} from '../invalidations';
 
 export const useCreatePayment = (
   mutationOptions: UseMutationOptions<
@@ -23,17 +27,17 @@ export const useCreatePayment = (
 
   return useMutation<unknown, Error, { paymentData: CreatePaymentData }>({
     mutationFn: ({ paymentData }) => createPayment(paymentData),
+    ...mutationOptions,
     onSuccess: (...args) => {
       invalidatePaymentDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
-    ...mutationOptions,
   });
 };
 
 export const useUpdatePayment = (
   mutationOptions: UseMutationOptions<
-    unknown,
+    Payment,
     Error,
     { id: string; paymentData: UpdatePaymentData }
   >,
@@ -41,16 +45,19 @@ export const useUpdatePayment = (
   const queryClient = useQueryClient();
 
   return useMutation<
-    unknown,
+    Payment,
     Error,
     { id: string; paymentData: UpdatePaymentData }
   >({
     mutationFn: ({ id, paymentData }) => updatePayment(id, paymentData),
+    ...mutationOptions,
     onSuccess: (...args) => {
+      // Verify is the hot path: paint the server's result into every cached
+      // view immediately, then refetch to reconcile.
+      if (args[0]?.isVerified) applyVerifiedPayment(queryClient, args[0]);
       invalidatePaymentDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
-    ...mutationOptions,
   });
 };
 
@@ -61,10 +68,10 @@ export const useRemovePayment = (
 
   return useMutation<unknown, Error, { id: string }>({
     mutationFn: ({ id }) => removePayment(id),
+    ...mutationOptions,
     onSuccess: (...args) => {
       invalidatePaymentDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
-    ...mutationOptions,
   });
 };

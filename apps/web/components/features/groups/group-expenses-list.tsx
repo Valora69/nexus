@@ -1,6 +1,8 @@
 import { Card, CardContent } from '@web/components/ui/card';
 import { Button } from '@web/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Badge } from '@web/components/ui/badge';
+import { CheckCircle, Plus } from 'lucide-react';
+import { expenseSettlement, formatCurrency } from '@web/lib/utils';
 import type {
   ExpenseWithRelations,
   GroupMember,
@@ -55,6 +57,7 @@ export function GroupExpensesList({
             const splitCount = hasSplits
               ? expense.splits!.length
               : members.length;
+            const settlement = expenseSettlement(expense);
 
             return (
               <Card
@@ -85,16 +88,29 @@ export function GroupExpensesList({
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-lg text-primary font-mono">
-                      ${expense.totalAmount.toFixed(2)}
-                    </p>
+                    <div className="flex items-center justify-end gap-2">
+                      {settlement.owing > 0 &&
+                        (settlement.isFullySettled ? (
+                          <Badge variant="gain" className="gap-1 text-[10px]">
+                            <CheckCircle className="h-3 w-3" />
+                            Paid by all
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-[10px]">
+                            {settlement.settled}/{settlement.owing} paid
+                          </Badge>
+                        ))}
+                      <p className="font-bold text-lg text-primary font-mono">
+                        {formatCurrency(expense.totalAmount)}
+                      </p>
+                    </div>
                     {hasSplits ? (
                       <p className="text-xs text-muted-foreground">
                         Split among {splitCount}
                       </p>
                     ) : members.length > 0 ? (
                       <p className="text-xs text-muted-foreground">
-                        ${splitPerPerson.toFixed(2)}/person
+                        {formatCurrency(splitPerPerson)}/person
                       </p>
                     ) : null}
                   </div>

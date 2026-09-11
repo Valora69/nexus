@@ -8,10 +8,12 @@ import {
   getPendingConfirmation,
 } from '../services/paymentService';
 import { queryKeys } from '../queryKeys';
+import { LIVE_REFETCH } from '../live';
 
 export const useGetAllPayments = () => {
   return useQuery({
     queryKey: queryKeys.payments.all(),
+    ...LIVE_REFETCH,
     queryFn: () => getAllPayments(),
     staleTime: 2 * 60 * 1000,
     refetchOnMount: 'always',
@@ -32,6 +34,7 @@ export const useGetPaymentById = (id: string) => {
 export const useGetPendingVerification = () => {
   return useQuery({
     queryKey: queryKeys.payments.pendingVerification(),
+    ...LIVE_REFETCH,
     queryFn: () => getPendingVerification(),
     staleTime: 1 * 60 * 1000,
     refetchOnMount: 'always',
@@ -43,6 +46,7 @@ export const useGetPendingVerification = () => {
 export const useGetPendingConfirmation = () => {
   return useQuery({
     queryKey: queryKeys.payments.pendingConfirmation(),
+    ...LIVE_REFETCH,
     queryFn: () => getPendingConfirmation(),
     staleTime: 1 * 60 * 1000,
     refetchOnMount: 'always',
