@@ -3,6 +3,7 @@ import { prisma } from '@/lib/server/db';
 import { ApiError } from '@/lib/server/errors';
 import { logActivity } from '@/lib/server/activity';
 import { assertGroupMember } from '@/lib/server/authz';
+import { notifyGroupMembersAdded } from '@/lib/server/notification-events';
 import type {
   CreateGroupInput,
   UpdateGroupInput,
@@ -10,6 +11,9 @@ import type {
 
 export async function createGroup(dto: CreateGroupInput, userId: string) {
   const { memberIds, ...groupData } = dto;
+  const addedMemberIds = [...new Set(memberIds ?? [])].filter(
+    (id) => id !== userId,
+  );
 
   try {
     const createdGroup = await prisma.$transaction(async (tx) => {
@@ -33,10 +37,9 @@ export async function createGroup(dto: CreateGroupInput, userId: string) {
       });
 
       // Add any additional members, skipping the creator if accidentally included
-      const extraIds = (memberIds ?? []).filter((id) => id !== userId);
-      if (extraIds.length > 0) {
+      if (addedMemberIds.length > 0) {
         await tx.groupMember.createMany({
-          data: extraIds.map((id) => ({ groupId: group.id, userId: id })),
+          data: addedMemberIds.map((id) => ({ groupId: group.id, userId: id })),
           skipDuplicates: true,
         });
       }
@@ -51,6 +54,7 @@ export async function createGroup(dto: CreateGroupInput, userId: string) {
         activityOn: ActivityOnEnum.GROUP_DETAILS,
         createdByUserId: userId,
       });
+      await notifyGroupMembersAdded(createdGroup.id, addedMemberIds, userId);
     }
 
     return createdGroup;

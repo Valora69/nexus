@@ -3,6 +3,7 @@ import { prisma } from '@/lib/server/db';
 import { ApiError } from '@/lib/server/errors';
 import { logActivity } from '@/lib/server/activity';
 import { assertGroupMember } from '@/lib/server/authz';
+import { notifyGroupMembersAdded } from '@/lib/server/notification-events';
 import type { CreateGroupMemberInput } from '@/lib/server/schemas/group-member';
 
 export async function createGroupMember(
@@ -41,6 +42,7 @@ export async function createGroupMember(
         activityOn: ActivityOnEnum.GROUP_MEMBER,
         createdByUserId: userId,
       });
+      await notifyGroupMembersAdded(dto.groupId, [dto.userId], userId);
     }
 
     return createdMember;
