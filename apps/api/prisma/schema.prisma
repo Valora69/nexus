@@ -18,47 +18,50 @@ enum ActivityNameEnum {
 }
 
 enum ActivityOnEnum {
-  GROUP_DETAILS  
+  GROUP_DETAILS
   EXPENSE
   PAYMENT
-  GROUP_MEMBER   //to track member additions/removals
-  EXPENSE_PAYEE  
-  EXPENSE_PAYER  
+  GROUP_MEMBER //to track member additions/removals
+  EXPENSE_PAYEE
+  EXPENSE_PAYER
 }
 
 model User {
-  id                     String          @id @default(uuid())
+  id                     String                @id @default(uuid())
   name                   String
-  email                  String          @unique
-  googleId               String          @unique
+  email                  String                @unique
+  googleId               String                @unique
   picture                String?
   gcashNumber            String?
   groups                 GroupMember[]
-  lendedExpenses         Expense[]       @relation("ExpensePayee")
-  owedExpenses           Expense[]       @relation("ExpensePayer")
+  lendedExpenses         Expense[]             @relation("ExpensePayee")
+  owedExpenses           Expense[]             @relation("ExpensePayer")
   expenseSplits          ExpenseSplit[]
   createdGroups          Group[]
   activities             Activity[]
   personalTransactions   PersonalTransaction[]
-  sentFriendRequests     FriendRequest[] @relation("SentFriendRequests")
-  receivedFriendRequests FriendRequest[] @relation("ReceivedFriendRequests")
-  friends                Friendship[]    @relation("UserFriends")
-  friendOf               Friendship[]    @relation("FriendOf")
-  createdAt              DateTime        @default(now())
-  updatedAt              DateTime        @updatedAt
+  sentFriendRequests     FriendRequest[]       @relation("SentFriendRequests")
+  receivedFriendRequests FriendRequest[]       @relation("ReceivedFriendRequests")
+  friends                Friendship[]          @relation("UserFriends")
+  friendOf               Friendship[]          @relation("FriendOf")
+  notifications          Notification[]        @relation("NotificationRecipient")
+  actedNotifications     Notification[]        @relation("NotificationActor")
+  createdAt              DateTime              @default(now())
+  updatedAt              DateTime              @updatedAt
 }
 
 model Group {
-  id              String        @id @default(uuid())
+  id              String         @id @default(uuid())
   name            String
   description     String?
   members         GroupMember[]
   expenses        Expense[]
   activities      Activity[]
-  createdBy       User          @relation(fields: [createdByUserId], references: [id])
+  notifications   Notification[]
+  createdBy       User           @relation(fields: [createdByUserId], references: [id])
   createdByUserId String
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
 }
 
 model GroupMember {
@@ -73,20 +76,21 @@ model GroupMember {
 }
 
 model Expense {
-  id          String         @id @default(uuid())
-  name        String
-  totalAmount Float
-  group       Group          @relation(fields: [groupId], references: [id])
-  groupId     String
-  date        DateTime
-  notes       String?
-  payer       User           @relation("ExpensePayer", fields: [payerId], references: [id], onDelete: Cascade)
-  payerId     String
-  payee       User?          @relation("ExpensePayee", fields: [payeeId], references: [id], onDelete: Cascade)
-  payeeId     String?
-  splits      ExpenseSplit[]
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  id            String         @id @default(uuid())
+  name          String
+  totalAmount   Float
+  group         Group          @relation(fields: [groupId], references: [id])
+  groupId       String
+  date          DateTime
+  notes         String?
+  payer         User           @relation("ExpensePayer", fields: [payerId], references: [id], onDelete: Cascade)
+  payerId       String
+  payee         User?          @relation("ExpensePayee", fields: [payeeId], references: [id], onDelete: Cascade)
+  payeeId       String?
+  splits        ExpenseSplit[]
+  notifications Notification[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 
   /// Client-supplied idempotency key (stage-12 offline outbox). Null for
   /// creates that did not originate from the mobile outbox path. Unique so
@@ -104,15 +108,16 @@ enum PaymentMethod {
 }
 
 model Payment {
-  id             String        @id @default(uuid())
+  id             String         @id @default(uuid())
   amountPaid     Float
-  paymentMethod  PaymentMethod @default(CASH)
+  paymentMethod  PaymentMethod  @default(CASH)
   paymentProof   String?
-  isVerified     Boolean       @default(false)
+  isVerified     Boolean        @default(false)
   verifiedAt     DateTime?
-  paidAt         DateTime      @default(now())
-  expenseSplit   ExpenseSplit  @relation(fields: [expenseSplitId], references: [id], onDelete: Cascade)
+  paidAt         DateTime       @default(now())
+  expenseSplit   ExpenseSplit   @relation(fields: [expenseSplitId], references: [id], onDelete: Cascade)
   expenseSplitId String
+  notifications  Notification[]
 
   /// Client-supplied idempotency key (stage-12 offline outbox). Same contract
   /// as Expense.clientRequestId: null for web-originated payments, unique on
@@ -203,6 +208,7 @@ model FriendRequest {
   token          String              @unique @default(uuid())
   createdAt      DateTime            @default(now())
   expiresAt      DateTime
+  notifications  Notification[]
 
   @@unique([senderId, recipientEmail])
 }
@@ -216,4 +222,48 @@ model Friendship {
   createdAt DateTime @default(now())
 
   @@unique([userId, friendId])
+}
+
+// In-app notifications. One row per recipient per meaningful action; written
+// after the business transaction commits (see apps/web/lib/server/notifications.ts).
+enum NotificationType {
+  GROUP_ADDED
+  EXPENSE_ADDED
+  EXPENSE_UPDATED
+  EXPENSE_DELETED
+  PAYMENT_RECORDED
+  PAYMENT_CONFIRMED
+  PAYMENT_WITHDRAWN
+  FRIEND_REQUEST
+  FRIEND_ACCEPTED
+}
+
+model Notification {
+  id              String           @id @default(uuid())
+  recipientId     String
+  recipient       User             @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  actorId         String?
+  actor           User?            @relation("NotificationActor", fields: [actorId], references: [id], onDelete: SetNull)
+  type            NotificationType
+  /// Entity links drive navigation. SetNull when the entity is deleted, so
+  /// the row survives and renders as "no longer available".
+  groupId         String?
+  group           Group?           @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  expenseId       String?
+  expense         Expense?         @relation(fields: [expenseId], references: [id], onDelete: SetNull)
+  paymentId       String?
+  payment         Payment?         @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  friendRequestId String?
+  friendRequest   FriendRequest?   @relation(fields: [friendRequestId], references: [id], onDelete: SetNull)
+  /// Event-time snapshot for display (names, amounts). Shape per type is
+  /// NotificationData in packages/shared/src/types/notifications.ts.
+  data            Json
+  /// Coalescing key, e.g. "expense-updated:<expenseId>".
+  dedupeKey       String?
+  readAt          DateTime?
+  createdAt       DateTime         @default(now())
+
+  @@index([recipientId, createdAt(sort: Desc)])
+  @@index([recipientId, readAt])
+  @@index([recipientId, dedupeKey])
 }
