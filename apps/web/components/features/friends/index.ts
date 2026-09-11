@@ -1,4 +1,4 @@
-export { FriendsTabs } from './friends-tabs';
+export { FriendsTabs, type FriendsTab } from './friends-tabs';
 export { FriendsList } from './friends-list';
 export { PendingRequestsList } from './pending-requests-list';
 export { AddFriendModal } from './add-friend-modal';

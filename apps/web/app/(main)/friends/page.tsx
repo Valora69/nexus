@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 import {
   FriendsTabs,
+  type FriendsTab,
   FriendsList,
   PendingRequestsList,
   AddFriendModal,
@@ -12,6 +14,7 @@ import {
 } from '@web/components/features/friends';
 import { FriendModals } from '@web/lib/constants/modals';
 import { PageHeader } from '@web/components/layout/page-header';
+import { SearchParamListener } from '@web/components/shared/search-param-listener';
 
 import {
   useGetAllFriends,
@@ -26,10 +29,19 @@ import {
 import type { Friend } from '@web/lib/types/entities';
 
 export default function FriendsPage() {
+  const router = useRouter();
   // Modal state
   const [activeModal, setActiveModal] = useState<FriendModals | null>(null);
   const [friendToRemove, setFriendToRemove] = useState<Friend | null>(null);
   const [email, setEmail] = useState('');
+  // `?tab=requests` from a friend-request notification.
+  const [tab, setTab] = useState<FriendsTab>('friends');
+  const onTabParam = (value: string | null) => {
+    if (value !== 'requests' && value !== 'friends') return;
+    setTab(value);
+    // Consume the param so the next notification click changes the URL again.
+    router.replace('/friends', { scroll: false });
+  };
 
   // Data queries
   const { data: friends = [], isLoading: isLoadingFriends } =
@@ -146,6 +158,7 @@ export default function FriendsPage() {
     return (
       <div className="p-6 space-y-6">
         {header}
+        <SearchParamListener name="tab" onChange={onTabParam} />
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-20 rounded-2xl bg-card animate-pulse" />
@@ -158,11 +171,14 @@ export default function FriendsPage() {
   return (
     <div className="p-6 space-y-6">
       {header}
+      <SearchParamListener name="tab" onChange={onTabParam} />
 
       <FriendsTabs
         friendsCount={friends.length}
         pendingCount={pendingRequests.length}
         onAddFriend={onAddFriend}
+        tab={tab}
+        onTabChange={setTab}
       >
         <FriendsList
           friends={friends}
