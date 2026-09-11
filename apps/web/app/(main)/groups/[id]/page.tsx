@@ -27,6 +27,7 @@ import {
   type RemovalBlocker,
 } from '@web/components/features/groups/edit-group-modal';
 import { PageHeader } from '@web/components/layout/page-header';
+import { SearchParamListener } from '@web/components/shared/search-param-listener';
 import { GroupMembersCard } from '@web/components/features/groups/group-members-card';
 import { GroupExpensesList } from '@web/components/features/groups/group-expenses-list';
 import { GroupModals } from '@web/lib/constants/modals';
@@ -41,7 +42,8 @@ export default function GroupDetailPage() {
   const groupId = params.id as string;
 
   const { data: group, isLoading: groupLoading } = useGetGroupById(groupId);
-  const { data: groupExpenses = [] } = useGetAllExpenses(undefined, groupId);
+  const { data: groupExpenses = [], isLoading: expensesLoading } =
+    useGetAllExpenses(undefined, groupId);
   const { data: currentUser } = useCurrentUser();
   const { data: allUsers = [] } = useGetAllUsers();
 
@@ -68,6 +70,25 @@ export default function GroupDetailPage() {
       setRemovalBlockers({});
     }
   }, [isOpen]);
+
+  // Deep link from a notification: open that expense once it's loaded.
+  const [expenseParam, setExpenseParam] = useState<string | null>(null);
+  useEffect(() => {
+    if (!expenseParam || expensesLoading) return;
+    const found = (groupExpenses as ExpenseWithRelations[]).some(
+      (e) => e.id === expenseParam,
+    );
+    if (found) {
+      setSelectedExpenseId(expenseParam);
+      setActiveModal(GroupModals.ViewExpense);
+      setIsOpen(true);
+    } else {
+      toast('That expense is no longer available.');
+    }
+    setExpenseParam(null);
+    // Consume the param so closing the modal doesn't reopen it.
+    router.replace(`/groups/${groupId}`, { scroll: false });
+  }, [expenseParam, expensesLoading, groupExpenses, groupId, router]);
 
   const typedGroup = group as GroupWithRelations | undefined;
   const members = typedGroup?.members ?? [];
@@ -218,6 +239,7 @@ export default function GroupDetailPage() {
         subtitle={typedGroup.description || undefined}
         backHref="/groups"
       />
+      <SearchParamListener name="expense" onChange={setExpenseParam} />
 
       <GroupMembersCard members={members} onEditGroup={onEditGroup} />
 
