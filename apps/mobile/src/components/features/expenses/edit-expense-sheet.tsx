@@ -122,7 +122,9 @@ export function EditExpenseSheet({
       setError(errorMessage(result.error));
       return;
     }
-    const payerId = pickPayerId(result.splits, currentUserQuery.data.id);
+    // Editing must not reassign who fronted the money.
+    const payeeId = expense.payeeId ?? currentUserQuery.data.id;
+    const payerId = pickPayerId(result.splits, payeeId);
     updateMutation.mutate({
       id: expense.id,
       expenseData: {
@@ -130,11 +132,10 @@ export function EditExpenseSheet({
         totalAmount,
         groupId: expense.groupId,
         payerId,
-        payeeId: currentUserQuery.data.id,
+        payeeId,
         date: date.toISOString(),
         notes:
-          notes.trim() ||
-          (splitMode === 'custom' ? 'Custom split' : undefined),
+          notes.trim() || (splitMode === 'custom' ? 'Custom split' : undefined),
         splits: result.splits,
       },
     });

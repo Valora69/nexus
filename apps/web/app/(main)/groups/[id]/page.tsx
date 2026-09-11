@@ -49,8 +49,15 @@ export default function GroupDetailPage() {
   // Modal state
   const [isOpen, setIsOpen] = useState(false);
   const [activeModal, setActiveModal] = useState<GroupModals | null>(null);
-  const [selectedExpense, setSelectedExpense] =
-    useState<ExpenseWithRelations | null>(null);
+  // Track the id, not a snapshot, so the open modal re-renders with
+  // refetched data (e.g. a payment verified while it's open).
+  const [selectedExpenseId, setSelectedExpenseId] = useState<string | null>(
+    null,
+  );
+  const selectedExpense: ExpenseWithRelations | null =
+    (groupExpenses as ExpenseWithRelations[]).find(
+      (e) => e.id === selectedExpenseId,
+    ) ?? null;
   const [removalBlockers, setRemovalBlockers] = useState<
     Record<string, RemovalBlocker[]>
   >({});
@@ -58,7 +65,7 @@ export default function GroupDetailPage() {
   useEffect(() => {
     if (!isOpen) {
       setActiveModal(null);
-      setSelectedExpense(null);
+      setSelectedExpenseId(null);
       setRemovalBlockers({});
     }
   }, [isOpen]);
@@ -103,7 +110,7 @@ export default function GroupDetailPage() {
   };
 
   const onViewExpense = (expense: ExpenseWithRelations) => {
-    setSelectedExpense(expense);
+    setSelectedExpenseId(expense.id);
     setActiveModal(GroupModals.ViewExpense);
     setIsOpen(true);
   };

@@ -13,7 +13,14 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
+import {
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  Text,
+  View,
+} from 'react-native';
+import { hasAnyPayment } from '@repo/shared/utils/splits';
 
 import { ErrorState, LoadingState, Screen } from '../../ui';
 import { useGetExpenseById } from '../../../lib/api/queries/expenseQueries';
@@ -45,7 +52,12 @@ export function ExpenseDetailScreen({ id }: { id: string | undefined }) {
         title={expenseQuery.data?.name ?? 'Expense'}
         onBack={onBack}
         onEdit={() => setEditOpen(true)}
-        canEdit={!!expenseQuery.data}
+        // Server rejects edits once any payment is recorded; hide the
+        // affordance rather than let the save fail.
+        canEdit={
+          !!expenseQuery.data &&
+          !hasAnyPayment(splitsQuery.data ?? expenseQuery.data.splits)
+        }
       />
 
       {expenseQuery.isLoading ? (

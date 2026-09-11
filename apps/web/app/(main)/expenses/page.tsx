@@ -30,8 +30,9 @@ export default function ExpensesPage() {
 
   // Modal state
   const [activeModal, setActiveModal] = useState<ExpenseModals | null>(null);
-  const [selectedSplit, setSelectedSplit] =
-    useState<ExpenseSplitWithRelations | null>(null);
+  // Track the id, not a snapshot, so an open modal reflects refetched
+  // payment state (e.g. the payee verifying while it's open).
+  const [selectedSplitId, setSelectedSplitId] = useState<string | null>(null);
 
   // Data queries
   const { data: payableSplits = [], isLoading: isLoadingPayable } =
@@ -72,14 +73,19 @@ export default function ExpensesPage() {
 
   const isLoading = isLoadingPayable || isLoadingReceivable;
 
+  const selectedSplit: ExpenseSplitWithRelations | null =
+    [...payableSplits, ...receivableSplits].find(
+      (split) => split.id === selectedSplitId,
+    ) ?? null;
+
   // Modal handlers
   const closeModal = () => {
     setActiveModal(null);
-    setSelectedSplit(null);
+    setSelectedSplitId(null);
   };
 
   const onViewSplit = (split: ExpenseSplitWithRelations) => {
-    setSelectedSplit(split);
+    setSelectedSplitId(split.id);
     setActiveModal(ExpenseModals.ViewSplit);
   };
 

@@ -22,7 +22,11 @@ export function AwaitingConfirmationList() {
   return (
     <GlassCard>
       <View className="flex-row items-center gap-2 mb-3">
-        <Ionicons name="hourglass-outline" size={18} color={colors.foreground} />
+        <Ionicons
+          name="hourglass-outline"
+          size={18}
+          color={colors.foreground}
+        />
         <Text className="text-foreground font-sans-semibold text-base">
           Awaiting confirmation
         </Text>
@@ -46,7 +50,10 @@ export function AwaitingConfirmationList() {
                 className="text-foreground font-sans-medium text-sm"
                 numberOfLines={1}
               >
-                Paid to {p.expenseSplit?.expense?.payer?.name ?? 'someone'}
+                Paid to{' '}
+                {p.expenseSplit?.expense?.payee?.name ??
+                  p.expenseSplit?.expense?.payer?.name ??
+                  'someone'}
               </Text>
               <Text
                 className="text-muted font-sans text-xs mt-0.5"

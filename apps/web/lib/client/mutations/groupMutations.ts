@@ -23,11 +23,11 @@ export const useCreateGroup = (
 
   return useMutation<unknown, Error, { groupData: CreateGroupData }>({
     mutationFn: ({ groupData }) => createGroup(groupData),
+    ...mutationOptions,
     onSuccess: (...args) => {
       invalidateGroupDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
-    ...mutationOptions,
   });
 };
 
@@ -46,11 +46,11 @@ export const useUpdateGroup = (
     { id: string; groupData: UpdateGroupData }
   >({
     mutationFn: ({ id, groupData }) => updateGroup(id, groupData),
+    ...mutationOptions,
     onSuccess: (...args) => {
       invalidateGroupDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
-    ...mutationOptions,
   });
 };
 
@@ -61,10 +61,10 @@ export const useRemoveGroup = (
 
   return useMutation<unknown, Error, { id: string }>({
     mutationFn: ({ id }) => removeGroup(id),
+    ...mutationOptions,
     onSuccess: (...args) => {
       invalidateGroupDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
-    ...mutationOptions,
   });
 };

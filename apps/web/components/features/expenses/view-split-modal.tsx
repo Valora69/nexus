@@ -11,9 +11,18 @@ import type { ExpenseSplitWithRelations } from '@web/lib/types/entities';
 import {
   formatCurrency,
   formatDateShort,
-  isSplitSettled,
   latestVerifiedPaymentAt,
+  pendingPaid,
+  splitStatus,
+  verifiedPaid,
 } from '@web/lib/utils';
+
+const STATUS_TEXT = {
+  paid: { label: 'Paid', className: 'text-green-500' },
+  pending: { label: 'Pending verification', className: 'text-yellow-500' },
+  partial: { label: 'Partially paid', className: 'text-yellow-500' },
+  unpaid: { label: 'Unpaid', className: 'text-muted-foreground' },
+} as const;
 
 interface ViewSplitModalProps {
   isOpen: boolean;
@@ -32,9 +41,15 @@ export function ViewSplitModal({
 }: ViewSplitModalProps) {
   if (!split) return null;
 
-  const settled = isSplitSettled(split);
+  const status = splitStatus(split);
+  const settled = status === 'paid';
   const settledAt = latestVerifiedPaymentAt(split.payments);
-  const isMyPayable = split.userId === currentUserId && !settled;
+  const verified = verifiedPaid(split.payments);
+  const pending = pendingPaid(split.payments);
+  // Pending claims count against the balance too (the server refuses a
+  // payment once verified + pending covers the share).
+  const remaining = Math.max(0, split.amount - verified - pending);
+  const isMyPayable = split.userId === currentUserId && remaining > 0.01;
   const isPayee = split.expense.payeeId === currentUserId;
 
   return (
@@ -84,11 +99,15 @@ export function ViewSplitModal({
             </div>
             <div>
               <p className="text-muted-foreground">Status</p>
-              <p
-                className={`font-medium ${settled ? 'text-green-500' : 'text-yellow-500'}`}
-              >
-                {settled ? 'Paid' : 'Pending'}
+              <p className={`font-medium ${STATUS_TEXT[status].className}`}>
+                {STATUS_TEXT[status].label}
               </p>
+              {(status === 'partial' || status === 'pending') && (
+                <p className="text-xs text-muted-foreground font-mono">
+                  {formatCurrency(verified)} verified
+                  {pending > 0 && ` · ${formatCurrency(pending)} pending`}
+                </p>
+              )}
             </div>
             {settled && settledAt && (
               <div>
@@ -115,7 +134,7 @@ export function ViewSplitModal({
               <Separator />
               <Button className="w-full gap-2" onClick={onPay}>
                 <CreditCard className="h-4 w-4" />
-                Pay {formatCurrency(split.amount)}
+                Pay {formatCurrency(remaining)}
               </Button>
             </>
           )}

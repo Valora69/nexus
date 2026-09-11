@@ -14,10 +14,10 @@ export const useQuickCapture = (
 
   return useMutation<unknown, Error, QuickCaptureData>({
     mutationFn: (data: QuickCaptureData) => quickCapture(data),
+    ...mutationOptions,
     onSuccess: (...args) => {
       invalidatePersonalTransactionDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
-    ...mutationOptions,
   });
 };

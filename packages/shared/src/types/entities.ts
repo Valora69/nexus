@@ -121,6 +121,7 @@ export type ExpenseWithRelations = Expense & {
         email: string;
         picture?: string;
       };
+      payments?: Payment[];
     }
   >;
 };

@@ -32,11 +32,11 @@ export const useSendFriendRequest = (
     { data: SendFriendRequestData }
   >({
     mutationFn: ({ data }) => sendFriendRequest(data),
+    ...mutationOptions,
     onSuccess: (...args) => {
       invalidateFriendDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
-    ...mutationOptions,
   });
 };
 
@@ -51,11 +51,11 @@ export const useAcceptFriendRequest = (
 
   return useMutation<{ message: string }, Error, { requestId: string }>({
     mutationFn: ({ requestId }) => acceptFriendRequest(requestId),
+    ...mutationOptions,
     onSuccess: (...args) => {
       invalidateFriendDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
-    ...mutationOptions,
   });
 };
 
@@ -74,11 +74,11 @@ export const useAcceptFriendRequestByToken = (
     { data: AcceptFriendRequestByTokenData }
   >({
     mutationFn: ({ data }) => acceptFriendRequestByToken(data),
+    ...mutationOptions,
     onSuccess: (...args) => {
       invalidateFriendDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
-    ...mutationOptions,
   });
 };
 
@@ -93,11 +93,11 @@ export const useDeclineFriendRequest = (
 
   return useMutation<{ message: string }, Error, { requestId: string }>({
     mutationFn: ({ requestId }) => declineFriendRequest(requestId),
+    ...mutationOptions,
     onSuccess: (...args) => {
       invalidateFriendDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
-    ...mutationOptions,
   });
 };
 
@@ -112,10 +112,10 @@ export const useRemoveFriend = (
 
   return useMutation<{ message: string }, Error, { friendId: string }>({
     mutationFn: ({ friendId }) => removeFriend(friendId),
+    ...mutationOptions,
     onSuccess: (...args) => {
       invalidateFriendDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
-    ...mutationOptions,
   });
 };

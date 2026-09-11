@@ -23,12 +23,12 @@ export const useLoginUser = (
 ) =>
   useMutation<LoginResponse, LoginError, LoginDTO>({
     mutationFn: (credentials) => loginUser(credentials),
+    ...mutationOptions,
     onSuccess: (...args) => {
       // Prior session's cache (if any) must not leak across login boundaries.
       queryClient.clear();
       mutationOptions?.onSuccess?.(...args);
     },
-    ...mutationOptions,
   });
 
 export const useLogoutUser = (
@@ -36,10 +36,10 @@ export const useLogoutUser = (
 ) =>
   useMutation<LogoutResponse, LogoutError, void>({
     mutationFn: () => logoutUser(),
+    ...mutationOptions,
     onSettled: (...args) => {
       // Always wipe — even if logout API failed, the local session is gone.
       queryClient.clear();
       mutationOptions?.onSettled?.(...args);
     },
-    ...mutationOptions,
   });

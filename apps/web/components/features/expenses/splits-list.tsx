@@ -5,14 +5,10 @@ import {
   CardTitle,
 } from '@web/components/ui/card';
 import { Badge } from '@web/components/ui/badge';
-import { Receipt, CheckCircle } from 'lucide-react';
+import { Receipt, CheckCircle, Clock } from 'lucide-react';
 import type { ExpenseSplitWithRelations } from '@web/lib/types/entities';
 import type { SplitFilter } from './split-filter-tabs';
-import {
-  formatCurrency,
-  formatDateShort,
-  isSplitSettled,
-} from '@web/lib/utils';
+import { formatCurrency, formatDateShort, splitStatus } from '@web/lib/utils';
 
 interface SplitsListProps {
   splits: ExpenseSplitWithRelations[];
@@ -98,6 +94,7 @@ function SplitCard({ split, filter, currentUserId, onClick }: SplitCardProps) {
     ? split.user.name
     : split.expense.payee?.name || 'Unknown';
   const owesFrom = isOwedToMe ? split.user.name : 'You';
+  const status = splitStatus(split);
 
   return (
     <div
@@ -138,8 +135,14 @@ function SplitCard({ split, filter, currentUserId, onClick }: SplitCardProps) {
           <p className="text-lg font-mono font-bold text-primary">
             {formatCurrency(split.amount)}
           </p>
-          {isSplitSettled(split) && (
-            <CheckCircle className="h-4 w-4 text-green-500" />
+          {status === 'paid' && (
+            <CheckCircle className="h-4 w-4 text-green-500" aria-label="Paid" />
+          )}
+          {status === 'pending' && (
+            <Clock
+              className="h-4 w-4 text-yellow-500"
+              aria-label="Pending verification"
+            />
           )}
         </div>
       </div>

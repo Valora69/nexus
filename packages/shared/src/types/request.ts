@@ -55,11 +55,16 @@ export type CreatePaymentData = {
   amountPaid: number;
   paymentMethod?: 'GCASH' | 'CASH';
   paymentProof?: string;
-  isVerified?: boolean;
   paidAt?: string;
 };
 
-export type UpdatePaymentData = Partial<CreatePaymentData>;
+/** `isVerified` is payee-only; method/proof are editable by the split owner
+ * while the payment is unverified. Amount and split are immutable. */
+export type UpdatePaymentData = {
+  isVerified?: boolean;
+  paymentMethod?: 'GCASH' | 'CASH';
+  paymentProof?: string;
+};
 
 export type CreateActivityData = {
   groupId: string;
