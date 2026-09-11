@@ -1,4 +1,3 @@
-export { ProfileHeader } from './profile-header';
 export { ProfileCard } from './profile-card';
 export { UsersList } from './users-list';
 export { EditProfileModal } from './edit-profile-modal';

@@ -1,12 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import {
-  ProfileHeader,
   ProfileCard,
   EditProfileModal,
 } from '@web/components/features/profile';
@@ -18,6 +15,7 @@ import {
   RemoveFriendModal,
 } from '@web/components/features/friends';
 import { Card, CardContent } from '@web/components/ui/card';
+import { PageHeader } from '@web/components/layout/page-header';
 
 import { useCurrentUser } from '@web/lib/client/queries/userQueries';
 import {
@@ -79,9 +77,6 @@ function AccountStats({
 }
 
 export default function AccountPage() {
-  const router = useRouter();
-  const queryClient = useQueryClient();
-
   // Profile modal state
   const [editOpen, setEditOpen] = useState(false);
   const [editName, setEditName] = useState('');
@@ -161,19 +156,6 @@ export default function AccountPage() {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await fetch('/api/auth/logout', {
-        method: 'POST',
-        credentials: 'include',
-      });
-    } finally {
-      // Always wipe cache so prior user's data doesn't leak to the next session.
-      queryClient.clear();
-      router.push('/login');
-    }
-  };
-
   // Friend handlers
   const onAddFriend = () => setAddFriendOpen(true);
 
@@ -188,21 +170,21 @@ export default function AccountPage() {
     sendRequestMutation.mutate({ data: { email: friendEmail.trim() } });
   };
 
+  // Logout lives in the sidebar (which also clears the query cache).
+  const header = (
+    <PageHeader title="Account" subtitle="Identity and connections" />
+  );
+
   if (isLoading) {
     return (
       <div className="p-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="space-y-2">
-            <div className="h-9 w-28 bg-muted/30 rounded animate-pulse" />
-            <div className="h-4 w-44 bg-muted/30 rounded animate-pulse" />
-          </div>
-        </div>
+        {header}
         <div className="grid grid-cols-1 lg:grid-cols-[2fr_3fr] gap-6">
           <div className="space-y-4">
-            <div className="h-40 bg-muted/30 rounded-lg animate-pulse" />
-            <div className="h-16 bg-muted/30 rounded-lg animate-pulse" />
+            <div className="h-40 rounded-2xl bg-card animate-pulse" />
+            <div className="h-16 rounded-2xl bg-card animate-pulse" />
           </div>
-          <div className="h-64 bg-muted/30 rounded-lg animate-pulse" />
+          <div className="h-64 rounded-2xl bg-card animate-pulse" />
         </div>
       </div>
     );
@@ -212,7 +194,7 @@ export default function AccountPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <ProfileHeader onLogout={handleLogout} />
+      {header}
 
       <div className="grid grid-cols-1 lg:grid-cols-[2fr_3fr] gap-6 items-start">
         {/* Left column — identity */}
