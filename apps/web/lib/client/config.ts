@@ -20,6 +20,7 @@ export const API_BASES = {
   payment: LOCAL,
   personalTransaction: LOCAL,
   dashboard: LOCAL,
+  notification: LOCAL,
 } as const;
 
 // Re-export for backward compat — services that haven't migrated yet

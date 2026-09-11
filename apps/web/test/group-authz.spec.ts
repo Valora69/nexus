@@ -23,6 +23,9 @@ jest.mock('../lib/server/db', () => ({ prisma: mockPrisma }));
 jest.mock('../lib/server/activity', () => ({
   logActivity: jest.fn(async () => undefined),
 }));
+jest.mock('../lib/server/notification-events', () => ({
+  notifyGroupMembersAdded: jest.fn(async () => undefined),
+}));
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 const groupMembers =

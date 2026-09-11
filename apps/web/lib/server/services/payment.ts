@@ -2,6 +2,11 @@ import { ActivityNameEnum, ActivityOnEnum, Prisma } from '@prisma/client';
 import { prisma } from '@/lib/server/db';
 import { ApiError } from '@/lib/server/errors';
 import { logActivity } from '@/lib/server/activity';
+import {
+  notifyPaymentRecorded,
+  notifyPaymentVerified,
+  preparePaymentWithdrawn,
+} from '@/lib/server/notification-events';
 import type {
   CreatePaymentInput,
   UpdatePaymentInput,
@@ -141,6 +146,8 @@ export async function create(
       activityOn: ActivityOnEnum.PAYMENT,
       createdByUserId: userId,
     });
+    // Replays return above, so a retried outbox write never re-notifies.
+    await notifyPaymentRecorded(createdPayment.id, userId);
 
     return { payment: createdPayment, replayed: false as const };
   } catch (error) {
@@ -341,6 +348,11 @@ export async function updatePayment(
       activityOn: ActivityOnEnum.PAYMENT,
       createdByUserId: userId,
     });
+    // Only the unverified → verified transition is news (re-verify returns
+    // early above; method/proof edits notify nobody).
+    if (dto.isVerified === true) {
+      await notifyPaymentVerified(id, userId);
+    }
 
     return updatedPayment;
   } catch (error) {
@@ -366,6 +378,7 @@ export async function remove(id: string, userId: string) {
   }
 
   const groupId = payment.expenseSplit.expense.groupId;
+  const commitWithdrawnNotification = await preparePaymentWithdrawn(id, userId);
 
   try {
     const deletedPayment = await prisma.payment.delete({
@@ -379,6 +392,7 @@ export async function remove(id: string, userId: string) {
       activityOn: ActivityOnEnum.PAYMENT,
       createdByUserId: userId,
     });
+    await commitWithdrawnNotification();
 
     return deletedPayment;
   } catch (error) {

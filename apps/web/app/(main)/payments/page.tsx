@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 import {
@@ -10,6 +12,7 @@ import {
 } from '@web/components/features/payments';
 import { PaymentModals } from '@web/lib/constants/modals';
 import { PageHeader } from '@web/components/layout/page-header';
+import { SearchParamListener } from '@web/components/shared/search-param-listener';
 import { useModalWithItem } from '@web/hooks';
 
 import {
@@ -21,6 +24,8 @@ import { useUpdatePayment } from '@web/lib/client/mutations/paymentMutation';
 import type { PaymentWithRelations } from '@web/lib/types/entities';
 
 export default function PaymentsPage() {
+  const router = useRouter();
+
   // Modal state using custom hook
   const {
     activeModal,
@@ -51,6 +56,30 @@ export default function PaymentsPage() {
 
   const isLoading =
     isLoadingVerification || isLoadingConfirmation || isLoadingAll;
+
+  // Deep link from a "paid you — confirm receipt" notification.
+  const [verifyParam, setVerifyParam] = useState<string | null>(null);
+  useEffect(() => {
+    if (!verifyParam || isLoadingVerification) return;
+    const payment = pendingVerification.find((p) => p.id === verifyParam);
+    if (payment) {
+      openModalWithItem(PaymentModals.VerifyPayment, payment);
+    } else {
+      toast('That payment is no longer waiting for your confirmation.');
+    }
+    setVerifyParam(null);
+    // Consume the param so a refresh or poll doesn't reopen the modal.
+    router.replace('/payments', { scroll: false });
+  }, [
+    verifyParam,
+    isLoadingVerification,
+    pendingVerification,
+    openModalWithItem,
+    router,
+  ]);
+  const deepLink = (
+    <SearchParamListener name="verify" onChange={setVerifyParam} />
+  );
 
   // Handlers
   const onVerifyPayment = (payment: PaymentWithRelations) => {
@@ -95,6 +124,7 @@ export default function PaymentsPage() {
     return (
       <div className="p-6 space-y-6">
         {header}
+        {deepLink}
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-20 rounded-2xl bg-card animate-pulse" />
@@ -107,6 +137,7 @@ export default function PaymentsPage() {
   return (
     <div className="p-6 space-y-6">
       {header}
+      {deepLink}
 
       <PendingVerificationList
         payments={pendingVerification}

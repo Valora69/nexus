@@ -5,11 +5,16 @@ import { Button } from '@web/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@web/components/ui/tabs';
 import { Users, Mail, UserPlus } from 'lucide-react';
 
+export type FriendsTab = 'friends' | 'requests';
+
 interface FriendsTabsProps {
   friendsCount: number;
   pendingCount: number;
   onAddFriend: () => void;
   children: React.ReactNode;
+  /** Controlled tab (e.g. from a `?tab=requests` deep link); uncontrolled if omitted. */
+  tab?: FriendsTab;
+  onTabChange?: (tab: FriendsTab) => void;
 }
 
 export function FriendsTabs({
@@ -17,9 +22,19 @@ export function FriendsTabs({
   pendingCount,
   onAddFriend,
   children,
+  tab,
+  onTabChange,
 }: FriendsTabsProps) {
+  const controlled =
+    tab !== undefined
+      ? {
+          value: tab,
+          onValueChange: (v: string) => onTabChange?.(v as FriendsTab),
+        }
+      : { defaultValue: 'friends' };
+
   return (
-    <Tabs defaultValue="friends" className="w-full">
+    <Tabs {...controlled} className="w-full">
       <div className="flex items-center gap-2">
         <TabsList className="grid grid-cols-2 flex-1">
           <TabsTrigger value="friends" className="flex items-center gap-2">

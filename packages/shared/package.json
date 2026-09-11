@@ -9,8 +9,10 @@
     ".": "./src/index.ts",
     "./types/entities": "./src/types/entities.ts",
     "./types/request": "./src/types/request.ts",
+    "./types/notifications": "./src/types/notifications.ts",
     "./utils/formatters": "./src/utils/formatters.ts",
     "./utils/splits": "./src/utils/splits.ts",
+    "./utils/notifications": "./src/utils/notifications.ts",
     "./queryKeys": "./src/queryKeys.ts",
     "./theme/tokens": "./src/theme/tokens.ts"
   },

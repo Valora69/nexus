@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Menu, X, Bell } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
 import { AppSidebar } from './AppSidebar';
 import { QuickCaptureModal } from './QuickCaptureModal';
+import { NotificationBell } from '@web/components/features/notifications/notification-bell';
 import {
   PageHeaderProvider,
   PageHeaderSlot,
@@ -162,13 +163,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               label={quickAddLabel}
               onClick={() => setCaptureOpen(true)}
             />
-            <button
-              type="button"
-              aria-label="Notifications"
-              className="glass inline-flex h-10 w-10 items-center justify-center rounded-full text-muted transition hover:text-foreground"
-            >
-              <Bell className="h-4 w-4" />
-            </button>
+            <NotificationBell variant="sheet" />
             <ThemeToggle />
             <button
               type="button"
@@ -245,13 +240,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   label={quickAddLabel}
                   onClick={() => setCaptureOpen(true)}
                 />
-                <button
-                  type="button"
-                  aria-label="Notifications"
-                  className="glass inline-flex h-10 w-10 items-center justify-center rounded-full text-muted transition hover:text-foreground"
-                >
-                  <Bell className="h-4 w-4" />
-                </button>
+                <NotificationBell variant="popover" />
                 <ThemeToggle />
               </div>
             </div>

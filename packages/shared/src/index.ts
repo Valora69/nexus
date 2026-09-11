@@ -4,7 +4,9 @@
 
 export * from './types/entities';
 export * from './types/request';
+export * from './types/notifications';
 export * from './utils/formatters';
 export * from './utils/splits';
+export * from './utils/notifications';
 export * from './queryKeys';
 export * from './theme/tokens';
