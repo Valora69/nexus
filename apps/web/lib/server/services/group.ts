@@ -2,6 +2,7 @@ import { ActivityNameEnum, ActivityOnEnum } from '@prisma/client';
 import { prisma } from '@/lib/server/db';
 import { ApiError } from '@/lib/server/errors';
 import { logActivity } from '@/lib/server/activity';
+import { assertGroupMember } from '@/lib/server/authz';
 import type {
   CreateGroupInput,
   UpdateGroupInput,
@@ -129,6 +130,8 @@ export async function updateGroup(
   dto: UpdateGroupInput,
   userId: string,
 ) {
+  await assertGroupMember(id, userId);
+
   try {
     const { memberIds: _memberIds, ...groupData } = dto;
     const updatedGroup = await prisma.group.update({
@@ -155,6 +158,8 @@ export async function updateGroup(
 }
 
 export async function removeGroup(id: string, userId: string) {
+  await assertGroupMember(id, userId);
+
   const unsettledSplits = await prisma.expenseSplit.findMany({
     where: { expense: { groupId: id } },
     include: { payments: { where: { isVerified: true } } },
