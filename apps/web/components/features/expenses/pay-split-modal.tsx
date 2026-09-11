@@ -163,7 +163,7 @@ export function PaySplitModal({
           {paymentMode === 'gcash' && (
             <div className="space-y-3">
               {split.expense.payee?.gcashNumber ? (
-                <div className="bg-muted p-4 rounded-lg space-y-3">
+                <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
                   <p className="text-sm font-medium">GCash Payment Details</p>
                   <div className="flex items-center justify-between">
                     <div>
@@ -208,7 +208,7 @@ export function PaySplitModal({
 
           {/* Cash Payment Instructions */}
           {paymentMode === 'cash' && (
-            <div className="bg-muted p-4 rounded-lg space-y-2">
+            <div className="rounded-2xl border border-border bg-card p-4 space-y-2">
               <p className="text-sm font-medium">Cash Payment</p>
               <p className="text-xs text-muted-foreground">
                 Hand the cash to{' '}
