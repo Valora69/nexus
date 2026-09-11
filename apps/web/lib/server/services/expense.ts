@@ -40,12 +40,17 @@ const EXPENSE_WRITE_SELECT = {
   groupId: true,
   payerId: true,
   payeeId: true,
+  clientRequestId: true,
   group: { select: { name: true } },
   splits: { select: { id: true, userId: true, amount: true } },
 } as const;
 
 // ---------------------------------------------------------------------------
-// Validation helpers (use top-level prisma, NOT tx — intentional)
+// Validation helpers — call BEFORE opening a transaction, never inside one.
+// An interactive tx pins a pooled connection; a top-level `prisma` query
+// issued from inside the callback has to wait for a second connection, and
+// on Vercel that wait blew the 5s tx timeout (P2028) on every group-expense
+// create.
 // ---------------------------------------------------------------------------
 
 async function validateGroupExists(groupId: string) {
@@ -60,70 +65,81 @@ async function validateGroupExists(groupId: string) {
   }
 }
 
-async function validateUserExists(userId: string) {
+/** Returns the subset of `userIds` that are NOT members of `groupId`. */
+async function findNonMembers(groupId: string, userIds: string[]) {
+  const unique = [...new Set(userIds)];
   try {
-    return await prisma.user.findUnique({
-      where: { id: userId },
-      select: { id: true },
+    const members = await prisma.groupMember.findMany({
+      where: { groupId, userId: { in: unique } },
+      select: { userId: true },
     });
-  } catch {
-    console.error('Failed to validate user');
-    throw new ApiError(500, 'Failed to validate user');
-  }
-}
-
-async function validateGroupMembership(userId: string, groupId: string) {
-  try {
-    return await prisma.groupMember.findUnique({
-      where: {
-        GroupMemberUnique: { userId, groupId },
-      },
-      select: { id: true },
-    });
+    const found = new Set(members.map((m) => m.userId));
+    return unique.filter((id) => !found.has(id));
   } catch {
     console.error('Failed to validate group membership');
     throw new ApiError(500, 'Failed to validate group membership');
   }
 }
 
+async function validateCreateExpense(dto: CreateExpenseInput, userId: string) {
+  const { groupId, payerId, payeeId, splits, totalAmount } = dto;
+  const splitUserIds = (splits ?? []).map((split) => split.userId);
+
+  if (splits && splits.length > 0) {
+    // Caught here as a 400 rather than as a P2002 on
+    // ExpenseSplit(expenseId, userId) mid-transaction.
+    if (new Set(splitUserIds).size !== splitUserIds.length) {
+      throw new ApiError(400, 'Each member can only appear once in splits');
+    }
+    const totalSplitAmount = splits.reduce(
+      (sum, split) => sum + split.amount,
+      0,
+    );
+    if (Math.abs(totalSplitAmount - totalAmount) > 0.01) {
+      throw new ApiError(400, 'Split amounts must equal total expense amount');
+    }
+  }
+
+  const [group, nonMembers] = await Promise.all([
+    validateGroupExists(groupId),
+    findNonMembers(groupId, [
+      userId,
+      payerId,
+      ...(payeeId ? [payeeId] : []),
+      ...splitUserIds,
+    ]),
+  ]);
+  if (!group) {
+    throw new ApiError(404, 'Group not found');
+  }
+  if (nonMembers.includes(userId)) {
+    throw new ApiError(403, 'You are not a member of this group');
+  }
+  if (nonMembers.length > 0) {
+    throw new ApiError(
+      400,
+      'Payer, payee, and split participants must be members of the group',
+    );
+  }
+}
+
 // ---------------------------------------------------------------------------
-// createExpenseInTx
+// createExpenseInTx — writes only; run validateCreateExpense first.
 // ---------------------------------------------------------------------------
 
 async function createExpenseInTx(
   tx: Prisma.TransactionClient,
   dto: CreateExpenseInput,
-  userId: string,
+  clientRequestId?: string,
 ) {
   const { groupId, payeeId, payerId, splits, ...rest } = dto;
-
-  // Validations use top-level prisma since they're reads — fine outside tx
-  await validateGroupExists(groupId);
-  if (userId) {
-    await Promise.all([
-      validateUserExists(userId),
-      validateGroupMembership(userId, groupId),
-    ]);
-  }
-
-  if (splits && splits.length > 0) {
-    const totalSplitAmount = splits.reduce(
-      (sum, split) => sum + split.amount,
-      0,
-    );
-    if (Math.abs(totalSplitAmount - rest.totalAmount) > 0.01) {
-      throw new ApiError(400, 'Split amounts must equal total expense amount');
-    }
-    await Promise.all(
-      splits.map((split) => validateGroupMembership(split.userId, groupId)),
-    );
-  }
 
   const expense = await tx.expense.create({
     data: {
       payer: { connect: { id: payerId } },
       ...(payeeId && { payee: { connect: { id: payeeId } } }),
       group: { connect: { id: groupId } },
+      ...(clientRequestId ? { clientRequestId } : {}),
       ...(splits &&
         splits.length > 0 && {
           splits: {
@@ -160,10 +176,38 @@ async function createExpenseInTx(
 // create
 // ---------------------------------------------------------------------------
 
-export async function createExpense(dto: CreateExpenseInput, userId: string) {
+/**
+ * Result envelope: {expense, replayed}. `replayed=true` means the caller's
+ * clientRequestId matched a previously-created expense; the record is
+ * returned unchanged and no fresh Activity/PersonalTransaction rows are
+ * written. The route layer strips this flag before responding — the wire
+ * shape stays identical to a first-write response.
+ */
+export async function createExpense(
+  dto: CreateExpenseInput,
+  userId: string,
+  clientRequestId?: string,
+) {
+  // Fast path: if this outbox row already landed once, hand back the same
+  // record without re-entering the transaction. Cheap findUnique on the
+  // unique index; the vast majority of retries take this branch, not the
+  // P2002 race path below.
+  if (clientRequestId) {
+    const existing = await prisma.expense.findUnique({
+      where: { clientRequestId },
+      select: EXPENSE_WRITE_SELECT,
+    });
+    if (existing) {
+      return { expense: existing, replayed: true as const };
+    }
+  }
+
+  await validateCreateExpense(dto, userId);
+
   try {
-    const createdExpense = await prisma.$transaction((tx) =>
-      createExpenseInTx(tx, dto, userId),
+    const createdExpense = await prisma.$transaction(
+      (tx) => createExpenseInTx(tx, dto, clientRequestId),
+      { timeout: 10000 },
     );
 
     await logActivity({
@@ -173,8 +217,30 @@ export async function createExpense(dto: CreateExpenseInput, userId: string) {
       groupId: dto.groupId,
     });
 
-    return createdExpense;
+    return { expense: createdExpense, replayed: false as const };
   } catch (error) {
+    // P2002 with the clientRequestId target = a concurrent replay of the
+    // same outbox row won the race. Refetch and return the winner's row;
+    // never surface a "duplicate key" error to a legitimately-retried
+    // idempotent write.
+    if (
+      clientRequestId &&
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2002'
+    ) {
+      const target = error.meta?.target;
+      const hitClientRequestId = Array.isArray(target)
+        ? target.includes('clientRequestId')
+        : target === 'clientRequestId' ||
+          target === 'Expense_clientRequestId_key';
+      if (hitClientRequestId) {
+        const raced = await prisma.expense.findUnique({
+          where: { clientRequestId },
+          select: EXPENSE_WRITE_SELECT,
+        });
+        if (raced) return { expense: raced, replayed: true as const };
+      }
+    }
     console.error('Error creating expense', error);
     if (error instanceof ApiError) throw error;
     throw new ApiError(500, 'Failed to create expense');
@@ -190,12 +256,16 @@ export async function createManyExpenses(
   userId: string,
 ) {
   const { expenses } = dto;
+  await Promise.all(
+    expenses.map((expenseDto) => validateCreateExpense(expenseDto, userId)),
+  );
+
   try {
     const createdExpenses = await prisma.$transaction(
       async (tx) => {
         const results = [];
         for (const expenseDto of expenses) {
-          results.push(await createExpenseInTx(tx, expenseDto, userId));
+          results.push(await createExpenseInTx(tx, expenseDto));
         }
         return results;
       },
@@ -327,6 +397,11 @@ async function updateWithSplits(
     );
   }
 
+  const splitUserIds = splits.map((s) => s.userId);
+  if (new Set(splitUserIds).size !== splitUserIds.length) {
+    throw new ApiError(400, 'Each member can only appear once in splits');
+  }
+
   const effectiveTotal = rest.totalAmount ?? existing.totalAmount;
   const totalSplit = splits.reduce((sum, s) => sum + s.amount, 0);
   if (Math.abs(totalSplit - effectiveTotal) > 0.01) {
@@ -334,9 +409,13 @@ async function updateWithSplits(
   }
 
   const effectiveGroupId = groupId ?? existing.groupId;
-  await Promise.all(
-    splits.map((s) => validateGroupMembership(s.userId, effectiveGroupId)),
-  );
+  const nonMembers = await findNonMembers(effectiveGroupId, splitUserIds);
+  if (nonMembers.length > 0) {
+    throw new ApiError(
+      400,
+      'All split participants must be members of the group',
+    );
+  }
 
   try {
     const updated = await prisma.$transaction(async (tx) => {

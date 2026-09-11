@@ -1,14 +1,17 @@
 /**
  * Payment mutations — mobile mirror of web's `paymentMutation.ts`.
  *
- * `useCreatePayment` accepts `clientRequestId` alongside the payload so
- * stage 12's outbox can generate an id, stash the request, and replay
- * it against the same choke point on reconnect without needing a
- * parallel mutation.
+ * `useCreatePayment` routes through the stage-12 offline outbox choke
+ * point (see `submitCreatePayment`), returning a discriminated
+ * `SubmitResult<Payment>` so the caller can distinguish an online
+ * `'sent'` write from an offline `'queued'` enqueue.
  *
  * `useUpdatePayment` doubles as the "verify" call: web flips
  * `isVerified: true` and the server auto-fills `verifiedAt` — same
  * contract mobile uses from the Home pending-verification section.
+ * Updates are *not* queued offline: the plan explicitly scopes the
+ * outbox to append-only creates, and 'record then verify' requires
+ * a real server round-trip anyway.
  */
 
 import type { Payment } from '@repo/shared/types/entities';
@@ -22,29 +25,39 @@ import {
   type UseMutationOptions,
 } from '@tanstack/react-query';
 
+import { useAuth } from '../../auth/auth-context';
+import { submitCreatePayment, type SubmitResult } from '../../offline';
 import { invalidatePaymentDomain } from '../invalidations';
-import {
-  createPayment,
-  removePayment,
-  updatePayment,
-} from '../services/paymentService';
+import { removePayment, updatePayment } from '../services/paymentService';
 
 export type CreatePaymentArgs = {
   paymentData: CreatePaymentData;
-  clientRequestId?: string;
+  clientRequestId: string;
 };
 
 export function useCreatePayment(
-  mutationOptions?: UseMutationOptions<Payment, Error, CreatePaymentArgs>,
+  mutationOptions?: UseMutationOptions<
+    SubmitResult<Payment>,
+    Error,
+    CreatePaymentArgs
+  >,
 ) {
   const queryClient = useQueryClient();
-  return useMutation<Payment, Error, CreatePaymentArgs>({
-    mutationFn: ({ paymentData, clientRequestId }) =>
-      createPayment(paymentData, { clientRequestId }),
+  const { user } = useAuth();
+  return useMutation<SubmitResult<Payment>, Error, CreatePaymentArgs>({
+    mutationFn: ({ paymentData, clientRequestId }) => {
+      if (!user) {
+        throw new Error('Cannot record a payment while signed out');
+      }
+      return submitCreatePayment(paymentData, {
+        userId: user.sub,
+        clientRequestId,
+      });
+    },
     ...mutationOptions,
-    onSuccess: (...args) => {
-      invalidatePaymentDomain(queryClient);
-      mutationOptions?.onSuccess?.(...args);
+    onSuccess: (result, ...rest) => {
+      if (result.kind === 'sent') invalidatePaymentDomain(queryClient);
+      mutationOptions?.onSuccess?.(result, ...rest);
     },
   });
 }

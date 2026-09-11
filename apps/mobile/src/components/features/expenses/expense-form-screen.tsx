@@ -121,7 +121,18 @@ function NewExpenseForm({
   const [error, setError] = useState<string | null>(null);
 
   const createMutation = useCreateExpense({
-    onSuccess: () => onCreated(),
+    onSuccess: (result) => {
+      if (result.kind === 'queued') {
+        // Offline: the outbox owns the write from here on. Let the user
+        // know before backing out so an "add expense, nothing appears"
+        // race can't look like a bug.
+        Alert.alert(
+          'Queued for sync',
+          "This expense will send as soon as you're back online.",
+        );
+      }
+      onCreated();
+    },
     onError: (err) => {
       const message =
         err instanceof ApiError

@@ -13,6 +13,7 @@ import { View, type ViewProps } from 'react-native';
 import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
 
 import { OfflineBanner } from './offline-banner';
+import { SyncStatusStrip } from './sync-status-strip';
 
 type Props = PropsWithChildren<{
   edges?: readonly Edge[];
@@ -24,6 +25,7 @@ export function Screen({ children, edges, className, style }: Props) {
   return (
     <SafeAreaView edges={edges} className="flex-1 bg-background" style={style}>
       <OfflineBanner />
+      <SyncStatusStrip />
       <View className={`flex-1 ${className ?? ''}`}>{children}</View>
     </SafeAreaView>
   );

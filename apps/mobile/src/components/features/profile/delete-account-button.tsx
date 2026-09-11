@@ -16,6 +16,7 @@ import type { User } from '@repo/shared/types/entities';
 
 import { useRemoveUser } from '../../../lib/api/mutations/userMutations';
 import { useAuth } from '../../../lib/auth/auth-context';
+import { deleteAllForUser } from '../../../lib/offline/outbox';
 import { colors } from '../../../lib/theme';
 import { GlassCard } from '../../ui';
 
@@ -24,9 +25,15 @@ export function DeleteAccountButton({ user }: { user: User }) {
 
   const remove = useRemoveUser({
     onSuccess: () => {
-      // Local sign-out clears the token + resets the query cache. The
-      // authenticated-only layout redirects to /(auth)/login next render.
-      void signOut();
+      // Purge queued offline writes for this user — the account row is
+      // gone server-side, so any replay would just 404. Fire-and-forget:
+      // signing out first would leave orphaned SQLite rows if the delete
+      // failed, so we chain them explicitly.
+      void deleteAllForUser(user.id).finally(() => {
+        // Local sign-out clears the token + resets the query cache. The
+        // authenticated-only layout redirects to /(auth)/login next render.
+        void signOut();
+      });
     },
     onError: (err) => {
       Alert.alert(

@@ -10,7 +10,7 @@
 
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Constants from 'expo-constants';
-import { ScrollView, Text, View } from 'react-native';
+import { Alert, ScrollView, Text, View } from 'react-native';
 
 import {
   Avatar,
@@ -22,6 +22,7 @@ import {
 } from '../../ui';
 import { useCurrentUser } from '../../../lib/api/queries/userQueries';
 import { useAuth } from '../../../lib/auth/auth-context';
+import { handleSignOutWithOutboxConfirm } from './sign-out-helpers';
 import { colors } from '../../../lib/theme';
 import { DeleteAccountButton } from './delete-account-button';
 import { GcashEditor } from './gcash-editor';
@@ -97,7 +98,7 @@ export function ProfileScreen() {
             label="Sign out"
             variant="secondary"
             onPress={() => {
-              void signOut();
+              void handleSignOutWithOutboxConfirm(user.id, signOut);
             }}
           />
           <DeleteAccountButton user={user} />
