@@ -63,6 +63,11 @@ export const queryKeys = {
     page: (skip?: number, take?: number) =>
       ['activities', skip ?? 0, take ?? 0] as const,
   },
+  notifications: {
+    all: () => ['notifications'] as const,
+    list: () => ['notifications', 'list'] as const,
+    unreadCount: () => ['notifications', 'unread-count'] as const,
+  },
   dashboard: {
     all: () => ['dashboard'] as const,
     forMonth: (month: string | undefined) =>
