@@ -3,6 +3,11 @@ import { waitUntil } from '@vercel/functions';
 import { prisma } from '@/lib/server/db';
 import { ApiError } from '@/lib/server/errors';
 import { sendFriendRequestEmail } from '@/lib/server/email';
+import {
+  notifyFriendAccepted,
+  notifyFriendRequest,
+  resolveFriendRequest,
+} from '@/lib/server/notification-events';
 
 export async function sendFriendRequest(
   senderId: string,
@@ -78,6 +83,8 @@ export async function sendFriendRequest(
           data: { status: 'ACCEPTED' },
         }),
       ]);
+      // Mutual request: the sender effectively accepted the recipient's.
+      await notifyFriendAccepted(reverseRequest.id, senderId, recipient.id);
       return {
         message:
           'You were already requested by this user — you are now friends!',
@@ -110,6 +117,10 @@ export async function sendFriendRequest(
         console.error('Failed to send friend request email:', err),
       ),
     );
+    // Invitees without an account only get the email for now.
+    if (recipient) {
+      await notifyFriendRequest(request.id, senderId, recipient.id);
+    }
 
     return { message: 'Friend request sent!' };
   } catch (error) {
@@ -217,6 +228,7 @@ export async function acceptRequest(userId: string, requestId: string) {
         data: { status: 'ACCEPTED' },
       }),
     ]);
+    await notifyFriendAccepted(requestId, userId, request.senderId);
 
     return { message: 'Friend request accepted!' };
   } catch (error) {
@@ -294,6 +306,7 @@ export async function declineRequest(userId: string, requestId: string) {
     where: { id: requestId },
     data: { status: 'DECLINED' },
   });
+  await resolveFriendRequest(requestId, userId);
 
   return { message: 'Friend request declined' };
 }
