@@ -7,6 +7,12 @@ import {
 import { prisma } from '@/lib/server/db';
 import { ApiError } from '@/lib/server/errors';
 import { logActivity } from '@/lib/server/activity';
+import {
+  notifyExpenseCreated,
+  notifyExpensesCreated,
+  notifyExpenseUpdated,
+  prepareExpenseDeleted,
+} from '@/lib/server/notification-events';
 import type {
   CreateExpenseInput,
   CreateManyExpensesInput,
@@ -154,6 +160,17 @@ async function validateCreateExpense(dto: CreateExpenseInput, userId: string) {
   }
 }
 
+/** Who owes/is owed before an edit, for diffing in notifications. */
+function stakeStateOf(expense: {
+  payeeId: string | null;
+  splits: Array<{ userId: string; amount: number }>;
+}) {
+  return {
+    payeeId: expense.payeeId,
+    splits: expense.splits.map((s) => ({ userId: s.userId, amount: s.amount })),
+  };
+}
+
 // ---------------------------------------------------------------------------
 // createExpenseInTx — writes only; run validateCreateExpense first.
 // ---------------------------------------------------------------------------
@@ -247,6 +264,7 @@ export async function createExpense(
       activityOn: ActivityOnEnum.EXPENSE,
       groupId: dto.groupId,
     });
+    await notifyExpenseCreated(createdExpense.id, userId);
 
     return { expense: createdExpense, replayed: false as const };
   } catch (error) {
@@ -312,6 +330,10 @@ export async function createManyExpenses(
         groupId: expenseDto.groupId,
       });
     }
+    await notifyExpensesCreated(
+      createdExpenses.map((e) => e.id),
+      userId,
+    );
 
     return createdExpenses;
   } catch (error) {
@@ -400,8 +422,11 @@ async function updateWithSplits(
     id: string;
     totalAmount: number;
     groupId: string;
+    payeeId: string | null;
     splits: Array<{
       id: string;
+      userId: string;
+      amount: number;
       payments: Array<{ isVerified: boolean }>;
     }>;
   },
@@ -494,6 +519,7 @@ async function updateWithSplits(
       activityOn: ActivityOnEnum.EXPENSE,
       createdByUserId: userId,
     });
+    await notifyExpenseUpdated(stakeStateOf(existing), id, userId);
 
     return updated;
   } catch (error) {
@@ -581,6 +607,8 @@ export async function updateExpense(
       activityOn,
       createdByUserId: userId,
     });
+    // A payee change moves money even without new splits.
+    await notifyExpenseUpdated(stakeStateOf(existing), id, userId);
 
     return updatedExpense;
   } catch (error) {
@@ -624,6 +652,9 @@ export async function removeExpense(id: string, userId: string) {
     );
   }
 
+  // Read who was involved before the row (and its splits) disappear.
+  const commitDeletedNotifications = await prepareExpenseDeleted(id, userId);
+
   try {
     const deletedExpense = await prisma.expense.delete({
       where: { id },
@@ -636,6 +667,7 @@ export async function removeExpense(id: string, userId: string) {
         activityOn: ActivityOnEnum.EXPENSE,
         createdByUserId: userId,
       });
+      await commitDeletedNotifications();
     }
     return deletedExpense;
   } catch (error) {

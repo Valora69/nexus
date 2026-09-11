@@ -1,6 +1,7 @@
 import { PaymentMethod } from '@prisma/client';
 import { prisma } from '@/lib/server/db';
 import { ApiError } from '@/lib/server/errors';
+import { notifyPaymentRecorded } from '@/lib/server/notification-events';
 import type { UpdateExpenseSplitInput } from '@/lib/server/schemas/expense-split';
 
 const USER_SELECT = {
@@ -269,6 +270,7 @@ export async function markAsPaid(
       { timeout: 10000 },
     );
 
+    await notifyPaymentRecorded(payment.id, userId);
     const updatedSplit = await findOne(id);
 
     return { payment, split: updatedSplit };

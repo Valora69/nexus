@@ -33,6 +33,15 @@ jest.mock('../lib/server/db', () => ({ prisma: mockPrisma }));
 jest.mock('../lib/server/activity', () => ({
   logActivity: jest.fn(async () => undefined),
 }));
+jest.mock('../lib/server/notification-events', () => ({
+  notifyPaymentRecorded: jest.fn(async () => undefined),
+  notifyPaymentVerified: jest.fn(async () => undefined),
+  preparePaymentWithdrawn: jest.fn(async () => async () => undefined),
+  prepareExpenseDeleted: jest.fn(async () => async () => undefined),
+  notifyExpenseCreated: jest.fn(async () => undefined),
+  notifyExpensesCreated: jest.fn(async () => undefined),
+  notifyExpenseUpdated: jest.fn(async () => undefined),
+}));
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 const payments =
