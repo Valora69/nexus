@@ -2,12 +2,16 @@ import { ActivityNameEnum, ActivityOnEnum } from '@prisma/client';
 import { prisma } from '@/lib/server/db';
 import { ApiError } from '@/lib/server/errors';
 import { logActivity } from '@/lib/server/activity';
+import { assertGroupMember } from '@/lib/server/authz';
 import type { CreateGroupMemberInput } from '@/lib/server/schemas/group-member';
 
 export async function createGroupMember(
   dto: CreateGroupMemberInput,
   userId: string,
 ) {
+  // Only existing members can add people to a group.
+  await assertGroupMember(dto.groupId, userId);
+
   try {
     const existingMember = await prisma.groupMember.findUnique({
       where: {
@@ -84,8 +88,10 @@ export async function findOneGroupMember(id: string) {
   }
 }
 
-export async function findRemovalBlockers(memberId: string) {
-  const member = await findOneGroupMember(memberId);
+export async function findRemovalBlockers(member: {
+  userId: string;
+  groupId: string;
+}) {
   const { userId, groupId } = member;
 
   const [ownSplits, owedToMember, pendingPayments] = await Promise.all([
@@ -155,7 +161,13 @@ export async function findRemovalBlockers(memberId: string) {
 }
 
 export async function removeGroupMember(id: string, userId: string) {
-  const { blockers } = await findRemovalBlockers(id);
+  const member = await findOneGroupMember(id);
+  // Anyone may leave a group; removing someone else requires membership.
+  if (member.userId !== userId) {
+    await assertGroupMember(member.groupId, userId);
+  }
+
+  const { blockers } = await findRemovalBlockers(member);
   if (blockers.length > 0) {
     return { blocked: true as const, blockers };
   }
