@@ -34,6 +34,8 @@ export function invalidatePaymentDomain(queryClient: QueryClient) {
   queryClient.invalidateQueries({ queryKey: queryKeys.expenses.all() });
   queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all() });
   queryClient.invalidateQueries({ queryKey: queryKeys.groups.all() });
+  // Verifying resolves the payee's "confirm receipt" notification server-side.
+  invalidateNotificationDomain(queryClient);
 }
 
 type VerifiedPayment = {
@@ -119,6 +121,13 @@ export function invalidateGroupDomain(queryClient: QueryClient) {
 export function invalidateFriendDomain(queryClient: QueryClient) {
   queryClient.invalidateQueries({ queryKey: queryKeys.friends.all() });
   queryClient.invalidateQueries({ queryKey: queryKeys.friends.requests() });
+  // Accept / decline resolve the friend-request notification server-side.
+  invalidateNotificationDomain(queryClient);
+}
+
+/** Badge count and inbox list. */
+export function invalidateNotificationDomain(queryClient: QueryClient) {
+  queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all() });
 }
 
 /** User profile updates: name and gcashNumber are denormalized inside
