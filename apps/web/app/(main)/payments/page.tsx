@@ -3,13 +3,13 @@
 import { toast } from 'sonner';
 
 import {
-  PaymentsHeader,
   PendingVerificationList,
   AwaitingConfirmationList,
   PaymentHistoryList,
   VerifyPaymentModal,
 } from '@web/components/features/payments';
 import { PaymentModals } from '@web/lib/constants/modals';
+import { PageHeader } from '@web/components/layout/page-header';
 import { useModalWithItem } from '@web/hooks';
 
 import {
@@ -84,19 +84,20 @@ export default function PaymentsPage() {
     ),
   };
 
+  const header = (
+    <PageHeader
+      title="Payments"
+      subtitle="Confirm receipts and track payment status"
+    />
+  );
+
   if (isLoading) {
     return (
       <div className="p-6 space-y-6">
-        <PaymentsHeader
-          title="Payments"
-          description="View payment history and status"
-        />
+        {header}
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="h-20 bg-muted/30 rounded-lg animate-pulse"
-            />
+            <div key={i} className="h-20 rounded-2xl bg-card animate-pulse" />
           ))}
         </div>
       </div>
@@ -105,10 +106,7 @@ export default function PaymentsPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <PaymentsHeader
-        title="Payments"
-        description="View payment history and status"
-      />
+      {header}
 
       <PendingVerificationList
         payments={pendingVerification}
