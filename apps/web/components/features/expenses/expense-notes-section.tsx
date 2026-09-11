@@ -28,8 +28,8 @@ export function ExpenseNotesSection({
   onCancel,
 }: ExpenseNotesSectionProps) {
   return (
-    <div className="mb-10 space-y-4">
-      <h2 className="text-xl font-semibold text-gray-900">Notes</h2>
+    <div className="space-y-4">
+      <h2 className="text-lg font-medium text-foreground">Notes</h2>
 
       {isEditing ? (
         <div className="space-y-4">
@@ -37,8 +37,8 @@ export function ExpenseNotesSection({
             <Textarea
               value={editedNotes}
               onChange={(e) => onEditedNotesChange(e.target.value)}
-              className={`min-h-[160px] text-gray-700 leading-relaxed ${
-                notesError ? 'border-red-500 focus-visible:ring-red-500' : ''
+              className={`min-h-[160px] leading-relaxed ${
+                notesError ? 'border-loss focus-visible:ring-loss' : ''
               }`}
               placeholder="Add any details about this expense..."
               aria-invalid={!!notesError}
@@ -46,24 +46,21 @@ export function ExpenseNotesSection({
             />
             <div className="flex items-center justify-between">
               {notesError ? (
-                <p
-                  id="notes-error"
-                  className="text-sm text-red-600 font-medium"
-                >
+                <p id="notes-error" className="text-sm font-medium text-loss">
                   {notesError}
                 </p>
               ) : (
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-muted">
                   Notes are optional but helpful for context.
                 </p>
               )}
               <p
                 className={`text-sm ${
                   editedNotes.length > 2000
-                    ? 'text-red-600 font-medium'
+                    ? 'font-medium text-loss'
                     : editedNotes.length > 0 && editedNotes.length < 5
-                      ? 'text-orange-600'
-                      : 'text-gray-500'
+                      ? 'text-yellow-600 dark:text-yellow-400'
+                      : 'text-muted'
                 }`}
               >
                 {editedNotes.length} / 2000 characters
@@ -74,26 +71,20 @@ export function ExpenseNotesSection({
           <div className="flex gap-2 justify-end">
             <Button
               type="button"
-              variant="outline"
+              variant="ghost"
               onClick={onCancel}
-              className="border-gray-300 text-gray-700 hover:bg-gray-50"
               disabled={isPending}
             >
               Cancel
             </Button>
-            <Button
-              type="button"
-              onClick={onSave}
-              disabled={isPending}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
+            <Button type="button" onClick={onSave} disabled={isPending}>
               {isPending ? 'Saving...' : 'Save Notes'}
             </Button>
           </div>
         </div>
       ) : (
         <p
-          className="text-gray-700 leading-relaxed text-justify cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors"
+          className="cursor-pointer rounded-2xl border border-border bg-card p-4 leading-relaxed text-foreground transition-colors hover:bg-card-hover"
           onDoubleClick={onStartEdit}
           title="Double click to edit notes"
         >
@@ -101,7 +92,7 @@ export function ExpenseNotesSection({
             ? truncateText(notes, 600)
             : 'No notes added yet. Double click here to add some details.'}
           {notes && notes.length > 600 && (
-            <span className="ml-1 font-semibold text-gray-900">…</span>
+            <span className="ml-1 font-semibold text-foreground">…</span>
           )}
         </p>
       )}
