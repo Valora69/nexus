@@ -56,6 +56,12 @@ export const useAcceptFriendRequest = (
       invalidateFriendDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
+    // A stale list (e.g. already accepted from the email link) resyncs
+    // from the server instead of lingering as "pending".
+    onError: (...args) => {
+      invalidateFriendDomain(queryClient);
+      mutationOptions?.onError?.(...args);
+    },
   });
 };
 
@@ -79,6 +85,12 @@ export const useAcceptFriendRequestByToken = (
       invalidateFriendDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
     },
+    // A stale list (e.g. already accepted from the email link) resyncs
+    // from the server instead of lingering as "pending".
+    onError: (...args) => {
+      invalidateFriendDomain(queryClient);
+      mutationOptions?.onError?.(...args);
+    },
   });
 };
 
@@ -97,6 +109,12 @@ export const useDeclineFriendRequest = (
     onSuccess: (...args) => {
       invalidateFriendDomain(queryClient);
       mutationOptions?.onSuccess?.(...args);
+    },
+    // A stale list (e.g. already accepted from the email link) resyncs
+    // from the server instead of lingering as "pending".
+    onError: (...args) => {
+      invalidateFriendDomain(queryClient);
+      mutationOptions?.onError?.(...args);
     },
   });
 };
