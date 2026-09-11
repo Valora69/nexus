@@ -175,7 +175,7 @@ export function ViewExpenseModal({
                     return (
                       <div
                         key={split.id}
-                        className="flex justify-between items-center text-sm p-2 rounded bg-muted/30"
+                        className="flex justify-between items-center text-sm px-3 py-2 rounded-xl border border-border bg-card"
                       >
                         <span
                           className={`flex items-center gap-2 ${isPayee ? 'text-primary font-medium' : ''}`}
@@ -211,7 +211,7 @@ export function ViewExpenseModal({
                     return (
                       <div
                         key={member.userId}
-                        className="flex justify-between items-center text-sm p-2 rounded bg-muted/30"
+                        className="flex justify-between items-center text-sm px-3 py-2 rounded-xl border border-border bg-card"
                       >
                         <span
                           className={isPayer ? 'text-primary font-medium' : ''}
