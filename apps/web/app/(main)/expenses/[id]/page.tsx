@@ -6,13 +6,13 @@ import { useRouter } from 'next/navigation';
 
 import { Button } from '@web/components/ui/button';
 import { ConfirmationModal } from '@web/components/shared/confirmation-modal';
+import { PageHeader } from '@web/components/layout/page-header';
 import {
-  ExpenseDetailHeader,
   ExpenseNotesSection,
   ExpenseMetaInfo,
   ExpenseDetailActions,
 } from '@web/components/features/expenses';
-import { useToast } from '@web/hooks/use-toast';
+import { toast } from 'sonner';
 
 import { useGetExpenseById } from '@web/lib/client/queries/expenseQueries';
 import {
@@ -20,6 +20,7 @@ import {
   useRemoveExpense,
 } from '@web/lib/client/mutations/expenseMutation';
 import type { ExpenseWithRelations } from '@web/lib/types/entities';
+import { formatCurrency, formatDate, formatTime } from '@web/lib/utils';
 
 interface ExpenseDetailsPageProps {
   params: {
@@ -31,7 +32,6 @@ export default function ExpenseDetailsPage({
   params,
 }: ExpenseDetailsPageProps) {
   const router = useRouter();
-  const { toast } = useToast();
 
   // Edit state
   const [isEditingNotes, setIsEditingNotes] = useState(false);
@@ -79,11 +79,7 @@ export default function ExpenseDetailsPage({
     if (!expense) return;
 
     if (!validateNotes(editedNotes)) {
-      toast({
-        variant: 'destructive',
-        title: 'Validation Error',
-        description: notesError || 'Please fix any errors before saving.',
-      });
+      toast.error(notesError || 'Please fix any errors before saving.');
       return;
     }
 
@@ -102,20 +98,13 @@ export default function ExpenseDetailsPage({
       setIsEditingNotes(false);
       setNotesError(null);
 
-      toast({
-        title: 'Notes updated',
-        description: 'Expense notes were updated successfully.',
-      });
+      toast.success('Notes updated');
     } catch (err) {
       const message =
         err instanceof Error ? err.message : 'An unexpected error occurred';
 
       setNotesError(message);
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: `Failed to save notes: ${message}`,
-      });
+      toast.error(`Failed to save notes: ${message}`);
     }
   };
 
@@ -138,31 +127,24 @@ export default function ExpenseDetailsPage({
       await removeExpenseMutation.mutateAsync({ id: expense.id });
       setShowArchiveModal(false);
 
-      toast({
-        title: 'Expense archived',
-        description: 'The expense has been removed from the list.',
-      });
+      toast.success('Expense archived');
 
       router.push('/expenses');
     } catch (err) {
       const message =
         err instanceof Error ? err.message : 'An unexpected error occurred';
 
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: `Failed to archive expense: ${message}`,
-      });
+      toast.error(`Failed to archive expense: ${message}`);
     }
   };
 
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading expense details...</p>
+      <div className="flex min-h-[50vh] items-center justify-center p-6">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-10 w-10 animate-spin rounded-full border-2 border-border border-t-accent" />
+          <p className="text-sm text-muted">Loading expense details…</p>
         </div>
       </div>
     );
@@ -171,17 +153,13 @@ export default function ExpenseDetailsPage({
   // Error / not found state
   if (error || !expense) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex min-h-[50vh] items-center justify-center p-6">
         <div className="text-center">
-          <p className="text-red-600 mb-2">Failed to load expense details</p>
-          <p className="text-gray-600 text-sm">
+          <p className="mb-2 text-loss">Failed to load expense details</p>
+          <p className="text-sm text-muted">
             {error instanceof Error ? error.message : 'Expense not found'}
           </p>
-          <Button
-            variant="ghost"
-            onClick={handleBack}
-            className="mt-4 text-gray-600 hover:text-gray-900"
-          >
+          <Button variant="ghost" onClick={handleBack} className="mt-4">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Expenses
           </Button>
@@ -193,13 +171,12 @@ export default function ExpenseDetailsPage({
   const typedExpense = expense as ExpenseWithRelations;
 
   return (
-    <div className="min-h-screen">
-      <div className="container mx-auto py-10 px-6">
-        <ExpenseDetailHeader
-          name={typedExpense.name}
-          date={typedExpense.date}
-          totalAmount={typedExpense.totalAmount}
-          onBack={handleBack}
+    <div className="p-6">
+      <div className="space-y-8">
+        <PageHeader
+          title={typedExpense.name}
+          subtitle={`${formatDate(typedExpense.date)} · ${formatTime(typedExpense.date)} · ${formatCurrency(typedExpense.totalAmount)}`}
+          backHref="/expenses"
         />
 
         <ExpenseNotesSection

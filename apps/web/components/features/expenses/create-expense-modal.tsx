@@ -315,7 +315,7 @@ export function CreateExpenseModal({
                     return (
                       <div
                         key={userId}
-                        className={`flex items-center justify-between gap-3 p-2 rounded ${isZeroCustom ? 'bg-muted/10 opacity-60' : 'bg-muted/30'}`}
+                        className={`flex items-center justify-between gap-3 px-3 py-2 rounded-xl border border-border bg-card ${isZeroCustom ? 'opacity-60' : ''}`}
                       >
                         <span
                           className={`text-sm flex-1 ${isCurrentUser ? 'text-primary font-medium' : ''}`}

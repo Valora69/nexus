@@ -3,14 +3,16 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { Plus } from 'lucide-react';
 
 import {
-  GroupsListHeader,
   GroupsGrid,
   EmptyGroups,
   CreateGroupModal,
 } from '@web/components/features/groups-list';
 import { GroupListModals } from '@web/lib/constants/modals';
+import { Button } from '@web/components/ui/button';
+import { PageHeader } from '@web/components/layout/page-header';
 
 import { useGetAllGroups } from '@web/lib/client/queries/groupQueries';
 import { useGetAllFriends } from '@web/lib/client/queries/friendQueries';
@@ -103,16 +105,25 @@ export default function GroupsPage() {
     ),
   };
 
+  const header = (
+    <PageHeader
+      title="Groups"
+      subtitle="Manage your expense groups"
+      actions={
+        <Button onClick={openCreateModal} size="sm">
+          <Plus className="h-4 w-4" /> Create Group
+        </Button>
+      }
+    />
+  );
+
   if (isLoading) {
     return (
       <div className="p-6 space-y-6">
-        <GroupsListHeader onCreateGroup={openCreateModal} />
+        {header}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="h-48 bg-muted/30 rounded-lg animate-pulse"
-            />
+            <div key={i} className="h-48 rounded-2xl bg-card animate-pulse" />
           ))}
         </div>
       </div>
@@ -121,7 +132,7 @@ export default function GroupsPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <GroupsListHeader onCreateGroup={openCreateModal} />
+      {header}
 
       {groups.length === 0 ? (
         <EmptyGroups />

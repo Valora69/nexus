@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
-import { Card, CardContent } from '@web/components/ui/card';
 import { Button } from '@web/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 
@@ -27,7 +26,7 @@ import {
   EditGroupModal,
   type RemovalBlocker,
 } from '@web/components/features/groups/edit-group-modal';
-import { GroupHeader } from '@web/components/features/groups/group-header';
+import { PageHeader } from '@web/components/layout/page-header';
 import { GroupMembersCard } from '@web/components/features/groups/group-members-card';
 import { GroupExpensesList } from '@web/components/features/groups/group-expenses-list';
 import { GroupModals } from '@web/lib/constants/modals';
@@ -191,8 +190,8 @@ export default function GroupDetailPage() {
   if (groupLoading) {
     return (
       <div className="p-6 space-y-6">
-        <div className="h-10 w-64 bg-muted/30 rounded animate-pulse" />
-        <div className="h-48 w-full bg-muted/30 rounded animate-pulse" />
+        <div className="h-10 w-64 rounded-2xl bg-card animate-pulse" />
+        <div className="h-48 w-full rounded-2xl bg-card animate-pulse" />
       </div>
     );
   }
@@ -214,10 +213,10 @@ export default function GroupDetailPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <GroupHeader
-        name={typedGroup.name}
-        description={typedGroup.description}
-        onBack={() => router.push('/groups')}
+      <PageHeader
+        title={typedGroup.name}
+        subtitle={typedGroup.description || undefined}
+        backHref="/groups"
       />
 
       <GroupMembersCard members={members} onEditGroup={onEditGroup} />

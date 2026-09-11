@@ -187,10 +187,7 @@ export function DataTable<TData>({
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">{title}</h1>
         {onCreateItem && (
-          <Button
-            onClick={onCreateItem}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
-          >
+          <Button onClick={onCreateItem}>
             <Plus className="mr-2 h-4 w-4" />
             {addButtonLabel}
           </Button>
@@ -236,7 +233,7 @@ export function DataTable<TData>({
         <div className="flex items-center gap-3 w-full lg:w-auto">
           {/* Search Input */}
           <div className="relative flex-1 lg:w-80">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted" />
             <Input
               placeholder={searchPlaceholder}
               value={
@@ -318,7 +315,7 @@ export function DataTable<TData>({
                   data-state={row.getIsSelected() && 'selected'}
                   onClick={() => onRowClick?.(row.original)}
                   className={
-                    onRowClick ? 'cursor-pointer hover:bg-muted/50' : ''
+                    onRowClick ? 'cursor-pointer hover:bg-card-hover' : ''
                   }
                 >
                   {row.getVisibleCells().map((cell) => (
@@ -346,7 +343,7 @@ export function DataTable<TData>({
       </div>
 
       <div className="flex items-center justify-between py-4">
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-muted">
           {pagination ? (
             <>
               Showing {(pagination.page - 1) * pagination.limit + 1} to{' '}
@@ -366,7 +363,7 @@ export function DataTable<TData>({
         <div className="flex items-center gap-2">
           {pagination && (
             <>
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-muted">
                 Page {pagination.page} of {pagination.totalPages}
               </span>
               <DropdownMenu>

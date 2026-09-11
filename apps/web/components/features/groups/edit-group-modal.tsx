@@ -116,7 +116,7 @@ export function EditGroupModal({
                         {member.user?.name || 'Unknown'}
                         <button
                           onClick={() => onRemoveMember(member.id)}
-                          className="ml-1 rounded-full hover:bg-muted-foreground/20 p-0.5 transition-colors"
+                          className="ml-1 rounded-full hover:bg-card-hover p-0.5 transition-colors"
                           aria-label={`Remove ${member.user?.name}`}
                         >
                           <X className="h-3 w-3" />
@@ -124,7 +124,7 @@ export function EditGroupModal({
                       </Badge>
                     </div>
                     {hasBlockers && (
-                      <div className="ml-1 p-2 rounded border border-destructive/30 bg-destructive/5 space-y-1">
+                      <div className="ml-1 p-2 rounded-xl border border-destructive/30 bg-destructive/5 space-y-1">
                         <div className="flex items-center gap-1 text-xs font-medium text-destructive">
                           <AlertCircle className="h-3 w-3" />
                           Cannot remove — unsettled balances

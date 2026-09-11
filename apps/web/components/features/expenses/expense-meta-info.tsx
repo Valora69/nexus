@@ -14,17 +14,17 @@ export function ExpenseMetaInfo({
   updatedAt,
 }: ExpenseMetaInfoProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
       <div className="space-y-1">
-        <h3 className="text-sm font-semibold text-gray-900">Paid By</h3>
-        <p className="text-sm text-gray-700">{paidByName}</p>
+        <h3 className="text-xs uppercase tracking-wider text-muted">Paid By</h3>
+        <p className="text-sm text-foreground">{paidByName}</p>
       </div>
       <div className="space-y-1">
-        <h3 className="text-sm font-semibold text-gray-900">Audit</h3>
-        <p className="text-sm text-gray-700">
+        <h3 className="text-xs uppercase tracking-wider text-muted">Audit</h3>
+        <p className="text-sm text-foreground">
           Created: {formatDate(createdAt)} at {formatTime(createdAt)}
         </p>
-        <p className="text-sm text-gray-700">
+        <p className="text-sm text-foreground">
           Updated: {formatDate(updatedAt)} at {formatTime(updatedAt)}
         </p>
       </div>

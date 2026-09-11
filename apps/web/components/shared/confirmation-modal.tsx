@@ -35,34 +35,27 @@ export function ConfirmationModal({
 }: ConfirmationModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-white sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle className="text-gray-900 text-xl font-semibold">
-            {title}
-          </DialogTitle>
-          <DialogDescription className="text-gray-600 text-base pt-2">
+          <DialogTitle className="text-xl">{title}</DialogTitle>
+          <DialogDescription className="text-base pt-2">
             {description}
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter className="gap-2 sm:gap-0">
+        <DialogFooter>
           <Button
             type="button"
-            variant="outline"
+            variant="ghost"
             onClick={onClose}
             disabled={isLoading}
-            className="border-gray-300 text-gray-700 hover:bg-gray-50"
           >
             {cancelText}
           </Button>
           <Button
             type="button"
+            variant={variant}
             onClick={onConfirm}
             disabled={isLoading}
-            className={
-              variant === 'destructive'
-                ? 'bg-red-600 hover:bg-red-700 text-white'
-                : 'bg-blue-600 hover:bg-blue-700 text-white'
-            }
           >
             {isLoading ? 'Processing...' : confirmText}
           </Button>

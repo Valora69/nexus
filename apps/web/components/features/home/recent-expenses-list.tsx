@@ -31,7 +31,7 @@ export function RecentExpensesList({ feed }: RecentExpensesListProps) {
             feed.map((item) => (
               <div
                 key={item.id}
-                className="flex justify-between items-center border-b border-border pb-2 hover:bg-muted/30 p-2 rounded transition-colors"
+                className="flex justify-between items-center border-b border-border pb-2 hover:bg-card-hover p-2 rounded-xl transition-colors"
               >
                 <div className="flex items-start gap-2 min-w-0">
                   {item.isCredit ? (

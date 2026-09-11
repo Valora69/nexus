@@ -1,10 +1,8 @@
 'use client';
 
-/**
- * Page-level context line for the dashboard.
- * The page title now lives in the global sticky topbar, so this just renders
- * a soft date label as a sub-heading.
- */
+import { PageHeader } from '@web/components/layout/page-header';
+
+/** Dashboard title in the top bar, with today's date as the subtitle. */
 export function DashboardHeader() {
   const dateLabel = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
@@ -13,9 +11,5 @@ export function DashboardHeader() {
     year: 'numeric',
   });
 
-  return (
-    <p className="text-sm font-medium text-muted">
-      <span className="text-accent">Today ·</span> {dateLabel}
-    </p>
-  );
+  return <PageHeader title="Dashboard" subtitle={`Today · ${dateLabel}`} />;
 }

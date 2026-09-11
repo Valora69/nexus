@@ -1,4 +1,3 @@
-export { FriendsHeader } from './friends-header';
 export { FriendsTabs } from './friends-tabs';
 export { FriendsList } from './friends-list';
 export { PendingRequestsList } from './pending-requests-list';

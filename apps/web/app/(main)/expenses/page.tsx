@@ -4,7 +4,6 @@ import { useState, useMemo } from 'react';
 import { toast } from 'sonner';
 
 import {
-  ExpensesHeader,
   SplitFilterTabs,
   SplitsList,
   ViewSplitModal,
@@ -12,6 +11,7 @@ import {
   type SplitFilter,
 } from '@web/components/features/expenses';
 import { ExpenseModals } from '@web/lib/constants/modals';
+import { PageHeader } from '@web/components/layout/page-header';
 
 import {
   useGetMyPayableSplits,
@@ -125,19 +125,20 @@ export default function ExpensesPage() {
     ),
   };
 
+  const header = (
+    <PageHeader
+      title="Expenses"
+      subtitle="Your splits across groups — record payments here"
+    />
+  );
+
   if (isLoading) {
     return (
       <div className="p-6 space-y-6">
-        <ExpensesHeader
-          title="My Expenses"
-          description="Track your expense splits and record payments"
-        />
+        {header}
         <div className="space-y-3">
           {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="h-24 bg-muted/30 rounded-lg animate-pulse"
-            />
+            <div key={i} className="h-24 rounded-2xl bg-card animate-pulse" />
           ))}
         </div>
       </div>
@@ -146,10 +147,7 @@ export default function ExpensesPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <ExpensesHeader
-        title="My Expenses"
-        description="View your expense splits across groups and record payments"
-      />
+      {header}
 
       <SplitFilterTabs filter={filter} onFilterChange={setFilter} />
 

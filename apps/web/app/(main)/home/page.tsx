@@ -19,7 +19,12 @@ export default function Dashboard() {
   );
 
   if (userLoading || dashboardLoading) {
-    return <DashboardSkeleton />;
+    return (
+      <>
+        <DashboardHeader />
+        <DashboardSkeleton />
+      </>
+    );
   }
 
   const safeDashboard = dashboard ?? {
