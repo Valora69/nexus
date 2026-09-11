@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 
 import {
-  FriendsHeader,
   FriendsTabs,
   FriendsList,
   PendingRequestsList,
@@ -12,6 +11,7 @@ import {
   RemoveFriendModal,
 } from '@web/components/features/friends';
 import { FriendModals } from '@web/lib/constants/modals';
+import { PageHeader } from '@web/components/layout/page-header';
 
 import {
   useGetAllFriends,
@@ -137,16 +137,18 @@ export default function FriendsPage() {
     ),
   };
 
+  // "Add Friend" lives next to the tabs, so the header needs no action.
+  const header = (
+    <PageHeader title="Friends" subtitle="Manage your connections" />
+  );
+
   if (isLoading) {
     return (
       <div className="p-6 space-y-6">
-        <FriendsHeader onAddFriend={onAddFriend} />
+        {header}
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="h-20 bg-muted/30 rounded-lg animate-pulse"
-            />
+            <div key={i} className="h-20 rounded-2xl bg-card animate-pulse" />
           ))}
         </div>
       </div>
@@ -155,7 +157,7 @@ export default function FriendsPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <FriendsHeader onAddFriend={onAddFriend} />
+      {header}
 
       <FriendsTabs
         friendsCount={friends.length}
