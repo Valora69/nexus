@@ -8,4 +8,5 @@ export { ModalSheet } from './modal-sheet';
 export { OfflineBanner } from './offline-banner';
 export { PillButton } from './pill-button';
 export { Screen } from './screen';
+export { SyncStatusStrip } from './sync-status-strip';
 export { TextField } from './text-field';

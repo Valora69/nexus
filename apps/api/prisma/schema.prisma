@@ -88,6 +88,11 @@ model Expense {
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
 
+  /// Client-supplied idempotency key (stage-12 offline outbox). Null for
+  /// creates that did not originate from the mobile outbox path. Unique so
+  /// a replay of the same outbox row cannot create a duplicate expense.
+  clientRequestId String? @unique
+
   @@index([groupId])
   @@index([payerId])
   @@index([payeeId])
@@ -108,6 +113,11 @@ model Payment {
   paidAt         DateTime      @default(now())
   expenseSplit   ExpenseSplit  @relation(fields: [expenseSplitId], references: [id], onDelete: Cascade)
   expenseSplitId String
+
+  /// Client-supplied idempotency key (stage-12 offline outbox). Same contract
+  /// as Expense.clientRequestId: null for web-originated payments, unique on
+  /// the mobile-outbox path so replays return the existing record.
+  clientRequestId String? @unique
 
   @@index([expenseSplitId])
 }

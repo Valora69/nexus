@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/server/auth';
 import { parseBody, parseQuery } from '@/lib/server/validation';
+import { readIdempotencyKey } from '@/lib/server/idempotency';
 import {
   createExpenseSchema,
   expenseQuerySchema,
@@ -9,12 +10,15 @@ import { createExpense, findAllExpenses } from '@/lib/server/services/expense';
 
 /**
  * POST /api/expenses  [Auth]
- * Create a single expense.
+ * Create a single expense. Accepts an optional `Idempotency-Key` header
+ * (stage 12 mobile-offline outbox); a repeat call with the same key
+ * returns the previously-created expense verbatim and never double-writes.
  */
 export const POST = withAuth(async (req: NextRequest, _ctx, user) => {
   const body = await req.json();
   const dto = parseBody(createExpenseSchema, body);
-  const expense = await createExpense(dto, user.sub);
+  const clientRequestId = readIdempotencyKey(req);
+  const { expense } = await createExpense(dto, user.sub, clientRequestId);
   return NextResponse.json(expense);
 });
 

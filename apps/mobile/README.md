@@ -128,3 +128,52 @@ On a dev build:
    it via `SecureStore.deleteItemAsync('auth_token')`) → next launch
    returns to the login screen.
 5. Force a 401 from any endpoint → app returns to `/login`.
+
+## Offline outbox (stage 12)
+
+The two append-only mutating actions — create expense and record payment
+— survive offline and slow connections through a durable outbox.
+
+- **Storage:** one SQLite table (`outbox`) under `expo-sqlite`, opened
+  lazily. Rows are keyed by `clientRequestId` (UUIDv4) and tagged with
+  the enqueueing `user_id` so a device that switches accounts cannot
+  replay writes under the wrong Bearer.
+- **Idempotency:** the client sends `clientRequestId` as an
+  `Idempotency-Key` header on `POST /api/expenses` and `POST /api/payment`.
+  The server persists it in a new `Expense.clientRequestId` /
+  `Payment.clientRequestId` column (unique index); a replay of the same
+  row returns the existing record with 200 rather than double-writing.
+- **Choke point:** `submitCreateExpense` / `submitCreatePayment`
+  (`src/lib/offline/submit.ts`) are the single entry point both
+  mutations use. Online = direct POST with the idempotency key; offline
+  = enqueue for replay. A mid-flight network drop on an online submit
+  also falls back to enqueue.
+- **Replay:** `startReplay(userId)` runs inside `AuthProvider` and drains
+  the queue on every online→offline→online transition, foreground event,
+  and manual retry. Sequential (one row at a time); exponential backoff
+  on transient errors (1s → 60s, capped at six retries); 4xx marks the
+  row `failed` immediately so the user can see and decide.
+- **UX:** the sync-status strip (rendered by `<Screen>`) shows the queue
+  count whenever it is non-empty and taps through to `/outbox` for
+  retry / discard. Sign-out prompts to keep-queued or discard when rows
+  exist. Account deletion always purges the queue.
+- **Not queued offline:** edits, deletes, member management,
+  verification. Those require connectivity — the disabled/toast UX is
+  driven by `useIsOnline`.
+
+### Verifying stage 12
+
+1. **Airplane mode → create + record.** Take the device offline, add an
+   expense and record a payment. Both modals show "Queued for sync".
+   The sync-status strip appears with a "2 pending" count.
+2. **Kill and relaunch offline.** The queue persists (SQLite, not
+   memory). Sync strip still shows "2 pending".
+3. **Reconnect.** Both rows send within seconds; the strip disappears
+   as they drain. Same records visible on the web dashboard.
+4. **Double replay.** Grab a pending row's `clientRequestId` (or reuse
+   from logs) and POST manually with the same header; the second call
+   returns the existing record, no duplicate.
+5. **Server rejection.** Enqueue with a payload the server will refuse
+   (e.g. split total ≠ expense total). Row lands in `failed` on the
+   first drain attempt; the outbox screen surfaces it with retry /
+   discard.

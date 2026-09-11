@@ -1,4 +1,4 @@
-import { ActivityNameEnum, ActivityOnEnum } from '@prisma/client';
+import { ActivityNameEnum, ActivityOnEnum, Prisma } from '@prisma/client';
 import { prisma } from '@/lib/server/db';
 import { ApiError } from '@/lib/server/errors';
 import { logActivity } from '@/lib/server/activity';
@@ -50,9 +50,31 @@ const PAYMENT_WRITE_SELECT = {
   verifiedAt: true,
   paidAt: true,
   expenseSplitId: true,
+  clientRequestId: true,
 } as const;
 
-export async function create(dto: CreatePaymentInput, userId: string) {
+/**
+ * Result envelope mirrors createExpense: `replayed=true` on a
+ * clientRequestId hit. Route unwraps to keep the wire shape stable.
+ */
+export async function create(
+  dto: CreatePaymentInput,
+  userId: string,
+  clientRequestId?: string,
+) {
+  // Fast path: outbox replay. Skip the transaction entirely if the same
+  // clientRequestId already produced a payment — no re-check of the split
+  // balance, no duplicate Activity row.
+  if (clientRequestId) {
+    const existing = await prisma.payment.findUnique({
+      where: { clientRequestId },
+      select: PAYMENT_WRITE_SELECT,
+    });
+    if (existing) {
+      return { payment: existing, replayed: true as const };
+    }
+  }
+
   try {
     const { createdPayment, groupId } = await prisma.$transaction(
       async (tx) => {
@@ -91,7 +113,10 @@ export async function create(dto: CreatePaymentInput, userId: string) {
         }
 
         const createdPayment = await tx.payment.create({
-          data: dto,
+          data: {
+            ...dto,
+            ...(clientRequestId ? { clientRequestId } : {}),
+          },
           select: PAYMENT_WRITE_SELECT,
         });
 
@@ -107,8 +132,28 @@ export async function create(dto: CreatePaymentInput, userId: string) {
       createdByUserId: userId,
     });
 
-    return createdPayment;
+    return { payment: createdPayment, replayed: false as const };
   } catch (error) {
+    // Concurrent-replay race: the other writer beat us to the unique
+    // index. Return their row instead of surfacing a duplicate-key error.
+    if (
+      clientRequestId &&
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2002'
+    ) {
+      const target = error.meta?.target;
+      const hitClientRequestId = Array.isArray(target)
+        ? target.includes('clientRequestId')
+        : target === 'clientRequestId' ||
+          target === 'Payment_clientRequestId_key';
+      if (hitClientRequestId) {
+        const raced = await prisma.payment.findUnique({
+          where: { clientRequestId },
+          select: PAYMENT_WRITE_SELECT,
+        });
+        if (raced) return { payment: raced, replayed: true as const };
+      }
+    }
     if (error instanceof ApiError) throw error;
     console.error('Failed to create payment', error);
     throw new ApiError(500, 'Failed to create payment');

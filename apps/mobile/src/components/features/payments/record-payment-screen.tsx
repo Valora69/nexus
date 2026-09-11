@@ -124,7 +124,15 @@ function RecordPaymentForm({
   const payeeName = split.expense.payee?.name ?? 'the payee';
 
   const createMutation = useCreatePayment({
-    onSuccess: () => onDone(),
+    onSuccess: (result) => {
+      if (result.kind === 'queued') {
+        Alert.alert(
+          'Queued for sync',
+          "This payment will send as soon as you're back online. Ask the recipient to verify it once it appears.",
+        );
+      }
+      onDone();
+    },
     onError: (err) => {
       const message =
         err instanceof ApiError

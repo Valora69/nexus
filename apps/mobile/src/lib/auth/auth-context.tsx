@@ -22,6 +22,7 @@ import { AppState, type AppStateStatus } from 'react-native';
 
 import { apiFetch, onUnauthorized, setAuthTokenGetter } from '../api/client';
 import { queryClient } from '../api/query-client';
+import { startReplay, stopReplay } from '../offline';
 import {
   clearToken,
   clearUser,
@@ -58,9 +59,20 @@ export function AuthProvider({ children }: PropsWithChildren) {
     setUser(nextUser);
     setStatus('signedIn');
     await Promise.all([saveToken(token), saveUser(nextUser)]);
+    // Kick the offline outbox replay engine, scoped to this user. Only
+    // rows tagged with their userId will drain, so a device that
+    // previously ran a different account can't ship its queued writes
+    // under the new session's Bearer.
+    startReplay(nextUser.sub);
   }, []);
 
   const clearSession = useCallback(async () => {
+    // Pause the outbox before touching credentials: rows stay in SQLite,
+    // scoped to the departing userId, and will resume on the same
+    // account's next sign-in. Any deliberate purge lives in signOut's
+    // confirmation flow, not here — a 401-driven auto-signout should
+    // never discard writes without the user's consent.
+    stopReplay();
     tokenRef.current = null;
     setUser(null);
     setStatus('signedOut');
