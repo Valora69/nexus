@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import { Prisma } from '@prisma/client';
 import { waitUntil } from '@vercel/functions';
 import { prisma } from '@/lib/server/db';
@@ -40,16 +41,18 @@ export async function sendFriendRequest(
     throw new ApiError(400, 'Already friends with this user');
   }
 
-  // Check if there's already a pending request
-  const existingRequest = await prisma.friendRequest.findFirst({
-    where: {
-      senderId,
-      recipientEmail,
-      status: 'PENDING',
-    },
+  // (senderId, recipientEmail) is unique, so there is at most one row. A live
+  // pending one blocks re-sending; a declined, expired, or accepted-then-
+  // unfriended one is reused below instead of tripping the unique index.
+  const existingRequest = await prisma.friendRequest.findUnique({
+    where: { senderId_recipientEmail: { senderId, recipientEmail } },
+    select: { id: true, status: true, expiresAt: true },
   });
 
-  if (existingRequest) {
+  if (
+    existingRequest?.status === 'PENDING' &&
+    existingRequest.expiresAt > new Date()
+  ) {
     throw new ApiError(400, 'Friend request already sent');
   }
 
@@ -69,22 +72,14 @@ export async function sendFriendRequest(
     });
 
     if (reverseRequest) {
-      // Auto-accept: create friendship from both directions and mark the existing request accepted
-      await prisma.$transaction([
-        prisma.friendship.createMany({
-          data: [
-            { userId: senderId, friendId: recipient.id },
-            { userId: recipient.id, friendId: senderId },
-          ],
-          skipDuplicates: true,
-        }),
-        prisma.friendRequest.update({
-          where: { id: reverseRequest.id },
-          data: { status: 'ACCEPTED' },
-        }),
-      ]);
-      // Mutual request: the sender effectively accepted the recipient's.
-      await notifyFriendAccepted(reverseRequest.id, senderId, recipient.id);
+      // Mutual request: sending one back accepts theirs, through the same
+      // path as the accept button and the email link.
+      await finalizeAcceptance({
+        requestId: reverseRequest.id,
+        accepterId: senderId,
+        requesterId: recipient.id,
+        requesterEmail: recipient.email,
+      });
       return {
         message:
           'You were already requested by this user — you are now friends!',
@@ -93,15 +88,37 @@ export async function sendFriendRequest(
   }
 
   try {
-    // Create friend request
-    const request = await prisma.friendRequest.create({
-      data: {
-        senderId,
-        recipientEmail,
-        recipientId: recipient?.id,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-      },
-    });
+    const fresh = {
+      recipientId: recipient?.id ?? null,
+      status: 'PENDING' as const,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+    };
+    let request: { id: string; token: string };
+    if (existingRequest) {
+      // Reuse the row with a new token (links from the earlier invite stop
+      // working). Conditional, so two concurrent re-sends can't both win and
+      // leave the first email pointing at an overwritten token.
+      const token = randomUUID();
+      const { count } = await prisma.friendRequest.updateMany({
+        where: {
+          id: existingRequest.id,
+          OR: [
+            { status: { not: 'PENDING' } },
+            { expiresAt: { lte: new Date() } },
+          ],
+        },
+        data: { ...fresh, token, createdAt: new Date() },
+      });
+      if (count === 0) {
+        throw new ApiError(400, 'Friend request already sent');
+      }
+      request = { id: existingRequest.id, token };
+    } else {
+      request = await prisma.friendRequest.create({
+        data: { senderId, recipientEmail, ...fresh },
+        select: { id: true, token: true },
+      });
+    }
 
     // Fire-and-forget: email runs in the background so the HTTP response
     // returns immediately after the DB write, regardless of SMTP outcome.
@@ -124,9 +141,70 @@ export async function sendFriendRequest(
 
     return { message: 'Friend request sent!' };
   } catch (error) {
+    if (error instanceof ApiError) throw error;
+    // A concurrent send of the same request won the unique index.
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2002'
+    ) {
+      throw new ApiError(400, 'Friend request already sent');
+    }
     console.error('Error sending friend request:', error);
     throw new ApiError(500, 'Failed to send friend request');
   }
+}
+
+/**
+ * The single place a friend request becomes a friendship — used by the
+ * accept button, the emailed invite link, and mutual-request auto-accept.
+ *
+ * Atomic and idempotent: the PENDING → ACCEPTED flip is a conditional
+ * update, so concurrent accepts (email link + profile button, double
+ * clicks, retried requests) can't both win; friendship rows are unique per
+ * pair and inserted with skipDuplicates. Returns false when another call
+ * already accepted it (the friendship exists either way).
+ */
+async function finalizeAcceptance({
+  requestId,
+  accepterId,
+  requesterId,
+  requesterEmail,
+}: {
+  requestId: string;
+  accepterId: string;
+  requesterId: string;
+  requesterEmail: string;
+}): Promise<boolean> {
+  const accepted = await prisma.$transaction(async (tx) => {
+    const { count } = await tx.friendRequest.updateMany({
+      where: { id: requestId, status: 'PENDING' },
+      data: { status: 'ACCEPTED' },
+    });
+    if (count === 0) return false;
+
+    await tx.friendship.createMany({
+      data: [
+        { userId: requesterId, friendId: accepterId },
+        { userId: accepterId, friendId: requesterId },
+      ],
+      skipDuplicates: true,
+    });
+    // A pending request the other way is settled by the same friendship.
+    await tx.friendRequest.updateMany({
+      where: {
+        senderId: accepterId,
+        recipientEmail: requesterEmail,
+        status: 'PENDING',
+      },
+      data: { status: 'ACCEPTED' },
+    });
+    return true;
+  });
+
+  if (accepted) {
+    await notifyFriendAccepted(requestId, accepterId, requesterId);
+  }
+  return accepted;
 }
 
 export async function getPendingRequests(
@@ -190,11 +268,8 @@ export async function acceptRequest(userId: string, requestId: string) {
     throw new ApiError(400, "You can't accept your own request");
   }
 
-  if (request.expiresAt < new Date()) {
-    throw new ApiError(400, 'This request has expired');
-  }
-
-  // Idempotent: if already accepted, return success (friendship should already exist)
+  // Idempotent first, so reopening an old email link after the invite has
+  // expired still reports "accepted" rather than "expired".
   if (request.status === 'ACCEPTED') {
     return { message: 'Friend request already accepted' };
   }
@@ -203,49 +278,23 @@ export async function acceptRequest(userId: string, requestId: string) {
     throw new ApiError(400, 'This request has already been processed');
   }
 
-  try {
-    // Use createMany + skipDuplicates so re-entry / race doesn't trip the unique constraint.
-    // We create both directions for easy querying.
-    // Also clean up any reverse-direction pending request between these two users.
-    await prisma.$transaction([
-      prisma.friendship.createMany({
-        data: [
-          { userId: request.senderId, friendId: userId },
-          { userId: userId, friendId: request.senderId },
-        ],
-        skipDuplicates: true,
-      }),
-      prisma.friendRequest.update({
-        where: { id: requestId },
-        data: { status: 'ACCEPTED' },
-      }),
-      prisma.friendRequest.updateMany({
-        where: {
-          senderId: userId,
-          recipientEmail: request.sender.email,
-          status: 'PENDING',
-        },
-        data: { status: 'ACCEPTED' },
-      }),
-    ]);
-    await notifyFriendAccepted(requestId, userId, request.senderId);
+  if (request.expiresAt < new Date()) {
+    throw new ApiError(400, 'This request has expired');
+  }
 
-    return { message: 'Friend request accepted!' };
+  try {
+    const accepted = await finalizeAcceptance({
+      requestId,
+      accepterId: userId,
+      requesterId: request.senderId,
+      requesterEmail: request.sender.email,
+    });
+    return {
+      message: accepted
+        ? 'Friend request accepted!'
+        : 'Friend request already accepted',
+    };
   } catch (error) {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === 'P2002'
-    ) {
-      // Friendship already existed — treat as success
-      console.warn(
-        `Friendship already existed for request ${requestId}; marking accepted`,
-      );
-      await prisma.friendRequest.update({
-        where: { id: requestId },
-        data: { status: 'ACCEPTED' },
-      });
-      return { message: 'Friend request accepted!' };
-    }
     console.error('Error accepting friend request:', error);
     throw new ApiError(500, 'Failed to accept friend request');
   }
@@ -281,15 +330,16 @@ export async function acceptRequestByToken(userId: string, token: string) {
     );
   }
 
-  // Backfill recipientId if it wasn't set (recipient didn't have an account when invite was sent)
+  // Backfill recipientId if the invitee had no account when it was sent.
+  // Conditional so it can never overwrite an already-claimed request.
   if (!request.recipientId) {
-    await prisma.friendRequest.update({
-      where: { id: request.id },
+    await prisma.friendRequest.updateMany({
+      where: { id: request.id, recipientId: null },
       data: { recipientId: userId },
     });
-    request.recipientId = userId;
   }
 
+  // Same backend path as Profile → Friend Requests → Accept.
   return acceptRequest(userId, request.id);
 }
 
@@ -302,10 +352,21 @@ export async function declineRequest(userId: string, requestId: string) {
     throw new ApiError(400, 'Invalid request');
   }
 
-  await prisma.friendRequest.update({
-    where: { id: requestId },
+  // Only a pending request can be declined — never flip an accepted one
+  // (e.g. accepted from the email, then "Decline" clicked on a stale list),
+  // which would leave a DECLINED request next to a live friendship.
+  const { count } = await prisma.friendRequest.updateMany({
+    where: { id: requestId, status: 'PENDING' },
     data: { status: 'DECLINED' },
   });
+  if (count === 0) {
+    throw new ApiError(
+      409,
+      request.status === 'ACCEPTED'
+        ? "You're already friends — this request was accepted"
+        : 'This request has already been processed',
+    );
+  }
   await resolveFriendRequest(requestId, userId);
 
   return { message: 'Friend request declined' };

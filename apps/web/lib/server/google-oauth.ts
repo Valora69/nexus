@@ -117,3 +117,25 @@ export async function fetchUserProfile(
 
   return response.json() as Promise<GoogleProfile>;
 }
+
+/** Cookie carrying where to land after sign-in (e.g. an email invite link). */
+export const OAUTH_RETURN_COOKIE = 'oauth_return_to';
+
+/**
+ * Accept only same-origin relative paths ("/friends/accept?token=…"), so the
+ * post-login redirect can never be turned into an open redirect.
+ */
+export function safeReturnPath(raw: string | null | undefined): string | null {
+  if (!raw || raw.length > 512) return null;
+  if (!raw.startsWith('/') || raw.startsWith('//') || raw.includes('\\')) {
+    return null;
+  }
+  try {
+    const base = 'http://return.invalid';
+    const url = new URL(raw, base);
+    if (url.origin !== base) return null;
+    return `${url.pathname}${url.search}`;
+  } catch {
+    return null;
+  }
+}

@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { exchangeCode, fetchUserProfile } from '@/lib/server/google-oauth';
+import {
+  exchangeCode,
+  fetchUserProfile,
+  OAUTH_RETURN_COOKIE,
+  safeReturnPath,
+} from '@/lib/server/google-oauth';
 import { signToken, setAuthCookie } from '@/lib/server/auth';
 import { findOrCreateOAuthUser } from '@/lib/server/services/auth-user';
 
@@ -16,7 +21,8 @@ export const dynamic = 'force-dynamic';
  *   3. Fetches the Google profile.
  *   4. Find-or-create the user (exact port of google.strategy.ts).
  *   5. Claims pending friend requests for this email.
- *   6. Signs a JWT, sets the auth cookie, and redirects to the frontend.
+ *   6. Signs a JWT, sets the auth cookie, and redirects to the frontend —
+ *      back to the validated `returnTo` path if one was set, else /home.
  */
 export async function GET(req: NextRequest) {
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
@@ -55,18 +61,27 @@ export async function GET(req: NextRequest) {
       picture: user.picture ?? undefined,
     });
 
-    const response = NextResponse.redirect(`${frontendUrl}/home?auth=success`);
+    const returnTo = safeReturnPath(
+      req.cookies.get(OAUTH_RETURN_COOKIE)?.value,
+    );
+    const response = NextResponse.redirect(
+      returnTo
+        ? `${frontendUrl}${returnTo}`
+        : `${frontendUrl}/home?auth=success`,
+    );
 
     setAuthCookie(response, token);
 
-    // Clear the one-time state cookie.
-    response.cookies.set('oauth_state', '', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 0,
-    });
+    // Clear the one-time state and return-path cookies.
+    for (const name of ['oauth_state', OAUTH_RETURN_COOKIE]) {
+      response.cookies.set(name, '', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 0,
+      });
+    }
 
     return response;
   } catch (error) {
