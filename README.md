@@ -1,120 +1,239 @@
-# Turborepo starter
+# MoneyApp
 
-This is a community-maintained example. If you experience a problem, please submit a pull request with a fix. GitHub Issues will be closed.
+Shared expense tracking for groups of friends — split a bill, record who paid,
+settle up, and keep everyone's balance honest.
 
-## Using this example
+Live at **[moneyapp.click](https://moneyapp.click)**, with an iOS companion app
+built on the same backend.
 
-Run the following command:
+---
 
-```bash
-npx create-turbo@latest -e with-nestjs
+## What it does
+
+- **Groups** — create a group, add members, track everything spent inside it.
+- **Expenses & splits** — one expense fans out into per-member `ExpenseSplit`
+  rows. Split logic lives in [`packages/shared/src/utils/splits.ts`](packages/shared/src/utils/splits.ts)
+  so web and mobile compute identical numbers.
+- **Payments** — settle a split via GCash or cash, attach proof, and have the
+  payee verify it. Unverified payments stay pending, so a claim alone never
+  clears a debt.
+- **Friends** — invite by email. Recipients who don't have an account yet get a
+  tokenised invite link that completes the friendship right after they sign in.
+- **Notifications** — an in-app inbox covering expenses, payments, and friend
+  requests, written after the business transaction commits.
+- **Dashboard** — per-month view of what you owe and what you're owed.
+- **Personal transactions** — track money movement outside any group.
+- **Quick capture** — parse a freeform line into a group expense.
+- **Offline outbox (mobile)** — queue expenses and payments while offline and
+  replay them safely; `clientRequestId` is unique server-side, so a replayed
+  row can never create a duplicate.
+
+---
+
+## Repository layout
+
+This is a [Turborepo](https://turborepo.com) monorepo managed with
+[Bun](https://bun.sh) workspaces.
+
+```
+.
+├── apps
+│   ├── web       # Next.js (App Router) — UI *and* backend. Deployed on Vercel.
+│   ├── mobile    # Expo / React Native, iOS-first. Talks to apps/web.
+│   └── api       # NestJS — legacy backend, see note below. Deployed on Render.
+└── packages
+    ├── shared            # @repo/shared — types, split math, query keys, theme tokens
+    ├── ui                # @repo/ui — shared React components
+    ├── api               # @repo/api — shared NestJS resources
+    ├── eslint-config     # @repo/eslint-config
+    ├── jest-config       # @repo/jest-config
+    └── typescript-config # @repo/typescript-config
 ```
 
-## What's inside?
+### A note on `apps/api`
 
-This Turborepo includes the following packages/apps:
+The project is mid-migration from a standalone NestJS service to Next.js route
+handlers colocated with the web app. Every client domain has already been
+flipped to the same-origin handlers — see `API_BASES` in
+[`apps/web/lib/client/config.ts`](apps/web/lib/client/config.ts), where all
+twelve entries point at `LOCAL`.
 
-### Apps and Packages
+In practice that means:
 
-    .
-    ├── apps
-    │   ├── api                       # NestJS app (https://nestjs.com).
-    │   └── web                       # Next.js app (https://nextjs.org).
-    └── packages
-        ├── @repo/api                 # Shared `NestJS` resources.
-        ├── @repo/eslint-config       # `eslint` configurations (includes `prettier`)
-        ├── @repo/jest-config         # `jest` configurations
-        ├── @repo/typescript-config   # `tsconfig.json`s used throughout the monorepo
-        └── @repo/ui                  # Shareable stub React component library.
+- **`apps/web` is the live backend.** Route handlers live in
+  `apps/web/app/api/**`, business logic in `apps/web/lib/server/services/**`,
+  and they talk to Postgres through Prisma directly.
+- **`apps/api` is legacy** and no longer serves the web client — but it still
+  **owns the Prisma schema and migrations** at
+  [`apps/api/prisma/schema.prisma`](apps/api/prisma/schema.prisma). `apps/web`
+  generates its client from that file. Schema changes go there.
 
-Each package and application are 100% [TypeScript](https://www.typescriptlang.org/) safe.
+---
 
-### Utilities
+## Stack
 
-This `Turborepo` has some additional tools already set for you:
+| Layer      | Technology |
+| ---------- | ---------- |
+| Web        | Next.js (App Router), React, Tailwind CSS, Radix UI, TanStack Query |
+| Mobile     | Expo, Expo Router, React Native, NativeWind, TanStack Query |
+| Backend    | Next.js route handlers (primary) · NestJS (legacy) |
+| Database   | PostgreSQL (Supabase) via Prisma 6 |
+| Auth       | Google OAuth only — no passwords. JWT in an HTTP-only cookie (7 days). |
+| Email      | Resend |
+| Tests      | Jest · Playwright |
+| Tooling    | Turborepo, Bun, TypeScript, ESLint, Prettier |
+| Hosting    | Vercel (`sin1`) for web · Render (Singapore) for the legacy API |
 
-- [TypeScript](https://www.typescriptlang.org/) for static type-safety
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-- [Jest](https://prettier.io) & [Playwright](https://playwright.dev/) for testing
+---
 
-### Commands
+## Getting started
 
-This `Turborepo` already configured useful commands for all your apps and packages.
+### Prerequisites
 
-#### Build
+- [Bun](https://bun.sh) 1.2.20
+- Node.js ≥ 18
+- A PostgreSQL database (Supabase works out of the box)
+- A Google Cloud project with OAuth credentials — see
+  [`GOOGLE_OAUTH_SETUP.md`](GOOGLE_OAUTH_SETUP.md)
+- Xcode 15+ with an iOS 17 simulator (only for `apps/mobile`)
 
-```bash
-# Will build all the app & packages with the supported `build` script.
-pnpm run build
-
-# ℹ️ If you plan to only build apps individually,
-# Please make sure you've built the packages first.
-```
-
-#### Develop
-
-```bash
-# Will run the development server for all the app & packages with the supported `dev` script.
-pnpm run dev
-```
-
-#### test
+### Install
 
 ```bash
-# Will launch a test suites for all the app & packages with the supported `test` script.
-pnpm run test
-
-# You can launch e2e testes with `test:e2e`
-pnpm run test:e2e
-
-# See `@repo/jest-config` to customize the behavior.
+git clone https://github.com/Valora69/nexus.git
+cd nexus
+bun install
 ```
 
-#### Lint
+### Configure
+
+Each app has its own `.env.example`. Copy and fill them in:
 
 ```bash
-# Will lint all the app & packages with the supported `lint` script.
-# See `@repo/eslint-config` to customize the behavior.
-pnpm run lint
+cp apps/api/.env.example apps/api/.env
+cp apps/web/.env.example apps/web/.env
+cp apps/mobile/.env.example apps/mobile/.env
 ```
 
-#### Format
+Key variables:
+
+| Variable | Used by | Purpose |
+| -------- | ------- | ------- |
+| `DATABASE_URL` | web, api | Pooled Postgres connection used at runtime |
+| `DIRECT_URL` | api | Direct connection, used only by `prisma migrate deploy` |
+| `JWT_SECRET` | web, api | Session token signing — generate with `openssl rand -hex 64` |
+| `AUTH_SECRET` | api | Legacy API session secret |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | web, api | Web OAuth client |
+| `GOOGLE_IOS_CLIENT_ID` | web, api | iOS OAuth client, accepted as `aud` on mobile idTokens |
+| `GOOGLE_CALLBACK_URL` | api | OAuth redirect target |
+| `FRONTEND_URL` | web, api | Origin used to build links in outbound email |
+| `COOKIE_DOMAIN` | web | Scope of the session cookie |
+| `RESEND_API_KEY` / `EMAIL_FROM` | web, api | Transactional email |
+| `ALLOWED_ORIGINS` | api | Comma-separated CORS allowlist |
+| `NEXT_PUBLIC_API_URL` | web | Legacy API origin; unused while every domain is same-origin |
+| `EXPO_PUBLIC_API_URL` | mobile | Backend origin — use your LAN IP for device testing |
+| `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID` | mobile | iOS OAuth client ID |
+
+> **Heads up:** `apps/web/.env.example` currently documents only
+> `NEXT_PUBLIC_API_URL`. Because the web app is now the backend, it also needs
+> `DATABASE_URL`, `JWT_SECRET`, the Google credentials, and the Resend
+> credentials to run locally. Use the table above until that file catches up.
+
+> `.env` files are gitignored. Never commit real credentials.
+
+### Set up the database
 
 ```bash
-# Will format all the supported `.ts,.js,json,.tsx,.jsx` files.
-# See `@repo/eslint-config/prettier-base.js` to customize the behavior.
-pnpm format
+bunx prisma migrate deploy --schema apps/api/prisma/schema.prisma
+bunx prisma generate --schema apps/api/prisma/schema.prisma
 ```
 
-### Remote Caching
+Optionally seed with [`apps/api/prisma/seed.ts`](apps/api/prisma/seed.ts).
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+### Run
 
 ```bash
-npx turbo login
+# every app in the monorepo
+bun run dev
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+Or one at a time:
 
 ```bash
-npx turbo link
+cd apps/web && bun run dev      # http://localhost:3000
+cd apps/api && bun run dev      # http://localhost:8080
+cd apps/mobile && bun run ios   # iOS simulator
 ```
 
-## Useful Links
+Open <http://localhost:3000/login> and sign in with Google.
 
-Learn more about the power of Turborepo:
+---
 
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+## Commands
+
+Run from the repo root; Turborepo fans each task out across workspaces.
+
+```bash
+bun run dev        # start all dev servers
+bun run build      # build every app and package
+bun run test       # unit tests (Jest)
+bun run test:e2e   # end-to-end tests (Playwright)
+bun run lint       # lint everything
+bun run format     # Prettier across .ts, .tsx, .md
+```
+
+Useful workspace-level commands:
+
+```bash
+# detect drift between migrations and schema.prisma
+cd apps/api && bun run prisma:check-drift
+
+# typecheck the mobile app
+cd apps/mobile && bun run typecheck
+```
+
+---
+
+## Testing
+
+Unit and integration tests live in [`apps/web/test`](apps/web/test) and cover
+the parts most likely to cost real money if they break — split math, payment
+verification rules, group authorization, notification building and persistence,
+friend-invite acceptance, and OAuth return-path safety.
+
+```bash
+cd apps/web
+bun run test              # Jest
+bun run test:e2e          # Playwright (test/e2e/*.e2e-spec.ts)
+```
+
+---
+
+## Deployment
+
+**Web** → Vercel, region `sin1`. Configured in
+[`apps/web/vercel.json`](apps/web/vercel.json). `prisma generate` runs as part
+of the build against the schema in `apps/api`.
+
+**Legacy API** → Render, Singapore, service `moneyapp-api`. Configured in
+[`apps/api/render.yaml`](apps/api/render.yaml). Migrations are applied on
+start via `prisma migrate deploy`; health check at `/api/health`.
+
+**Mobile** → built with Expo. Bundle ID `click.moneyapp.mobile`. See
+[`apps/mobile/README.md`](apps/mobile/README.md) for the build and OAuth setup.
+
+---
+
+## Further reading
+
+- [`apps/mobile/README.md`](apps/mobile/README.md) — mobile setup, Google OAuth
+  for iOS, and the reversed-client-ID gotcha
+- [`GOOGLE_OAUTH_SETUP.md`](GOOGLE_OAUTH_SETUP.md) — Google Cloud Console walkthrough
+- [`POST_AUTH_SETUP.md`](POST_AUTH_SETUP.md) — how the auth flow fits together
+- [`apps/api/prisma/schema.prisma`](apps/api/prisma/schema.prisma) — the data model
+
+---
+
+## License
+
+UNLICENSED — private project.
