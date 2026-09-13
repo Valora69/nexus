@@ -1,8 +1,25 @@
 export { BrandMark } from './brand-mark';
 export { CircuitGrid } from './circuit-grid';
+export {
+  DemoActivityProvider,
+  useDemoActivity,
+  useDemoActivityListener,
+  type DemoActivityEvent,
+  type DemoActivityListener,
+} from './demo-activity-provider';
 export { ExpenseCard, type ExpenseCardRow } from './expense-card';
+export { displayFont, handFont, landingFontVariables } from './fonts';
+export { HandNote, type HandNoteDirection } from './hand-note';
+export { Hero } from './hero';
+export { HeroToasts } from './hero-toasts';
 export { LandingFooter } from './landing-footer';
 export { LandingHeader } from './landing-header';
 export { NotificationToast } from './notification-toast';
+export { SoundPill } from './sound-pill';
+export {
+  SOUND_STORAGE_KEY,
+  SoundProvider,
+  useLandingSound,
+} from './sound-provider';
 export { useInView } from './use-in-view';
 export { usePrefersReducedMotion } from './use-prefers-reduced-motion';

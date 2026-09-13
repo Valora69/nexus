@@ -1,61 +1,38 @@
 import Link from 'next/link';
 
-import PixelTrail from '@web/components/effects/PixelTrail';
-import { LandingFooter, LandingHeader } from '@web/components/features/landing';
+// Import modules directly rather than via the barrel: the barrel re-exports
+// client toys (e.g. HandNote → motion) that would otherwise ship on this route.
+import { DemoActivityProvider } from '@web/components/features/landing/demo-activity-provider';
+import { landingFontVariables } from '@web/components/features/landing/fonts';
+import { Hero } from '@web/components/features/landing/hero';
+import { LandingFooter } from '@web/components/features/landing/landing-footer';
+import { LandingHeader } from '@web/components/features/landing/landing-header';
+import { SoundProvider } from '@web/components/features/landing/sound-provider';
 import { buttonClasses } from '@web/components/ui/button';
 
 export default function LandingPage() {
   return (
-    <div className="relative isolate flex min-h-screen flex-col overflow-hidden bg-black">
-      <PixelTrail
-        gridSize={100}
-        trailSize={0.05}
-        maxAge={750}
-        interpolate={0.5}
-        color="#00ff41"
-        gooeyFilter={{ id: 'custom-goo-filter', strength: 2 }}
-      />
-
-      <LandingHeader />
-
-      <main className="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6">
-        <Hero />
-        <ProblemPanel />
-        <Features />
-        <HowItWorks />
-        <FinalCta />
-      </main>
-
-      <LandingFooter />
-    </div>
-  );
-}
-
-function Hero() {
-  return (
-    <section className="mx-auto mt-16 max-w-3xl text-center sm:mt-24">
-      <h1 className="mt-6 text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl md:text-6xl">
-        Shared and missing expenses? We got you.
-      </h1>
-      <p className="mx-auto mt-6 max-w-xl text-lg text-muted">
-        Track who paid for what, split fairly, and settle up in seconds.
-        Designed for people who share money, not spreadsheets.
-      </p>
-      <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-        <Link
-          href="/login"
-          className={buttonClasses({ variant: 'primary', size: 'lg' })}
+    <SoundProvider>
+      <DemoActivityProvider>
+        <div
+          className={`relative isolate flex min-h-screen flex-col overflow-hidden bg-black ${landingFontVariables}`}
         >
-          Get Started
-        </Link>
-        <a
-          href="#features"
-          className={buttonClasses({ variant: 'secondary', size: 'lg' })}
-        >
-          See Features
-        </a>
-      </div>
-    </section>
+          <LandingHeader />
+
+          <main className="relative z-10 w-full">
+            <Hero />
+            <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
+              <ProblemPanel />
+              <Features />
+              <HowItWorks />
+              <FinalCta />
+            </div>
+          </main>
+
+          <LandingFooter />
+        </div>
+      </DemoActivityProvider>
+    </SoundProvider>
   );
 }
 

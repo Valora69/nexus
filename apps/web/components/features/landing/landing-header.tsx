@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { buttonClasses } from '@web/components/ui/button';
 
 import { BrandMark } from './brand-mark';
+import { SoundPill } from './sound-pill';
 
 export function LandingHeader() {
   return (
@@ -17,9 +18,16 @@ export function LandingHeader() {
         </a>
       </nav>
       <div className="flex items-center gap-2">
+        <SoundPill />
+        {/* Hidden on phones to make room for the Sound pill; Get Started
+            goes to the same /login page. */}
         <Link
           href="/login"
-          className={buttonClasses({ variant: 'ghost', size: 'sm' })}
+          className={buttonClasses({
+            variant: 'ghost',
+            size: 'sm',
+            className: 'hidden sm:inline-flex',
+          })}
         >
           Sign In
         </Link>
