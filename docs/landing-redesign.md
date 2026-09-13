@@ -226,6 +226,12 @@ Stage 5 notes:
   `dragElastic`, so it rubber-bands. The charge comes from the raw pointer
   offset through `pullAmount` (₱10 steps, capped at Mika's ₱400 share), and
   releases under `SETTLE_MIN_AMOUNT` spring back.
+- Release reads the charge from `onDragEnd`'s final `info.offset`, not from
+  the last `onDrag`. Motion calls `onDrag` once per frame, so a quick flick
+  can end before its last move reaches it.
+- Send / Verify / Reset use `aria-disabled` rather than `disabled`, so the
+  button a keyboard user just pressed keeps focus while it's unavailable. The
+  handlers ignore presses in that state.
 - The flight samples a quadratic arc into `x`/`y`/`rotate` keyframes. The
   landing is driven by a timer (`SETTLE_FLIGHT_MS`), not the animation, so
   Jest can advance it with fake timers.
