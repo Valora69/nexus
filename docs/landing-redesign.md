@@ -193,6 +193,27 @@ Stage 3 notes:
 - In track mode the header is fixed over the stage, and panels pad
   `pt-24 pb-20` to clear the header and the rail.
 
+Added in Stage 4:
+
+| Module | Export |
+|---|---|
+| `add-expense-playground.tsx` | `AddExpensePlayground`, `RECEIPT_PRINT_MS`, `PLAYGROUND_TOAST_MS`, `PLAYGROUND_MAX_ROWS` (tested in `apps/web/test/landing-playground.spec.tsx`) |
+| `bill-slicer.tsx` | `BillSlicer` |
+| `peso-flow.tsx` | `PesoFlow` (₱ amounts through `@number-flow/react`) |
+
+Stage 4 notes:
+
+- `@number-flow/react` depends on ESM-only packages (`esm-env`), which Jest
+  can't load. Specs that render a `PesoFlow` mock `@number-flow/react` with an
+  `Intl` formatter and `require()` the component after the mock (see
+  `test/page.spec.tsx`).
+- The playground's keypad listens on its own focusable group, never `window`,
+  so digits don't collide with the hero's page-wide Q key.
+- The receipt flies into the ledger through a shared motion `layoutId`: the
+  printing receipt unmounts in the same render the ledger row mounts.
+- `expenseAdded` fires when the receipt lands, not on click; the nav counter
+  wires up in a later stage.
+
 Pure demo logic lives in `apps/web/lib/landing/`:
 
 - `demo.ts`: `DEMO_CURRENT_USER`, `DEMO_MEMBERS`, `DEMO_EXPENSE`,
