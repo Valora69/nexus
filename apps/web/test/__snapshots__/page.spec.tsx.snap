@@ -2973,7 +2973,7 @@ exports[`Root page should match the snapshot 1`] = `
                           class="mt-3 flex items-center justify-between gap-3"
                         >
                           <p
-                            class="min-w-0 truncate font-mono text-[13px] text-muted"
+                            class="min-w-0 font-mono text-[13px] text-muted"
                             data-globe-caption="true"
                           >
                             <span
@@ -3135,7 +3135,16 @@ exports[`Root page should match the snapshot 1`] = `
                           <span
                             class="block"
                           >
-                            Split it. Settle it. 
+                            <span
+                              class="block sm:inline"
+                            >
+                              Split it. 
+                            </span>
+                            <span
+                              class="block sm:inline"
+                            >
+                              Settle it. 
+                            </span>
                           </span>
                           <span
                             class="block text-accent"

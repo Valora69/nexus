@@ -27,7 +27,11 @@ export function Finale() {
             id="finale-heading"
             className="font-[family-name:var(--font-display)] text-[clamp(3.25rem,7vw,7.5rem)] font-extrabold leading-[0.9] tracking-[-0.05em]"
           >
-            <span className="block">Split it. Settle it. </span>
+            {/* One phrase per line on phones, so "it." never wraps alone. */}
+            <span className="block">
+              <span className="block sm:inline">Split it. </span>
+              <span className="block sm:inline">Settle it. </span>
+            </span>
             <span className="block text-accent">Stay friends.</span>
           </h2>
           <div className="mt-10 flex flex-wrap items-center gap-x-5 gap-y-3">

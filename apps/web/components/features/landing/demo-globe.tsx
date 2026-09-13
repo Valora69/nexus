@@ -137,7 +137,8 @@ export function DemoGlobe() {
           <div className="mt-3 flex items-center justify-between gap-3">
             <p
               data-globe-caption
-              className="min-w-0 truncate font-mono text-[13px] text-muted"
+              // Wraps rather than truncates: the city is the point on phones.
+              className="min-w-0 font-mono text-[13px] text-muted"
             >
               <span className="text-accent">Demo</span> · Splits happening in{' '}
               {/* Enter-only: a new key mounts the next city, so the caption
