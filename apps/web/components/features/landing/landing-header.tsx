@@ -33,7 +33,11 @@ export function LandingHeader() {
         </Link>
         <Link
           href="/login"
-          className={buttonClasses({ variant: 'primary', size: 'sm' })}
+          className={buttonClasses({
+            variant: 'primary',
+            size: 'sm',
+            className: '!shadow-none',
+          })}
         >
           Get Started
         </Link>
