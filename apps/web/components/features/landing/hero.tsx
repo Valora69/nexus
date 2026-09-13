@@ -3,7 +3,6 @@ import Link from 'next/link';
 import PixelTrail from '@web/components/effects/PixelTrail';
 import { buttonClasses } from '@web/components/ui/button';
 
-import { CircuitGrid } from './circuit-grid';
 import { HeroStage } from './hero-stage';
 
 export function Hero() {
@@ -36,7 +35,11 @@ export function Hero() {
           <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3">
             <Link
               href="/login"
-              className={buttonClasses({ variant: 'primary', size: 'lg' })}
+              className={buttonClasses({
+                variant: 'primary',
+                size: 'lg',
+                className: '!shadow-none',
+              })}
             >
               Get Started
             </Link>
@@ -47,7 +50,6 @@ export function Hero() {
         </div>
 
         <div className="relative lg:order-1">
-          <CircuitGrid className="-inset-10 sm:-inset-16" />
           <HeroStage />
         </div>
       </div>

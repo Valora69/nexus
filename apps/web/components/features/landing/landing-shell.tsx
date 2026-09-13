@@ -87,11 +87,19 @@ export function LandingShell({ header, panels, children }: LandingShellProps) {
   const panelRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const distanceMV = useMotionValue(0);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ['start start', 'end end'],
+  const topMV = useMotionValue(0);
+  // Page scroll against our own measurements. useScroll({ target }) caches
+  // the container's offsets before its tall height is applied and can stick
+  // at full progress, which parked the track on its last panel at load.
+  const { scrollY } = useScroll();
+  const travelled = useTransform(() =>
+    clamp(scrollY.get() - topMV.get(), 0, distanceMV.get()),
+  );
+  const x = useTransform(() => -travelled.get());
+  const progress = useTransform(() => {
+    const d = distanceMV.get();
+    return d > 0 ? travelled.get() / d : 0;
   });
-  const x = useTransform(() => -scrollYProgress.get() * distanceMV.get());
 
   // Measure how far the track travels; re-measure whenever it or the stage
   // changes size (fonts, images, window resizes).
@@ -106,6 +114,10 @@ export function LandingShell({ header, panels, children }: LandingShellProps) {
 
     const measure = () => {
       const next = Math.max(0, trackEl.scrollWidth - stageEl.clientWidth);
+      const container = containerRef.current;
+      if (container) {
+        topMV.set(container.getBoundingClientRect().top + window.scrollY);
+      }
       distanceMV.set(next);
       setDistance(next);
     };
@@ -304,7 +316,7 @@ export function LandingShell({ header, panels, children }: LandingShellProps) {
             <ProgressRail
               panels={panels}
               active={active}
-              progress={scrollYProgress}
+              progress={progress}
               onSelect={(i) => scrollToPanel(i)}
             />
           )}

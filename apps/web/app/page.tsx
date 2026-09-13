@@ -126,7 +126,11 @@ function FinalCta() {
         <div className="mt-8 flex justify-center">
           <Link
             href="/login"
-            className={buttonClasses({ variant: 'primary', size: 'lg' })}
+            className={buttonClasses({
+              variant: 'primary',
+              size: 'lg',
+              className: '!shadow-none',
+            })}
           >
             Get Started
           </Link>

@@ -187,4 +187,26 @@ describe('HeroStage', () => {
     fireEvent.keyUp(coinKey(), { key: 'Enter' });
     expect(coinKey().getAttribute('data-pressed')).toBe('false');
   });
+
+  it('shows a Q keycap that the physical Q key presses', () => {
+    renderStage();
+
+    expect(within(coinKey()).getByText('Q')).toBeTruthy();
+    expect(coinKey().getAttribute('aria-keyshortcuts')).toBe('Q');
+
+    fireEvent.keyDown(window, { key: 'q' });
+    expect(coinKey().getAttribute('data-pressed')).toBe('true');
+    expect(ledgerRows()).toHaveLength(4);
+    fireEvent.keyUp(window, { key: 'q' });
+    expect(coinKey().getAttribute('data-pressed')).toBe('false');
+
+    // Held keys, shortcuts, and typing in a field don't add expenses.
+    fireEvent.keyDown(window, { key: 'q', repeat: true });
+    fireEvent.keyDown(window, { key: 'q', metaKey: true });
+    const input = document.createElement('input');
+    document.body.appendChild(input);
+    fireEvent.keyDown(input, { key: 'q' });
+    input.remove();
+    expect(ledgerRows()).toHaveLength(4);
+  });
 });
