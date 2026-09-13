@@ -11,7 +11,9 @@ export {
   type DemoActivityEvent,
   type DemoActivityListener,
 } from './demo-activity-provider';
+export { DemoGlobe } from './demo-globe';
 export { ExpenseCard, type ExpenseCardRow } from './expense-card';
+export { Finale } from './finale';
 export { displayFont, handFont, landingFontVariables } from './fonts';
 export { HandNote, type HandNoteDirection } from './hand-note';
 export { Hero } from './hero';
@@ -20,6 +22,7 @@ export { HeroToasts, type HeroToast } from './hero-toasts';
 export { LandingFooter } from './landing-footer';
 export { LandingHeader } from './landing-header';
 export { LandingShell, type LandingPanel } from './landing-shell';
+export { NavCounter } from './nav-counter';
 export { NotificationToast } from './notification-toast';
 export { Panel, type PanelWidth } from './panel';
 export { PesoFlow } from './peso-flow';
