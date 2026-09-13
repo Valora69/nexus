@@ -217,15 +217,32 @@ function demoPayment(amountPaid: number, isVerified: boolean): Payment {
 /**
  * Status of one debtor's share at a stage of the settle demo, computed by the
  * real `splitStatus`: nothing recorded → unpaid, marked paid with proof →
- * pending, verified by the payer → paid.
+ * pending, verified by the payer → paid. A payment smaller than the share
+ * (`amountPaid`) stays partial, just like in the app.
  */
 export function demoSplitStatus(
   stage: DemoSettleStage,
   share: number,
+  amountPaid: number = share,
 ): SplitStatus {
   const payments =
-    stage === 'unpaid' ? [] : [demoPayment(share, stage === 'paid')];
+    stage === 'unpaid' ? [] : [demoPayment(amountPaid, stage === 'paid')];
   return splitStatus({ amount: share, payments });
+}
+
+/**
+ * The settle slingshot's charge: how far the note is pulled back, as pesos.
+ * Grows linearly with the pull, snaps to ₱10 and never exceeds the share.
+ */
+export function pullAmount(
+  distance: number,
+  maxPull: number,
+  share: number,
+  step: number = SLICE_STEP,
+): number {
+  if (maxPull <= 0 || share <= 0) return 0;
+  const ratio = Math.min(Math.max(distance / maxPull, 0), 1);
+  return Math.min(share, snapToStep(share * ratio, step));
 }
 
 /** ₱1,234.50 — formatted by hand so server and client render identically. */
