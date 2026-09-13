@@ -1688,7 +1688,7 @@ exports[`Root page should match the snapshot 1`] = `
                 class=""
               >
                 <div
-                  class="relative w-full group-data-[mode=track]/shell:flex group-data-[mode=track]/shell:h-full group-data-[mode=track]/shell:shrink-0 group-data-[mode=track]/shell:items-center group-data-[mode=track]/shell:pb-10 group-data-[mode=track]/shell:pt-24 group-data-[mode=track]/shell:w-max group-data-[mode=track]/shell:min-w-[150vw] group-data-[mode=track]/shell:justify-center group-data-[mode=track]/shell:px-[25vw] group-data-[mode=vertical]/shell:py-16 sm:group-data-[mode=vertical]/shell:py-24"
+                  class="relative w-full group-data-[mode=track]/shell:flex group-data-[mode=track]/shell:h-full group-data-[mode=track]/shell:shrink-0 group-data-[mode=track]/shell:items-center group-data-[mode=track]/shell:pb-10 group-data-[mode=track]/shell:pt-24 group-data-[mode=track]/shell:w-max group-data-[mode=track]/shell:min-w-[125vw] group-data-[mode=track]/shell:justify-center group-data-[mode=track]/shell:pl-[25vw] group-data-[mode=vertical]/shell:py-16 sm:group-data-[mode=vertical]/shell:py-24"
                   data-landing-panel="How it works"
                 >
                   <div
@@ -2331,7 +2331,7 @@ exports[`Root page should match the snapshot 1`] = `
                 class=""
               >
                 <div
-                  class="relative w-full group-data-[mode=track]/shell:flex group-data-[mode=track]/shell:h-full group-data-[mode=track]/shell:shrink-0 group-data-[mode=track]/shell:items-center group-data-[mode=track]/shell:pb-10 group-data-[mode=track]/shell:pt-24 group-data-[mode=track]/shell:w-max group-data-[mode=track]/shell:min-w-[150vw] group-data-[mode=track]/shell:justify-center group-data-[mode=track]/shell:px-[25vw] group-data-[mode=vertical]/shell:py-16 sm:group-data-[mode=vertical]/shell:py-24"
+                  class="relative w-full group-data-[mode=track]/shell:flex group-data-[mode=track]/shell:h-full group-data-[mode=track]/shell:shrink-0 group-data-[mode=track]/shell:items-center group-data-[mode=track]/shell:pb-10 group-data-[mode=track]/shell:pt-24 group-data-[mode=track]/shell:w-max group-data-[mode=track]/shell:min-w-[125vw] group-data-[mode=track]/shell:justify-center group-data-[mode=track]/shell:pr-[25vw] group-data-[mode=vertical]/shell:py-16 sm:group-data-[mode=vertical]/shell:py-24"
                   data-landing-panel="Slice the bill"
                 >
                   <div
