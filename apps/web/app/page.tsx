@@ -1,9 +1,8 @@
 import Link from 'next/link';
 
 import PixelTrail from '@web/components/effects/PixelTrail';
+import { LandingFooter, LandingHeader } from '@web/components/features/landing';
 import { buttonClasses } from '@web/components/ui/button';
-import { BrandLogo } from '@web/components/ui/brand-logo';
-import { cn } from '@web/lib/utils';
 
 export default function LandingPage() {
   return (
@@ -17,31 +16,7 @@ export default function LandingPage() {
         gooeyFilter={{ id: 'custom-goo-filter', strength: 2 }}
       />
 
-      <header className="relative z-10 mx-auto mt-4 flex w-[calc(100%-2rem)] max-w-6xl items-center justify-between rounded-full border border-border bg-card px-5 py-3 backdrop-blur-xl">
-        <BrandMark />
-        <nav className="hidden items-center gap-6 text-sm text-muted md:flex">
-          <a href="#features" className="transition hover:text-foreground">
-            Features
-          </a>
-          <a href="#how-it-works" className="transition hover:text-foreground">
-            How it works
-          </a>
-        </nav>
-        <div className="flex items-center gap-2">
-          <Link
-            href="/login"
-            className={buttonClasses({ variant: 'ghost', size: 'sm' })}
-          >
-            Sign In
-          </Link>
-          <Link
-            href="/login"
-            className={buttonClasses({ variant: 'primary', size: 'sm' })}
-          >
-            Get Started
-          </Link>
-        </div>
-      </header>
+      <LandingHeader />
 
       <main className="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6">
         <Hero />
@@ -51,23 +26,8 @@ export default function LandingPage() {
         <FinalCta />
       </main>
 
-      <Footer />
+      <LandingFooter />
     </div>
-  );
-}
-
-function BrandMark({ className }: { className?: string }) {
-  return (
-    <Link
-      href="/"
-      className={cn(
-        'flex items-center gap-2 text-base font-bold tracking-tight',
-        className,
-      )}
-    >
-      <BrandLogo />
-      Money<span className="text-accent">App</span>
-    </Link>
   );
 }
 
@@ -252,24 +212,5 @@ function FinalCta() {
         </div>
       </div>
     </section>
-  );
-}
-
-function Footer() {
-  return (
-    <footer className="relative z-10 mt-auto border-t border-border">
-      <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-3 px-4 py-6 sm:flex-row sm:px-6">
-        <BrandMark className="text-sm" />
-        <div className="flex items-center gap-6 text-xs text-muted">
-          <a href="/terms" className="transition hover:text-foreground">
-            Terms
-          </a>
-          <a href="/privacy" className="transition hover:text-foreground">
-            Privacy
-          </a>
-          <span>© {new Date().getFullYear()} Money App</span>
-        </div>
-      </div>
-    </footer>
   );
 }
