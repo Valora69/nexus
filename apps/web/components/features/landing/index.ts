@@ -1,3 +1,4 @@
+export { Bento } from './bento';
 export { BrandMark } from './brand-mark';
 export { CircuitGrid } from './circuit-grid';
 export { CoinKey } from './coin-key';
@@ -16,10 +17,10 @@ export { HeroStage } from './hero-stage';
 export { HeroToasts, type HeroToast } from './hero-toasts';
 export { LandingFooter } from './landing-footer';
 export { LandingHeader } from './landing-header';
-export { NotificationToast } from './notification-toast';
 export { LandingShell, type LandingPanel } from './landing-shell';
-export { SoundPill } from './sound-pill';
+export { NotificationToast } from './notification-toast';
 export { Panel, type PanelWidth } from './panel';
+export { SoundPill } from './sound-pill';
 export {
   SOUND_STORAGE_KEY,
   SoundProvider,

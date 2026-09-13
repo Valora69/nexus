@@ -172,6 +172,27 @@ Added in Stage 2:
 | `hand-note.tsx` | `HandNote` |
 | `demo-activity-provider.tsx` | `DemoActivityProvider`, `useDemoActivity`, `useDemoActivityListener` |
 
+Added in Stage 3:
+
+| Module | Export |
+|---|---|
+| `landing-shell.tsx` | `LandingShell`, `LandingPanel`, `TRACK_MEDIA_QUERY` (tested in `apps/web/test/landing-shell.spec.tsx`) |
+| `panel.tsx` | `Panel`, `PanelWidth` (`'screen' \| 'content'`) |
+| `smooth-scroll.tsx` | `SmoothScroll` (ReactLenis root) |
+| `bento.tsx` | `Bento` |
+
+Stage 3 notes:
+
+- Lenis ships ESM only, which Jest can't load. `smooth-scroll.tsx` is loaded
+  with `next/dynamic` (`ssr:false`) and only in track mode; tests mock it.
+- The shell stamps `data-mode="track" | "vertical"` on a `group/shell` root.
+  Panels and panel content style themselves with
+  `group-data-[mode=track]/shell:` variants instead of reading context.
+- The landing root uses `overflow-x-clip`, not `overflow-hidden`, which would
+  stop the stage from sticking.
+- In track mode the header is fixed over the stage, and panels pad
+  `pt-24 pb-20` to clear the header and the rail.
+
 Pure demo logic lives in `apps/web/lib/landing/`:
 
 - `demo.ts`: `DEMO_CURRENT_USER`, `DEMO_MEMBERS`, `DEMO_EXPENSE`,

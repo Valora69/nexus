@@ -2,11 +2,13 @@ import Link from 'next/link';
 
 // Import modules directly rather than via the barrel: the barrel re-exports
 // client toys (e.g. HandNote → motion) that would otherwise ship on this route.
+import { Bento } from '@web/components/features/landing/bento';
 import { DemoActivityProvider } from '@web/components/features/landing/demo-activity-provider';
 import { landingFontVariables } from '@web/components/features/landing/fonts';
 import { Hero } from '@web/components/features/landing/hero';
 import { LandingFooter } from '@web/components/features/landing/landing-footer';
 import { LandingHeader } from '@web/components/features/landing/landing-header';
+import { LandingShell } from '@web/components/features/landing/landing-shell';
 import { SoundProvider } from '@web/components/features/landing/sound-provider';
 import { buttonClasses } from '@web/components/ui/button';
 
@@ -14,102 +16,44 @@ export default function LandingPage() {
   return (
     <SoundProvider>
       <DemoActivityProvider>
+        {/* overflow-x-clip, not overflow-hidden: the latter would stop the
+            track's sticky stage from sticking. */}
         <div
-          className={`relative isolate flex min-h-screen flex-col overflow-hidden bg-black ${landingFontVariables}`}
+          className={`relative isolate flex min-h-screen flex-col overflow-x-clip bg-black ${landingFontVariables}`}
         >
-          <LandingHeader />
-
-          <main className="relative z-10 w-full">
-            <Hero />
-            <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
-              <ProblemPanel />
-              <Features />
-              <HowItWorks />
-              <FinalCta />
-            </div>
-          </main>
-
-          <LandingFooter />
+          <LandingShell
+            header={<LandingHeader />}
+            panels={[
+              {
+                key: 'hero',
+                label: 'Start',
+                padded: false,
+                content: <Hero />,
+              },
+              {
+                key: 'features',
+                label: 'Features',
+                width: 'content',
+                content: <Bento />,
+              },
+              // Placeholders until their track panels land in later stages.
+              {
+                key: 'how-it-works',
+                label: 'How it works',
+                content: <HowItWorks />,
+              },
+              {
+                key: 'get-started',
+                label: 'Get started',
+                content: <FinalCta />,
+              },
+            ]}
+          >
+            <LandingFooter />
+          </LandingShell>
         </div>
       </DemoActivityProvider>
     </SoundProvider>
-  );
-}
-
-function ProblemPanel() {
-  return (
-    <section className="mt-24">
-      <div className="mx-auto max-w-3xl rounded-4xl border border-border bg-card p-8 text-center backdrop-blur-xl sm:p-12">
-        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
-          The Problem
-        </p>
-        <h2 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">
-          You shouldn't need a spreadsheet to split a pizza.
-        </h2>
-        <p className="mt-4 text-base leading-relaxed text-muted">
-          Group expenses are a quiet kind of friction. Someone fronts the bill,
-          others promise to pay later, and a week later nobody quite remembers
-          who owed what. Money App keeps the math automatic and the receipts
-          honest — so the friend chat stays a friend chat.
-        </p>
-      </div>
-    </section>
-  );
-}
-
-const FEATURES = [
-  {
-    title: 'Build for daily use',
-    desc: 'From morning coffee to monthly rent, track shared expenses as they happen — not a week later when nobody remembers.',
-  },
-  {
-    title: 'Quick Add expenses',
-    desc: 'Just press B from anywhere in the app. Add an expense in a single sentence!',
-  },
-  {
-    title: 'Groups that make sense',
-    desc: 'Friends, trips, lunch — every shared cost lives in the right place, with the right people.',
-  },
-  {
-    title: 'Fair splits, every time',
-    desc: 'Equal, percentage, or custom shares — math is calculated to the cent so nobody silently overpays.',
-  },
-  {
-    title: 'Settle up in one tap',
-    desc: 'Net balances per friend or per group. Mark a transfer as paid and the books reconcile instantly.',
-  },
-  {
-    title: 'Gentle confirmations',
-    desc: 'Payments wait on confirmation from both sides. Nothing gets missed and no awkward follow-up messages.',
-  },
-];
-
-function Features() {
-  return (
-    <section id="features" className="mt-24">
-      <div className="mx-auto max-w-3xl text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
-          Features
-        </p>
-        <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-          Built tracking not just expenses, but the whole shared money
-          experience.
-        </h2>
-      </div>
-      <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {FEATURES.map((f) => (
-          <article
-            key={f.title}
-            className="glass-card hover-lift p-6 hover:border-border-strong"
-          >
-            <h3 className="mt-4 text-lg font-semibold tracking-tight">
-              {f.title}
-            </h3>
-            <p className="mt-2 text-sm leading-relaxed text-muted">{f.desc}</p>
-          </article>
-        ))}
-      </div>
-    </section>
   );
 }
 
@@ -134,7 +78,7 @@ const STEPS = [
 
 function HowItWorks() {
   return (
-    <section id="how-it-works" className="mt-24">
+    <section id="how-it-works" className="px-4 sm:px-6">
       <div className="mx-auto max-w-3xl">
         <div className="text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
@@ -144,11 +88,11 @@ function HowItWorks() {
             Four steps. No tutorial required.
           </h2>
         </div>
-        <ol className="mt-10 space-y-5">
+        <ol className="mt-10 space-y-4">
           {STEPS.map((step, i) => (
             <li
               key={step.title}
-              className="glass-card flex items-start gap-5 p-5 sm:p-6"
+              className="glass-card flex items-start gap-5 p-5"
             >
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-accent text-lg font-bold text-background shadow-glow">
                 {i + 1}
@@ -171,7 +115,7 @@ function HowItWorks() {
 
 function FinalCta() {
   return (
-    <section className="mb-20 mt-24">
+    <section className="px-4 sm:px-6">
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
           No more guessing where money goes.
