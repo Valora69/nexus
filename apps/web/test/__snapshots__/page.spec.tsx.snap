@@ -1634,129 +1634,993 @@ exports[`Root page should match the snapshot 1`] = `
                 class=""
               >
                 <div
-                  class="relative w-full group-data-[mode=track]/shell:flex group-data-[mode=track]/shell:h-full group-data-[mode=track]/shell:shrink-0 group-data-[mode=track]/shell:items-center group-data-[mode=track]/shell:pb-20 group-data-[mode=track]/shell:pt-24 group-data-[mode=track]/shell:w-screen group-data-[mode=vertical]/shell:py-16 sm:group-data-[mode=vertical]/shell:py-24"
+                  class="relative w-full group-data-[mode=track]/shell:flex group-data-[mode=track]/shell:h-full group-data-[mode=track]/shell:shrink-0 group-data-[mode=track]/shell:items-center group-data-[mode=track]/shell:pb-20 group-data-[mode=track]/shell:pt-24 group-data-[mode=track]/shell:w-max group-data-[mode=vertical]/shell:py-16 sm:group-data-[mode=vertical]/shell:py-24"
                   data-landing-panel="How it works"
                 >
                   <div
                     class="w-full"
                   >
                     <section
-                      class="px-4 sm:px-6"
+                      aria-labelledby="how-it-works-heading"
+                      class="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 sm:px-6 group-data-[mode=track]/shell:max-w-none group-data-[mode=track]/shell:flex-row group-data-[mode=track]/shell:items-center group-data-[mode=track]/shell:gap-10 group-data-[mode=track]/shell:px-[max(4rem,6vw)]"
                       id="how-it-works"
                     >
                       <div
-                        class="mx-auto max-w-3xl"
+                        class="max-w-md shrink-0 group-data-[mode=track]/shell:w-[20rem]"
+                      >
+                        <p
+                          class="font-mono text-[12px] uppercase tracking-[0.14em] text-accent"
+                        >
+                          How it works
+                        </p>
+                        <h2
+                          class="mt-3 font-[family-name:var(--font-display)] text-[clamp(2.5rem,5vw,4rem)] font-extrabold leading-[0.95] tracking-[-0.04em]"
+                          id="how-it-works-heading"
+                        >
+                          Add it before the bill hits the table.
+                        </h2>
+                        <p
+                          class="mt-5 text-base text-muted"
+                        >
+                          Pick what it was, tap the amount, choose who's in. Everyone sees their share before the waiter comes back.
+                        </p>
+                        <div
+                          class="pointer-events-none w-max select-none gap-1 text-accent/70 flex-col items-end mt-6 hidden group-data-[mode=track]/shell:flex"
+                        >
+                          <span
+                            class="font-[family-name:var(--font-hand)] text-2xl font-semibold leading-none"
+                          >
+                            tap the keys
+                          </span>
+                          <svg
+                            aria-hidden="true"
+                            class="h-10 w-10"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            viewBox="0 0 48 48"
+                          >
+                            <path
+                              d="M8 6 C 10 18, 20 32, 40 38"
+                              pathLength="1"
+                              stroke-dasharray="0 1"
+                              stroke-dashoffset="0"
+                              style="opacity: 0;"
+                            />
+                            <path
+                              d="M29 40 L40 38 L35 28"
+                              pathLength="1"
+                              stroke-dasharray="0 1"
+                              stroke-dashoffset="0"
+                              style="opacity: 0;"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                      <div
+                        class="grid gap-4 md:grid-cols-2 lg:grid-cols-3 group-data-[mode=track]/shell:grid-cols-[21rem_21rem_17rem] group-data-[mode=track]/shell:items-start"
                       >
                         <div
-                          class="text-center"
+                          class="flex flex-col gap-4 rounded-3xl border border-border bg-[#0a0a0a] p-5"
+                        >
+                          <div>
+                            <p
+                              class="mb-1.5 flex items-center gap-1.5 text-[12px] font-medium text-muted"
+                            >
+                              Scenario
+                            </p>
+                            <div
+                              aria-label="Scenario"
+                              class="flex flex-wrap gap-1.5"
+                              role="group"
+                            >
+                              <button
+                                aria-pressed="true"
+                                class="h-8 rounded-full border px-3 text-[13px] font-medium tracking-[-0.02em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 border-accent bg-accent text-black"
+                                tabindex="0"
+                                type="button"
+                              >
+                                Pizza night
+                              </button>
+                              <button
+                                aria-pressed="false"
+                                class="h-8 rounded-full border px-3 text-[13px] font-medium tracking-[-0.02em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 border-border text-muted hover:text-foreground"
+                                tabindex="0"
+                                type="button"
+                              >
+                                Grab home
+                              </button>
+                              <button
+                                aria-pressed="false"
+                                class="h-8 rounded-full border px-3 text-[13px] font-medium tracking-[-0.02em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 border-border text-muted hover:text-foreground"
+                                tabindex="0"
+                                type="button"
+                              >
+                                Milk tea run
+                              </button>
+                              <button
+                                aria-pressed="false"
+                                class="h-8 rounded-full border px-3 text-[13px] font-medium tracking-[-0.02em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 border-border text-muted hover:text-foreground"
+                                tabindex="0"
+                                type="button"
+                              >
+                                Groceries
+                              </button>
+                            </div>
+                          </div>
+                          <div>
+                            <label
+                              class="mb-1.5 flex items-center gap-1.5 text-[12px] font-medium text-muted"
+                              for=":ri:"
+                            >
+                              Expense Name *
+                            </label>
+                            <input
+                              class="h-10 w-full rounded-xl border border-border bg-black px-3 text-[14px] outline-none placeholder:text-white/30 focus-visible:border-accent/60 focus-visible:ring-2 focus-visible:ring-accent/30"
+                              id=":ri:"
+                              maxlength="40"
+                              placeholder="e.g. Pizza night"
+                              value="Pizza night"
+                            />
+                          </div>
+                          <div>
+                            <p
+                              class="mb-1.5 flex items-center gap-1.5 text-[12px] font-medium text-muted"
+                            >
+                              Amount (₱) *
+                            </p>
+                            <output
+                              aria-label="Amount"
+                              class="flex h-14 items-center justify-end rounded-xl border border-border bg-black px-4 text-[28px] font-semibold tracking-[-0.02em]"
+                            >
+                              <span
+                                class="font-mono tabular-nums text-white/30"
+                              >
+                                ₱0.00
+                              </span>
+                            </output>
+                            <div
+                              aria-describedby=":rj:"
+                              aria-label="Amount keypad"
+                              class="-mx-1 mt-3 grid grid-cols-3 gap-2 rounded-2xl p-1 pb-2 outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]"
+                              role="group"
+                              tabindex="0"
+                            >
+                              <button
+                                aria-label="1"
+                                class="flex h-12 touch-manipulation select-none items-center justify-center rounded-xl border border-white/10 bg-gradient-to-b from-[#242424] to-[#141414] font-mono text-lg font-semibold tabular-nums shadow-[0_4px_0_0_#000,0_6px_12px_-4px_rgb(0_0_0/0.9),inset_0_1px_0_rgb(255_255_255/0.08)] outline-none transition-[transform,box-shadow] duration-75 active:translate-y-[2px] active:shadow-[0_2px_0_0_#000,inset_0_1px_0_rgb(255_255_255/0.08)] data-[pressed=true]:translate-y-[2px] data-[pressed=true]:shadow-[0_2px_0_0_#000,inset_0_1px_0_rgb(255_255_255/0.08)] text-foreground"
+                                data-pressed="false"
+                                tabindex="-1"
+                                type="button"
+                              >
+                                1
+                              </button>
+                              <button
+                                aria-label="2"
+                                class="flex h-12 touch-manipulation select-none items-center justify-center rounded-xl border border-white/10 bg-gradient-to-b from-[#242424] to-[#141414] font-mono text-lg font-semibold tabular-nums shadow-[0_4px_0_0_#000,0_6px_12px_-4px_rgb(0_0_0/0.9),inset_0_1px_0_rgb(255_255_255/0.08)] outline-none transition-[transform,box-shadow] duration-75 active:translate-y-[2px] active:shadow-[0_2px_0_0_#000,inset_0_1px_0_rgb(255_255_255/0.08)] data-[pressed=true]:translate-y-[2px] data-[pressed=true]:shadow-[0_2px_0_0_#000,inset_0_1px_0_rgb(255_255_255/0.08)] text-foreground"
+                                data-pressed="false"
+                                tabindex="-1"
+                                type="button"
+                              >
+                                2
+                              </button>
+                              <button
+                                aria-label="3"
+                                class="flex h-12 touch-manipulation select-none items-center justify-center rounded-xl border border-white/10 bg-gradient-to-b from-[#242424] to-[#141414] font-mono text-lg font-semibold tabular-nums shadow-[0_4px_0_0_#000,0_6px_12px_-4px_rgb(0_0_0/0.9),inset_0_1px_0_rgb(255_255_255/0.08)] outline-none transition-[transform,box-shadow] duration-75 active:translate-y-[2px] active:shadow-[0_2px_0_0_#000,inset_0_1px_0_rgb(255_255_255/0.08)] data-[pressed=true]:translate-y-[2px] data-[pressed=true]:shadow-[0_2px_0_0_#000,inset_0_1px_0_rgb(255_255_255/0.08)] text-foreground"
+                                data-pressed="false"
+                                tabindex="-1"
+                                type="button"
+                              >
+                                3
+                              </button>
+                              <button
+                                aria-label="4"
+                                class="flex h-12 touch-manipulation select-none items-center justify-center rounded-xl border border-white/10 bg-gradient-to-b from-[#242424] to-[#141414] font-mono text-lg font-semibold tabular-nums shadow-[0_4px_0_0_#000,0_6px_12px_-4px_rgb(0_0_0/0.9),inset_0_1px_0_rgb(255_255_255/0.08)] outline-none transition-[transform,box-shadow] duration-75 active:translate-y-[2px] active:shadow-[0_2px_0_0_#000,inset_0_1px_0_rgb(255_255_255/0.08)] data-[pressed=true]:translate-y-[2px] data-[pressed=true]:shadow-[0_2px_0_0_#000,inset_0_1px_0_rgb(255_255_255/0.08)] text-foreground"
+                                data-pressed="false"
+                                tabindex="-1"
+                                type="button"
+                              >
+                                4
+                              </button>
+                              <button
+                                aria-label="5"
+                                class="flex h-12 touch-manipulation select-none items-center justify-center rounded-xl border border-white/10 bg-gradient-to-b from-[#242424] to-[#141414] font-mono text-lg font-semibold tabular-nums shadow-[0_4px_0_0_#000,0_6px_12px_-4px_rgb(0_0_0/0.9),inset_0_1px_0_rgb(255_255_255/0.08)] outline-none transition-[transform,box-shadow] duration-75 active:translate-y-[2px] active:shadow-[0_2px_0_0_#000,inset_0_1px_0_rgb(255_255_255/0.08)] data-[pressed=true]:translate-y-[2px] data-[pressed=true]:shadow-[0_2px_0_0_#000,inset_0_1px_0_rgb(255_255_255/0.08)] text-foreground"
+                                data-pressed="false"
+                                tabindex="-1"
+                                type="button"
+                              >
+                                5
+                              </button>
+                              <button
+                                aria-label="6"
+                                class="flex h-12 touch-manipulation select-none items-center justify-center rounded-xl border border-white/10 bg-gradient-to-b from-[#242424] to-[#141414] font-mono text-lg font-semibold tabular-nums shadow-[0_4px_0_0_#000,0_6px_12px_-4px_rgb(0_0_0/0.9),inset_0_1px_0_rgb(255_255_255/0.08)] outline-none transition-[transform,box-shadow] duration-75 active:translate-y-[2px] active:shadow-[0_2px_0_0_#000,inset_0_1px_0_rgb(255_255_255/0.08)] data-[pressed=true]:translate-y-[2px] data-[pressed=true]:shadow-[0_2px_0_0_#000,inset_0_1px_0_rgb(255_255_255/0.08)] text-foreground"
+                                data-pressed="false"
+                                tabindex="-1"
+                                type="button"
+                              >
+                                6
+                              </button>
+                              <button
+                                aria-label="7"
+                                class="flex h-12 touch-manipulation select-none items-center justify-center rounded-xl border border-white/10 bg-gradient-to-b from-[#242424] to-[#141414] font-mono text-lg font-semibold tabular-nums shadow-[0_4px_0_0_#000,0_6px_12px_-4px_rgb(0_0_0/0.9),inset_0_1px_0_rgb(255_255_255/0.08)] outline-none transition-[transform,box-shadow] duration-75 active:translate-y-[2px] active:shadow-[0_2px_0_0_#000,inset_0_1px_0_rgb(255_255_255/0.08)] data-[pressed=true]:translate-y-[2px] data-[pressed=true]:shadow-[0_2px_0_0_#000,inset_0_1px_0_rgb(255_255_255/0.08)] text-foreground"
+                                data-pressed="false"
+                                tabindex="-1"
+                                type="button"
+                              >
+                                7
+                              </button>
+                              <button
+                                aria-label="8"
+                                class="flex h-12 touch-manipulation select-none items-center justify-center rounded-xl border border-white/10 bg-gradient-to-b from-[#242424] to-[#141414] font-mono text-lg font-semibold tabular-nums shadow-[0_4px_0_0_#000,0_6px_12px_-4px_rgb(0_0_0/0.9),inset_0_1px_0_rgb(255_255_255/0.08)] outline-none transition-[transform,box-shadow] duration-75 active:translate-y-[2px] active:shadow-[0_2px_0_0_#000,inset_0_1px_0_rgb(255_255_255/0.08)] data-[pressed=true]:translate-y-[2px] data-[pressed=true]:shadow-[0_2px_0_0_#000,inset_0_1px_0_rgb(255_255_255/0.08)] text-foreground"
+                                data-pressed="false"
+                                tabindex="-1"
+                                type="button"
+                              >
+                                8
+                              </button>
+                              <button
+                                aria-label="9"
+                                class="flex h-12 touch-manipulation select-none items-center justify-center rounded-xl border border-white/10 bg-gradient-to-b from-[#242424] to-[#141414] font-mono text-lg font-semibold tabular-nums shadow-[0_4px_0_0_#000,0_6px_12px_-4px_rgb(0_0_0/0.9),inset_0_1px_0_rgb(255_255_255/0.08)] outline-none transition-[transform,box-shadow] duration-75 active:translate-y-[2px] active:shadow-[0_2px_0_0_#000,inset_0_1px_0_rgb(255_255_255/0.08)] data-[pressed=true]:translate-y-[2px] data-[pressed=true]:shadow-[0_2px_0_0_#000,inset_0_1px_0_rgb(255_255_255/0.08)] text-foreground"
+                                data-pressed="false"
+                                tabindex="-1"
+                                type="button"
+                              >
+                                9
+                              </button>
+                              <button
+                                aria-label="00"
+                                class="flex h-12 touch-manipulation select-none items-center justify-center rounded-xl border border-white/10 bg-gradient-to-b from-[#242424] to-[#141414] font-mono text-lg font-semibold tabular-nums shadow-[0_4px_0_0_#000,0_6px_12px_-4px_rgb(0_0_0/0.9),inset_0_1px_0_rgb(255_255_255/0.08)] outline-none transition-[transform,box-shadow] duration-75 active:translate-y-[2px] active:shadow-[0_2px_0_0_#000,inset_0_1px_0_rgb(255_255_255/0.08)] data-[pressed=true]:translate-y-[2px] data-[pressed=true]:shadow-[0_2px_0_0_#000,inset_0_1px_0_rgb(255_255_255/0.08)] text-foreground"
+                                data-pressed="false"
+                                tabindex="-1"
+                                type="button"
+                              >
+                                00
+                              </button>
+                              <button
+                                aria-label="0"
+                                class="flex h-12 touch-manipulation select-none items-center justify-center rounded-xl border border-white/10 bg-gradient-to-b from-[#242424] to-[#141414] font-mono text-lg font-semibold tabular-nums shadow-[0_4px_0_0_#000,0_6px_12px_-4px_rgb(0_0_0/0.9),inset_0_1px_0_rgb(255_255_255/0.08)] outline-none transition-[transform,box-shadow] duration-75 active:translate-y-[2px] active:shadow-[0_2px_0_0_#000,inset_0_1px_0_rgb(255_255_255/0.08)] data-[pressed=true]:translate-y-[2px] data-[pressed=true]:shadow-[0_2px_0_0_#000,inset_0_1px_0_rgb(255_255_255/0.08)] text-foreground"
+                                data-pressed="false"
+                                tabindex="-1"
+                                type="button"
+                              >
+                                0
+                              </button>
+                              <button
+                                aria-label="Delete"
+                                class="flex h-12 touch-manipulation select-none items-center justify-center rounded-xl border border-white/10 bg-gradient-to-b from-[#242424] to-[#141414] font-mono text-lg font-semibold tabular-nums shadow-[0_4px_0_0_#000,0_6px_12px_-4px_rgb(0_0_0/0.9),inset_0_1px_0_rgb(255_255_255/0.08)] outline-none transition-[transform,box-shadow] duration-75 active:translate-y-[2px] active:shadow-[0_2px_0_0_#000,inset_0_1px_0_rgb(255_255_255/0.08)] data-[pressed=true]:translate-y-[2px] data-[pressed=true]:shadow-[0_2px_0_0_#000,inset_0_1px_0_rgb(255_255_255/0.08)] text-accent"
+                                data-pressed="false"
+                                tabindex="-1"
+                                type="button"
+                              >
+                                <svg
+                                  aria-hidden="true"
+                                  class="lucide lucide-delete h-5 w-5"
+                                  fill="none"
+                                  height="24"
+                                  stroke="currentColor"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  stroke-width="2"
+                                  viewBox="0 0 24 24"
+                                  width="24"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M10 5a2 2 0 0 0-1.344.519l-6.328 5.74a1 1 0 0 0 0 1.481l6.328 5.741A2 2 0 0 0 10 19h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z"
+                                  />
+                                  <path
+                                    d="m12 9 6 6"
+                                  />
+                                  <path
+                                    d="m18 9-6 6"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                            <p
+                              class="mt-1 text-[11px] text-muted"
+                              id=":rj:"
+                            >
+                              Tap the keys, or focus the keypad and type digits.
+                            </p>
+                          </div>
+                        </div>
+                        <div
+                          class="flex flex-col gap-4 rounded-3xl border border-border bg-[#0a0a0a] p-5"
+                        >
+                          <div>
+                            <p
+                              class="mb-1.5 flex items-center gap-1.5 text-[12px] font-medium text-muted"
+                            >
+                              <svg
+                                aria-hidden="true"
+                                class="lucide lucide-user-plus h-3.5 w-3.5"
+                                fill="none"
+                                height="24"
+                                stroke="currentColor"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                viewBox="0 0 24 24"
+                                width="24"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
+                                />
+                                <circle
+                                  cx="9"
+                                  cy="7"
+                                  r="4"
+                                />
+                                <line
+                                  x1="19"
+                                  x2="19"
+                                  y1="8"
+                                  y2="14"
+                                />
+                                <line
+                                  x1="22"
+                                  x2="16"
+                                  y1="11"
+                                  y2="11"
+                                />
+                              </svg>
+                               Split with Members
+                            </p>
+                            <div
+                              aria-label="Split with Members"
+                              class="flex flex-wrap gap-1.5"
+                              role="group"
+                            >
+                              <button
+                                aria-pressed="true"
+                                class="h-8 rounded-full border px-3 text-[13px] font-medium tracking-[-0.02em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 border-accent bg-accent text-black"
+                                tabindex="0"
+                                type="button"
+                              >
+                                You
+                              </button>
+                              <button
+                                aria-pressed="true"
+                                class="h-8 rounded-full border px-3 text-[13px] font-medium tracking-[-0.02em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 border-accent bg-accent text-black"
+                                tabindex="0"
+                                type="button"
+                              >
+                                James
+                              </button>
+                              <button
+                                aria-pressed="true"
+                                class="h-8 rounded-full border px-3 text-[13px] font-medium tracking-[-0.02em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 border-accent bg-accent text-black"
+                                tabindex="0"
+                                type="button"
+                              >
+                                Mika
+                              </button>
+                              <button
+                                aria-pressed="true"
+                                class="h-8 rounded-full border px-3 text-[13px] font-medium tracking-[-0.02em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 border-accent bg-accent text-black"
+                                tabindex="0"
+                                type="button"
+                              >
+                                Mara
+                              </button>
+                            </div>
+                          </div>
+                          <div>
+                            <p
+                              class="mb-1.5 flex items-center gap-1.5 text-[12px] font-medium text-muted"
+                            >
+                              Split Type
+                            </p>
+                            <div
+                              aria-label="Split Type"
+                              class="grid grid-cols-2 rounded-full border border-border p-0.5"
+                              role="group"
+                            >
+                              <button
+                                aria-pressed="true"
+                                class="relative h-8 rounded-full text-[13px] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
+                                type="button"
+                              >
+                                <span
+                                  class="absolute inset-0 rounded-full border border-white/10 bg-white/10"
+                                  style="opacity: 1;"
+                                />
+                                <span
+                                  class="relative text-foreground"
+                                >
+                                  Divide Equally
+                                </span>
+                              </button>
+                              <button
+                                aria-pressed="false"
+                                class="relative h-8 rounded-full text-[13px] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
+                                type="button"
+                              >
+                                <span
+                                  class="relative text-muted"
+                                >
+                                  Custom Amounts
+                                </span>
+                              </button>
+                            </div>
+                          </div>
+                          <div>
+                            <p
+                              class="mb-1.5 flex items-center gap-1.5 text-[12px] font-medium text-muted"
+                            >
+                              Split Preview
+                            </p>
+                            <ul
+                              class="space-y-1.5"
+                            >
+                              <li
+                                class="flex h-9 items-center justify-between gap-3 rounded-xl border border-border px-3 text-[13px]"
+                              >
+                                <span
+                                  class="flex items-center gap-1.5"
+                                >
+                                  You
+                                </span>
+                                <span
+                                  class="font-mono tabular-nums text-accent"
+                                >
+                                  ₱0.00
+                                </span>
+                              </li>
+                              <li
+                                class="flex h-9 items-center justify-between gap-3 rounded-xl border border-border px-3 text-[13px]"
+                              >
+                                <span
+                                  class="flex items-center gap-1.5"
+                                >
+                                  James
+                                </span>
+                                <span
+                                  class="font-mono tabular-nums text-accent"
+                                >
+                                  ₱0.00
+                                </span>
+                              </li>
+                              <li
+                                class="flex h-9 items-center justify-between gap-3 rounded-xl border border-border px-3 text-[13px]"
+                              >
+                                <span
+                                  class="flex items-center gap-1.5"
+                                >
+                                  Mika
+                                </span>
+                                <span
+                                  class="font-mono tabular-nums text-accent"
+                                >
+                                  ₱0.00
+                                </span>
+                              </li>
+                              <li
+                                class="flex h-9 items-center justify-between gap-3 rounded-xl border border-border px-3 text-[13px]"
+                              >
+                                <span
+                                  class="flex items-center gap-1.5"
+                                >
+                                  Mara
+                                </span>
+                                <span
+                                  class="font-mono tabular-nums text-accent"
+                                >
+                                  ₱0.00
+                                </span>
+                              </li>
+                            </ul>
+                          </div>
+                          <div
+                            class="mt-auto"
+                          >
+                            <p
+                              aria-live="polite"
+                              class="mb-3 min-h-[2.5rem] text-[13px] leading-snug text-foreground"
+                            />
+                            <button
+                              aria-describedby=":rk:"
+                              class="h-11 w-full rounded-full bg-accent text-[14px] font-semibold tracking-[-0.02em] text-black shadow-[0_3px_0_0_#00801f] outline-none transition-[transform,box-shadow,background-color] duration-75 focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a] enabled:active:translate-y-[2px] enabled:active:shadow-[0_1px_0_0_#00801f] disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-muted disabled:shadow-none"
+                              disabled=""
+                              type="button"
+                            >
+                              Add Expense
+                            </button>
+                            <p
+                              class="mt-2 text-[12px] text-muted"
+                              id=":rk:"
+                            >
+                              Tap an amount on the keypad
+                            </p>
+                          </div>
+                        </div>
+                        <div
+                          class="relative flex flex-col gap-4 md:col-span-2 lg:col-span-1"
+                        >
+                          <div
+                            aria-hidden="true"
+                            class="relative h-[240px]"
+                          >
+                            <div
+                              class="relative z-10 mx-auto h-4 w-[92%] rounded-full border border-white/10 bg-gradient-to-b from-[#1b1b1b] to-black shadow-[inset_0_-2px_0_rgb(0_0_0/0.8)]"
+                            >
+                              <span
+                                class="absolute inset-x-4 top-1/2 h-px -translate-y-1/2 bg-black"
+                              />
+                            </div>
+                            <div
+                              class="mx-auto -mt-2 w-[80%]"
+                            />
+                          </div>
+                          <section
+                            aria-label="Group ledger"
+                            class="rounded-3xl border border-border bg-[#0a0a0a] p-4"
+                          >
+                            <div
+                              class="flex items-baseline justify-between px-1 pb-3"
+                            >
+                              <h3
+                                class="text-[13px] font-semibold"
+                              >
+                                Barkada · BGC
+                              </h3>
+                              <span
+                                class="font-mono tabular-nums text-[12px] text-muted"
+                              >
+                                ₱630.00
+                              </span>
+                            </div>
+                            <ul
+                              class="flex h-[212px] flex-col gap-1.5 overflow-hidden"
+                            >
+                              <li
+                                class="flex h-[50px] shrink-0 items-center justify-between gap-3 rounded-xl border border-border bg-black px-3"
+                                style="opacity: 1;"
+                              >
+                                <span
+                                  class="min-w-0"
+                                >
+                                  <span
+                                    class="flex items-center gap-1.5 text-[13px] font-medium"
+                                  >
+                                    <span
+                                      class="truncate"
+                                    >
+                                      Grab home
+                                    </span>
+                                  </span>
+                                  <span
+                                    class="block font-mono text-[11px] text-muted"
+                                  >
+                                    Paid by 
+                                    Mika
+                                  </span>
+                                </span>
+                                <span
+                                  class="font-mono text-[13px] tabular-nums"
+                                >
+                                  ₱240.00
+                                </span>
+                              </li>
+                              <li
+                                class="flex h-[50px] shrink-0 items-center justify-between gap-3 rounded-xl border border-border bg-black px-3"
+                                style="opacity: 1;"
+                              >
+                                <span
+                                  class="min-w-0"
+                                >
+                                  <span
+                                    class="flex items-center gap-1.5 text-[13px] font-medium"
+                                  >
+                                    <span
+                                      class="truncate"
+                                    >
+                                      Milk tea run
+                                    </span>
+                                  </span>
+                                  <span
+                                    class="block font-mono text-[11px] text-muted"
+                                  >
+                                    Paid by 
+                                    James
+                                  </span>
+                                </span>
+                                <span
+                                  class="font-mono text-[13px] tabular-nums"
+                                >
+                                  ₱390.00
+                                </span>
+                              </li>
+                            </ul>
+                          </section>
+                          <div
+                            aria-hidden="true"
+                            class="pointer-events-none absolute inset-x-0 top-8 z-20 flex flex-col items-center gap-2"
+                          />
+                          <p
+                            aria-live="polite"
+                            class="sr-only"
+                          />
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </div>
+              </div>
+              <div
+                class=""
+              >
+                <div
+                  class="relative w-full group-data-[mode=track]/shell:flex group-data-[mode=track]/shell:h-full group-data-[mode=track]/shell:shrink-0 group-data-[mode=track]/shell:items-center group-data-[mode=track]/shell:pb-20 group-data-[mode=track]/shell:pt-24 group-data-[mode=track]/shell:w-screen group-data-[mode=vertical]/shell:py-16 sm:group-data-[mode=vertical]/shell:py-24"
+                  data-landing-panel="Slice the bill"
+                >
+                  <div
+                    class="w-full"
+                  >
+                    <section
+                      aria-labelledby="slice-heading"
+                      class="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 sm:px-6 group-data-[mode=track]/shell:max-w-none group-data-[mode=track]/shell:flex-row group-data-[mode=track]/shell:items-center group-data-[mode=track]/shell:gap-14 group-data-[mode=track]/shell:px-[max(4rem,6vw)]"
+                    >
+                      <div
+                        class="max-w-md shrink-0 group-data-[mode=track]/shell:w-[20rem]"
+                      >
+                        <p
+                          class="font-mono text-[12px] uppercase tracking-[0.14em] text-accent"
+                        >
+                          Custom amounts
+                        </p>
+                        <h2
+                          class="mt-3 font-[family-name:var(--font-display)] text-[clamp(2.5rem,5vw,4rem)] font-extrabold leading-[0.95] tracking-[-0.04em]"
+                          id="slice-heading"
+                        >
+                          Slice the bill.
+                        </h2>
+                        <p
+                          class="mt-5 text-base text-muted"
+                        >
+                          Not everyone ate the same. Drag the dividers to give each person their part; the total always has to match.
+                        </p>
+                      </div>
+                      <div
+                        class="w-full rounded-3xl border border-border bg-[#0a0a0a] p-5 sm:p-7 group-data-[mode=track]/shell:w-[min(46rem,58vw)]"
+                      >
+                        <div
+                          class="flex items-baseline justify-between gap-4"
                         >
                           <p
-                            class="text-xs font-semibold uppercase tracking-[0.25em] text-accent"
+                            class="text-[15px] font-semibold tracking-[-0.02em]"
                           >
-                            How it works
+                            Pizza night
                           </p>
-                          <h2
-                            class="mt-3 text-3xl font-bold tracking-tight sm:text-4xl"
+                          <span
+                            class="font-mono text-[15px] tabular-nums"
                           >
-                            Four steps. No tutorial required.
-                          </h2>
+                            ₱1,200.00
+                          </span>
                         </div>
-                        <ol
-                          class="mt-10 space-y-4"
+                        <div
+                          class="relative mt-12 sm:mt-14"
                         >
-                          <li
-                            class="glass-card flex items-start gap-5 p-5"
+                          <div
+                            class="pointer-events-none flex w-max select-none gap-1 text-accent/70 flex-col items-start absolute -top-12 right-[8%] sm:-top-14 [&>span]:text-xl"
                           >
                             <span
-                              class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-accent text-lg font-bold text-background shadow-glow"
+                              class="font-[family-name:var(--font-hand)] text-2xl font-semibold leading-none"
                             >
-                              1
+                              drag to slice
                             </span>
-                            <div
-                              class="min-w-0"
+                            <svg
+                              aria-hidden="true"
+                              class="h-10 w-10 -scale-x-100"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              viewBox="0 0 48 48"
                             >
-                              <h3
-                                class="text-base font-semibold tracking-tight"
-                              >
-                                Sign in with Google
-                              </h3>
-                              <p
-                                class="mt-1 text-sm leading-relaxed text-muted"
-                              >
-                                One tap. No password to forget, no email to verify.
-                              </p>
-                            </div>
-                          </li>
-                          <li
-                            class="glass-card flex items-start gap-5 p-5"
+                              <path
+                                d="M8 6 C 10 18, 20 32, 40 38"
+                                pathLength="1"
+                                stroke-dasharray="0 1"
+                                stroke-dashoffset="0"
+                                style="opacity: 0;"
+                              />
+                              <path
+                                d="M29 40 L40 38 L35 28"
+                                pathLength="1"
+                                stroke-dasharray="0 1"
+                                stroke-dashoffset="0"
+                                style="opacity: 0;"
+                              />
+                            </svg>
+                          </div>
+                          <div
+                            class="relative h-20 select-none rounded-2xl border border-white/10 sm:h-24"
                           >
-                            <span
-                              class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-accent text-lg font-bold text-background shadow-glow"
-                            >
-                              2
-                            </span>
                             <div
-                              class="min-w-0"
+                              aria-hidden="true"
+                              class="absolute inset-0 flex overflow-hidden rounded-2xl"
                             >
-                              <h3
-                                class="text-base font-semibold tracking-tight"
+                              <div
+                                class="flex min-w-0 flex-col items-center justify-center overflow-hidden px-2 text-center"
+                                style="width: 33.33333333333333%; background-color: rgb(0, 255, 65); color: rgb(2, 26, 8);"
                               >
-                                Log expenses as they happen
-                              </h3>
-                              <p
-                                class="mt-1 text-sm leading-relaxed text-muted"
+                                <span
+                                  class="truncate text-[12px] font-semibold transition-opacity"
+                                >
+                                  You
+                                </span>
+                                <span
+                                  class="font-mono tabular-nums text-[13px] font-semibold transition-opacity sm:text-[15px]"
+                                >
+                                  ₱400.00
+                                </span>
+                              </div>
+                              <div
+                                class="flex min-w-0 flex-col items-center justify-center overflow-hidden px-2 text-center"
+                                style="width: 33.33333333333333%; background-color: rgb(0, 168, 43); color: rgb(2, 26, 8);"
                               >
-                                Quick-capture an expense from anywhere with the keyboard shortcut, or open a group and add it inline.
-                              </p>
+                                <span
+                                  class="truncate text-[12px] font-semibold transition-opacity"
+                                >
+                                  James
+                                </span>
+                                <span
+                                  class="font-mono tabular-nums text-[13px] font-semibold transition-opacity sm:text-[15px]"
+                                >
+                                  ₱400.00
+                                </span>
+                              </div>
+                              <div
+                                class="flex min-w-0 flex-col items-center justify-center overflow-hidden px-2 text-center"
+                                style="width: 33.33333333333333%; background-color: rgb(11, 93, 32); color: rgb(232, 255, 238);"
+                              >
+                                <span
+                                  class="truncate text-[12px] font-semibold transition-opacity"
+                                >
+                                  Mika
+                                </span>
+                                <span
+                                  class="font-mono tabular-nums text-[13px] font-semibold transition-opacity sm:text-[15px]"
+                                >
+                                  ₱400.00
+                                </span>
+                              </div>
                             </div>
-                          </li>
-                          <li
-                            class="glass-card flex items-start gap-5 p-5"
+                            <div
+                              aria-label="Divider between You and James"
+                              aria-orientation="horizontal"
+                              aria-valuemax="790"
+                              aria-valuemin="10"
+                              aria-valuenow="400"
+                              aria-valuetext="You ₱400.00, James ₱400.00"
+                              class="group/handle absolute inset-y-[-10px] left-0 -ml-5 flex w-10 cursor-ew-resize items-center justify-center rounded-full outline-none"
+                              role="slider"
+                              style="transform: none;"
+                              tabindex="0"
+                            >
+                              <span
+                                class="h-full w-[3px] rounded-full bg-black"
+                              />
+                              <span
+                                class="absolute flex h-9 w-6 items-center justify-center gap-[3px] rounded-full border border-white/20 bg-[#111] shadow-[0_4px_12px_rgb(0_0_0/0.8)] transition-transform group-hover/handle:scale-110 group-focus-visible/handle:ring-2 group-focus-visible/handle:ring-white group-active/handle:scale-95"
+                              >
+                                <span
+                                  class="h-3.5 w-px bg-white/60"
+                                />
+                                <span
+                                  class="h-3.5 w-px bg-white/60"
+                                />
+                              </span>
+                            </div>
+                            <div
+                              aria-label="Divider between James and Mika"
+                              aria-orientation="horizontal"
+                              aria-valuemax="1190"
+                              aria-valuemin="410"
+                              aria-valuenow="800"
+                              aria-valuetext="James ₱400.00, Mika ₱400.00"
+                              class="group/handle absolute inset-y-[-10px] left-0 -ml-5 flex w-10 cursor-ew-resize items-center justify-center rounded-full outline-none"
+                              role="slider"
+                              style="transform: none;"
+                              tabindex="0"
+                            >
+                              <span
+                                class="h-full w-[3px] rounded-full bg-black"
+                              />
+                              <span
+                                class="absolute flex h-9 w-6 items-center justify-center gap-[3px] rounded-full border border-white/20 bg-[#111] shadow-[0_4px_12px_rgb(0_0_0/0.8)] transition-transform group-hover/handle:scale-110 group-focus-visible/handle:ring-2 group-focus-visible/handle:ring-white group-active/handle:scale-95"
+                              >
+                                <span
+                                  class="h-3.5 w-px bg-white/60"
+                                />
+                                <span
+                                  class="h-3.5 w-px bg-white/60"
+                                />
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          class="mt-8 grid items-center gap-6 sm:grid-cols-[10rem_1fr]"
+                        >
+                          <div
+                            class="mx-auto h-40 w-40"
                           >
-                            <span
-                              class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-accent text-lg font-bold text-background shadow-glow"
+                            <svg
+                              aria-hidden="true"
+                              class="h-full w-full"
+                              viewBox="0 0 200 200"
                             >
-                              3
-                            </span>
+                              <circle
+                                cx="100"
+                                cy="100"
+                                fill="#1a1a1a"
+                                r="94"
+                              />
+                              <g>
+                                <path
+                                  d="M100 100 L100 12 A88 88 0 0 1 176.2102355330306 144 Z"
+                                  fill="#00ff41"
+                                  stroke="#000"
+                                  stroke-linejoin="round"
+                                  stroke-width="3"
+                                />
+                                <circle
+                                  cx="130.1957462459499"
+                                  cy="74.38014620162318"
+                                  fill="#000"
+                                  opacity="0.22"
+                                  r="6"
+                                />
+                                <circle
+                                  cx="158.75523376788593"
+                                  cy="76.28687905649961"
+                                  fill="#000"
+                                  opacity="0.22"
+                                  r="6"
+                                />
+                              </g>
+                              <g>
+                                <path
+                                  d="M100 100 L176.2102355330306 144 A88 88 0 0 1 23.789764466969416 144.00000000000003 Z"
+                                  fill="#00a82b"
+                                  stroke="#000"
+                                  stroke-linejoin="round"
+                                  stroke-width="3"
+                                />
+                                <circle
+                                  cx="107.08957110766265"
+                                  cy="138.9602102344096"
+                                  fill="#000"
+                                  opacity="0.22"
+                                  r="6"
+                                />
+                                <circle
+                                  cx="91.1585482561412"
+                                  cy="162.7400855200327"
+                                  fill="#000"
+                                  opacity="0.22"
+                                  r="6"
+                                />
+                              </g>
+                              <g>
+                                <path
+                                  d="M100 100 L23.789764466969416 144.00000000000003 A88 88 0 0 1 99.99999999999999 12 Z"
+                                  fill="#0b5d20"
+                                  stroke="#000"
+                                  stroke-linejoin="round"
+                                  stroke-width="3"
+                                />
+                                <circle
+                                  cx="62.714682646387466"
+                                  cy="86.65964356396725"
+                                  fill="#000"
+                                  opacity="0.22"
+                                  r="6"
+                                />
+                                <circle
+                                  cx="50.086217975972865"
+                                  cy="60.97303542346772"
+                                  fill="#000"
+                                  opacity="0.22"
+                                  r="6"
+                                />
+                              </g>
+                            </svg>
+                          </div>
+                          <div>
+                            <ul
+                              class="space-y-1.5"
+                            >
+                              <li
+                                class="flex h-9 items-center justify-between gap-3 rounded-xl border border-border px-3 text-[13px]"
+                              >
+                                <span
+                                  class="flex items-center gap-2"
+                                >
+                                  <span
+                                    aria-hidden="true"
+                                    class="h-2.5 w-2.5 rounded-full"
+                                    style="background-color: rgb(0, 255, 65);"
+                                  />
+                                  You
+                                </span>
+                                <span
+                                  class="font-mono tabular-nums"
+                                >
+                                  ₱400.00
+                                </span>
+                              </li>
+                              <li
+                                class="flex h-9 items-center justify-between gap-3 rounded-xl border border-border px-3 text-[13px]"
+                              >
+                                <span
+                                  class="flex items-center gap-2"
+                                >
+                                  <span
+                                    aria-hidden="true"
+                                    class="h-2.5 w-2.5 rounded-full"
+                                    style="background-color: rgb(0, 168, 43);"
+                                  />
+                                  James
+                                </span>
+                                <span
+                                  class="font-mono tabular-nums"
+                                >
+                                  ₱400.00
+                                </span>
+                              </li>
+                              <li
+                                class="flex h-9 items-center justify-between gap-3 rounded-xl border border-border px-3 text-[13px]"
+                              >
+                                <span
+                                  class="flex items-center gap-2"
+                                >
+                                  <span
+                                    aria-hidden="true"
+                                    class="h-2.5 w-2.5 rounded-full"
+                                    style="background-color: rgb(11, 93, 32);"
+                                  />
+                                  Mika
+                                </span>
+                                <span
+                                  class="font-mono tabular-nums"
+                                >
+                                  ₱400.00
+                                </span>
+                              </li>
+                            </ul>
                             <div
-                              class="min-w-0"
+                              class="mt-3 flex flex-wrap items-center justify-between gap-3"
                             >
-                              <h3
-                                class="text-base font-semibold tracking-tight"
-                              >
-                                Add the people you share with
-                              </h3>
                               <p
-                                class="mt-1 text-sm leading-relaxed text-muted"
+                                class="font-mono text-[12px] tabular-nums text-muted"
                               >
-                                Invite friends by email or share a link. They join with one click.
+                                Total assigned: 
+                                ₱1,200.00
+                                 /
+                                 
+                                ₱1,200.00
                               </p>
-                            </div>
-                          </li>
-                          <li
-                            class="glass-card flex items-start gap-5 p-5"
-                          >
-                            <span
-                              class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-accent text-lg font-bold text-background shadow-glow"
-                            >
-                              4
-                            </span>
-                            <div
-                              class="min-w-0"
-                            >
-                              <h3
-                                class="text-base font-semibold tracking-tight"
+                              <button
+                                class="h-9 rounded-full border border-border bg-[#141414] px-4 text-[13px] font-medium tracking-[-0.02em] shadow-[0_3px_0_0_#000] outline-none transition-[transform,box-shadow] duration-75 hover:border-accent/50 focus-visible:ring-2 focus-visible:ring-accent active:translate-y-[2px] active:shadow-[0_1px_0_0_#000]"
+                                type="button"
                               >
-                                Settle up when it suits you
-                              </h3>
-                              <p
-                                class="mt-1 text-sm leading-relaxed text-muted"
-                              >
-                                Net balances tell you exactly what to send (or expect). Mark transfers as paid, both sides confirm, done.
-                              </p>
+                                Divide Equally
+                              </button>
                             </div>
-                          </li>
-                        </ol>
+                          </div>
+                        </div>
+                        <p
+                          aria-live="polite"
+                          class="sr-only"
+                        />
                       </div>
                     </section>
                   </div>

@@ -1,4 +1,6 @@
+export { AddExpensePlayground } from './add-expense-playground';
 export { Bento } from './bento';
+export { BillSlicer } from './bill-slicer';
 export { BrandMark } from './brand-mark';
 export { CircuitGrid } from './circuit-grid';
 export { CoinKey } from './coin-key';
@@ -20,6 +22,7 @@ export { LandingHeader } from './landing-header';
 export { LandingShell, type LandingPanel } from './landing-shell';
 export { NotificationToast } from './notification-toast';
 export { Panel, type PanelWidth } from './panel';
+export { PesoFlow } from './peso-flow';
 export { SoundPill } from './sound-pill';
 export {
   SOUND_STORAGE_KEY,
