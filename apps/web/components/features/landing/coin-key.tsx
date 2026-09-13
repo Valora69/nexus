@@ -35,14 +35,15 @@ function isTypingTarget(target: EventTarget | null) {
  * A sculpted mechanical keycap with a "Q" legend, the app's Quick Add
  * key, and a green handwritten note whose arrow points at it. Clicking it, or
  * pressing Q on the page, draws the next demo expense from a seeded PRNG,
- * clinks, and reports it to the hero and the page-wide demo activity.
+ * clicks, and reports it to the hero and the page-wide demo activity (the nav
+ * counts every press).
  */
 export function CoinKey({ onAdd, className }: CoinKeyProps) {
   const rng = useRef<Rng | null>(null);
   const previous = useRef<DemoScenario | undefined>(undefined);
   const [keyDown, setKeyDown] = useState(false);
   const { play } = useLandingSound();
-  const { expenseAdded } = useDemoActivity();
+  const { expenseAdded, quickAdded } = useDemoActivity();
 
   useEffect(() => {
     rng.current = createDemoRng();
@@ -52,9 +53,10 @@ export function CoinKey({ onAdd, className }: CoinKeyProps) {
     rng.current ??= createDemoRng();
     const expense = randomDemoExpense(rng.current, previous.current);
     previous.current = expense;
-    play('coin');
+    play('tap');
     onAdd(expense);
     expenseAdded(expense.total);
+    quickAdded();
   };
 
   // Keep the latest press for the window listener without re-subscribing.

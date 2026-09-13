@@ -1,38 +1,98 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import NumberFlow from '@number-flow/react';
 import { motion } from 'motion/react';
 
 import {
-  COUNTER_BASE,
-  createDemoRng,
-  nextCounterStep,
-  type Rng,
-} from '@web/lib/landing/simulated';
+  QUICK_ADDS_ENDPOINT,
+  QUICK_ADD_MAX_BATCH,
+  readQuickAddCount,
+} from '@web/lib/landing/quick-adds';
 import { cn } from '@web/lib/utils';
 
 import { useDemoActivityListener } from './demo-activity-provider';
 import { usePrefersReducedMotion } from './use-prefers-reduced-motion';
 
-/** One simulated tick this often, while the tab is visible. */
-export const COUNTER_TICK_MS = 3000;
+/** Re-read the shared total this often while the tab is visible. */
+export const COUNTER_POLL_MS = 10_000;
+/** Presses are batched into one request after this quiet gap. */
+export const COUNTER_FLUSH_MS = 600;
 
 const COUNT_FORMAT = { maximumFractionDigits: 0 } as const;
 const countFormatter = new Intl.NumberFormat('en-PH', COUNT_FORMAT);
 
 /**
- * Nav pill "₱ 12,408,550 split · demo": a simulated running total that rolls
- * up on a timer and jumps when the visitor adds an expense or sends a
- * payment. Always labeled demo; there's no backend behind it.
+ * Nav pill "1,204 quick adds": the real number of Quick Add presses (the
+ * hero's Q keycap, clicked or typed) from every visitor, stored by
+ * `/api/landing/quick-adds`. A press shows up right away; presses are sent in
+ * small batches and the pill re-reads the shared total on a timer.
  */
 export function NavCounter({ className }: { className?: string }) {
   const reduced = usePrefersReducedMotion();
-  const [total, setTotal] = useState(COUNTER_BASE);
+  const [server, setServer] = useState(0);
+  const [unsent, setUnsent] = useState(0);
   const [bump, setBump] = useState(0);
-  const rng = useRef<Rng | null>(null);
 
-  // Tick only while the tab is visible.
+  const queued = useRef(0);
+  const inFlight = useRef(0);
+  // Bumped by every send, so a read that started before it can't roll back.
+  const sends = useRef(0);
+  const flushTimer = useRef<number | undefined>(undefined);
+  const alive = useRef(true);
+
+  useEffect(() => {
+    alive.current = true;
+    return () => {
+      alive.current = false;
+      window.clearTimeout(flushTimer.current);
+    };
+  }, []);
+
+  const refresh = useCallback(async () => {
+    if (typeof fetch !== 'function' || inFlight.current > 0) return;
+    const startedAt = sends.current;
+    try {
+      const res = await fetch(QUICK_ADDS_ENDPOINT, { cache: 'no-store' });
+      const count = res.ok ? readQuickAddCount(await res.json()) : null;
+      if (count !== null && alive.current && sends.current === startedAt) {
+        setServer(count);
+      }
+    } catch {
+      // Offline or blocked: keep showing the last total.
+    }
+  }, []);
+
+  const flush = useCallback(async () => {
+    flushTimer.current = undefined;
+    if (typeof fetch !== 'function' || inFlight.current > 0) return;
+    const presses = Math.min(queued.current, QUICK_ADD_MAX_BATCH);
+    if (presses <= 0) return;
+    queued.current -= presses;
+    inFlight.current = presses;
+    sends.current += 1;
+    try {
+      const res = await fetch(QUICK_ADDS_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ presses }),
+      });
+      const count = res.ok ? readQuickAddCount(await res.json()) : null;
+      if (count !== null && alive.current) setServer(count);
+    } catch {
+      // A failed batch is dropped; the shared total stays the source of truth.
+    } finally {
+      inFlight.current = 0;
+      if (alive.current) {
+        setUnsent(queued.current);
+        if (queued.current > 0) {
+          flushTimer.current = window.setTimeout(flush, COUNTER_FLUSH_MS);
+        }
+      }
+    }
+  }, []);
+
+  // Read the total on load, then keep it fresh while the tab is visible.
   useEffect(() => {
     let timer: number | undefined;
     const stop = () => {
@@ -41,11 +101,8 @@ export function NavCounter({ className }: { className?: string }) {
     };
     const start = () => {
       if (timer !== undefined) return;
-      timer = window.setInterval(() => {
-        rng.current ??= createDemoRng();
-        const step = nextCounterStep(rng.current);
-        setTotal((t) => t + step);
-      }, COUNTER_TICK_MS);
+      void refresh();
+      timer = window.setInterval(() => void refresh(), COUNTER_POLL_MS);
     };
     const sync = () => {
       if (document.visibilityState === 'visible') start();
@@ -57,12 +114,19 @@ export function NavCounter({ className }: { className?: string }) {
       document.removeEventListener('visibilitychange', sync);
       stop();
     };
-  }, []);
+  }, [refresh]);
 
   useDemoActivityListener((event) => {
-    setTotal((t) => t + event.amount);
+    if (event.type !== 'quickAdded') return;
+    queued.current += 1;
+    setUnsent((n) => n + 1);
     setBump((b) => b + 1);
+    window.clearTimeout(flushTimer.current);
+    flushTimer.current = window.setTimeout(flush, COUNTER_FLUSH_MS);
   });
+
+  const total = server + unsent;
+  const unit = total === 1 ? 'quick add' : 'quick adds';
 
   return (
     <p
@@ -73,7 +137,6 @@ export function NavCounter({ className }: { className?: string }) {
       )}
     >
       <span aria-hidden className="font-mono tabular-nums text-foreground">
-        ₱{' '}
         <NumberFlow
           value={total}
           locales="en-PH"
@@ -81,15 +144,9 @@ export function NavCounter({ className }: { className?: string }) {
           animated={!reduced}
         />
       </span>
-      <span aria-hidden>split</span>
-      <span
-        aria-hidden
-        className="rounded-full border border-accent/40 bg-accent/10 px-1.5 py-0.5 font-mono text-[10px] uppercase leading-none tracking-[0.12em] text-accent"
-      >
-        demo
-      </span>
+      <span aria-hidden>{unit}</span>
       <span className="sr-only">
-        Demo counter, simulated: ₱{countFormatter.format(total)} split
+        {countFormatter.format(total)} {unit} so far
       </span>
       {bump > 0 && !reduced && (
         <motion.span

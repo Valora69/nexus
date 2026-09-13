@@ -1,16 +1,12 @@
 import { describe, expect, it } from '@jest/globals';
 
 import {
-  COUNTER_BASE,
-  COUNTER_STEP_MAX,
-  COUNTER_STEP_MIN,
   DEMO_CITIES,
   DEMO_SCENARIOS,
   DEMO_SEED,
   createDemoRng,
   mulberry32,
   nextCity,
-  nextCounterStep,
   randomDemoExpense,
 } from '../lib/landing/simulated';
 
@@ -125,24 +121,5 @@ describe('nextCity', () => {
       previous = next;
     }
     expect(seen.size).toBe(DEMO_CITIES.length);
-  });
-});
-
-describe('nextCounterStep', () => {
-  it('starts from the documented base', () => {
-    expect(COUNTER_BASE).toBe(12408550);
-  });
-
-  it('returns whole ₱10 steps within range, deterministically', () => {
-    const rngA = createDemoRng();
-    const rngB = createDemoRng();
-    const steps = take(500, () => nextCounterStep(rngA));
-    expect(steps).toEqual(take(500, () => nextCounterStep(rngB)));
-    for (const step of steps) {
-      expect(Number.isInteger(step)).toBe(true);
-      expect(step % 10).toBe(0);
-      expect(step).toBeGreaterThanOrEqual(COUNTER_STEP_MIN);
-      expect(step).toBeLessThanOrEqual(COUNTER_STEP_MAX);
-    }
   });
 });
