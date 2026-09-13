@@ -82,16 +82,21 @@ export const DEMO_CITIES = [
   },
 ] as const satisfies readonly DemoCity[];
 
-const TOTAL_CITY_WEIGHT = DEMO_CITIES.reduce((sum, c) => sum + c.weight, 0);
-
-/** Weighted pick from DEMO_CITIES. */
-export function nextCity(rng: Rng): DemoCity {
-  let roll = rng() * TOTAL_CITY_WEIGHT;
-  for (const city of DEMO_CITIES) {
+/**
+ * Weighted pick from DEMO_CITIES. Pass the previous city to never repeat it
+ * back to back, so the globe caption always moves on.
+ */
+export function nextCity(rng: Rng, previous?: DemoCity): DemoCity {
+  const pool: readonly DemoCity[] = previous
+    ? DEMO_CITIES.filter((c) => c.name !== previous.name)
+    : DEMO_CITIES;
+  const total = pool.reduce((sum, c) => sum + c.weight, 0);
+  let roll = rng() * total;
+  for (const city of pool) {
     roll -= city.weight;
     if (roll < 0) return city;
   }
-  return DEMO_CITIES[DEMO_CITIES.length - 1] ?? DEMO_CITIES[0];
+  return pool[pool.length - 1] ?? DEMO_CITIES[0];
 }
 
 /** Starting value of the "₱ … split · demo" nav counter. */

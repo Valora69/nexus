@@ -32,7 +32,7 @@ function isTypingTarget(target: EventTarget | null) {
 }
 
 /**
- * A sculpted keycap (after Keeby's) with a "Q" legend, the app's Quick Add
+ * A sculpted mechanical keycap with a "Q" legend, the app's Quick Add
  * key, and a green handwritten note whose arrow points at it. Clicking it, or
  * pressing Q on the page, draws the next demo expense from a seeded PRNG,
  * clinks, and reports it to the hero and the page-wide demo activity.
@@ -115,7 +115,7 @@ export function CoinKey({ onAdd, className }: CoinKeyProps) {
         }}
         onKeyUp={() => setKeyDown(false)}
         onBlur={() => setKeyDown(false)}
-        // Keeby-style press: the whole cap squashes toward its base.
+        // Keycap press: the whole cap squashes toward its base.
         className="relative h-[93px] w-[96px] shrink-0 origin-bottom touch-manipulation select-none rounded-[22px] outline-none transition-transform duration-100 active:scale-95 data-[pressed=true]:scale-95 focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-4 focus-visible:ring-offset-black"
       >
         {/* A cap in perspective: a dished top face on a body that flares to

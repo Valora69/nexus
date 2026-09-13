@@ -26,6 +26,12 @@ jest.mock('@number-flow/react', () => {
   };
 });
 
+// cobe is ESM-only and needs WebGL; the globe loads it lazily in the browser.
+jest.mock('cobe', () => ({
+  __esModule: true,
+  default: () => ({ update: () => {}, destroy: () => {} }),
+}));
+
 // Required after the mock is registered: static imports would load first.
 /* eslint-disable @typescript-eslint/no-var-requires */
 const RootPage = (require('../app/page') as typeof import('../app/page'))
