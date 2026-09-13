@@ -1,29 +1,38 @@
 import Link from 'next/link';
 
-import {
-  Hero,
-  LandingFooter,
-  LandingHeader,
-} from '@web/components/features/landing';
+// Import modules directly rather than via the barrel: the barrel re-exports
+// client toys (e.g. HandNote → motion) that would otherwise ship on this route.
+import { DemoActivityProvider } from '@web/components/features/landing/demo-activity-provider';
+import { landingFontVariables } from '@web/components/features/landing/fonts';
+import { Hero } from '@web/components/features/landing/hero';
+import { LandingFooter } from '@web/components/features/landing/landing-footer';
+import { LandingHeader } from '@web/components/features/landing/landing-header';
+import { SoundProvider } from '@web/components/features/landing/sound-provider';
 import { buttonClasses } from '@web/components/ui/button';
 
 export default function LandingPage() {
   return (
-    <div className="relative isolate flex min-h-screen flex-col overflow-hidden bg-black">
-      <LandingHeader />
+    <SoundProvider>
+      <DemoActivityProvider>
+        <div
+          className={`relative isolate flex min-h-screen flex-col overflow-hidden bg-black ${landingFontVariables}`}
+        >
+          <LandingHeader />
 
-      <main className="relative z-10 w-full">
-        <Hero />
-        <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
-          <ProblemPanel />
-          <Features />
-          <HowItWorks />
-          <FinalCta />
+          <main className="relative z-10 w-full">
+            <Hero />
+            <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
+              <ProblemPanel />
+              <Features />
+              <HowItWorks />
+              <FinalCta />
+            </div>
+          </main>
+
+          <LandingFooter />
         </div>
-      </main>
-
-      <LandingFooter />
-    </div>
+      </DemoActivityProvider>
+    </SoundProvider>
   );
 }
 
