@@ -228,8 +228,10 @@ function DividerHandle({
         onRelease();
       }}
       onKeyDown={handleKeyDown}
-      style={{ x, touchAction: 'none' }}
-      className="group/handle absolute inset-y-[-10px] left-0 -ml-5 flex w-10 cursor-ew-resize items-center justify-center rounded-full outline-none"
+      style={{ x }}
+      // drag="x" writes an inline touch-action: pan-y; !touch-none wins over
+      // it, so a touch drag never scrolls the page instead.
+      className="group/handle !touch-none absolute inset-y-[-10px] left-0 -ml-5 flex w-10 cursor-ew-resize items-center justify-center rounded-full outline-none"
     >
       <span className="h-full w-[3px] rounded-full bg-black" />
       <span className="absolute flex h-9 w-6 items-center justify-center gap-[3px] rounded-full border border-white/20 bg-[#111] shadow-[0_4px_12px_rgb(0_0_0/0.8)] transition-transform group-hover/handle:scale-110 group-focus-visible/handle:ring-2 group-focus-visible/handle:ring-white group-active/handle:scale-95">
