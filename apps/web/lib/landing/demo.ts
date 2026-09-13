@@ -25,6 +25,15 @@ export const DEMO_MEMBERS: GroupCaptureMember[] = [
   { userId: 'mara', name: 'Mara' },
 ];
 
+/** The Add Expense playground's barkada. */
+export const PLAYGROUND_MEMBERS: GroupCaptureMember[] = [
+  { userId: 'sid', name: 'Sid' },
+  { userId: 'ced', name: 'Ced' },
+  { userId: 'glenn', name: 'Glenn' },
+  { userId: 'migs', name: 'Migs' },
+  { userId: 'job', name: 'Job' },
+];
+
 export type DemoExpense = {
   name: string;
   total: number;
@@ -85,8 +94,21 @@ export function customValidity(
 /** The playground keypad's delete key. */
 export const KEYPAD_BACKSPACE = 'backspace';
 
-/** Keypad amounts are whole pesos, up to ₱999,999. */
-export const AMOUNT_MAX_DIGITS = 6;
+/** Keypad amounts are whole pesos, up to ₱99,999. */
+export const AMOUNT_MAX_DIGITS = 5;
+export const AMOUNT_MAX = 10 ** AMOUNT_MAX_DIGITS - 1;
+
+/**
+ * One edit of a custom share field: pesos with at most two decimals, never
+ * more than the bill (or `AMOUNT_MAX` before there is one). Returns the value
+ * to keep, or null to reject the edit.
+ */
+export function sanitizeCustomShare(raw: string, total: number): string | null {
+  if (!/^\d*(\.\d{0,2})?$/.test(raw)) return null;
+  const value = parseFloat(raw);
+  const cap = total > 0 ? total : AMOUNT_MAX;
+  return isFinite(value) && value > cap ? null : raw;
+}
 
 /**
  * One cash-register keypad press: digits (and "00") append, backspace drops
@@ -165,23 +187,24 @@ export function equalDividers(
   );
 }
 
-/** How far one divider may move: at least a step from each neighbour. */
+/**
+ * How far one divider may move: up to its neighbours (or the ends), so a
+ * person's share can drop to ₱0, like a zero custom amount in the app.
+ */
 export function dividerBounds(
   total: number,
   dividers: number[],
   index: number,
-  step: number = SLICE_STEP,
 ): { min: number; max: number } {
-  const min = (index > 0 ? (dividers[index - 1] ?? 0) : 0) + step;
+  const min = index > 0 ? (dividers[index - 1] ?? 0) : 0;
   const max =
-    (index < dividers.length - 1 ? (dividers[index + 1] ?? total) : total) -
-    step;
+    index < dividers.length - 1 ? (dividers[index + 1] ?? total) : total;
   return { min, max: Math.max(min, max) };
 }
 
 /**
- * Move one divider to `value`, snapped to the step and clamped so every
- * person keeps at least one step. Returns a new array.
+ * Move one divider to `value`, snapped to the step and clamped between its
+ * neighbours, so shares never go negative. Returns a new array.
  */
 export function moveDivider(
   total: number,
@@ -191,7 +214,7 @@ export function moveDivider(
   step: number = SLICE_STEP,
 ): number[] {
   if (index < 0 || index >= dividers.length) return dividers;
-  const { min, max } = dividerBounds(total, dividers, index, step);
+  const { min, max } = dividerBounds(total, dividers, index);
   const next = [...dividers];
   next[index] = Math.min(Math.max(snapToStep(value, step), min), max);
   return next;

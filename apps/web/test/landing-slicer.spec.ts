@@ -78,19 +78,20 @@ describe('equalDividers', () => {
 });
 
 describe('dividerBounds and moveDivider', () => {
-  it('keeps each divider a step away from its neighbours and the ends', () => {
-    expect(dividerBounds(1200, [400, 800], 0)).toEqual({ min: 10, max: 790 });
-    expect(dividerBounds(1200, [400, 800], 1)).toEqual({ min: 410, max: 1190 });
+  it('lets each divider reach its neighbours and the ends', () => {
+    expect(dividerBounds(1200, [400, 800], 0)).toEqual({ min: 0, max: 800 });
+    expect(dividerBounds(1200, [400, 800], 1)).toEqual({ min: 400, max: 1200 });
   });
 
   it('snaps a dragged position to ₱10', () => {
     expect(moveDivider(1200, [400, 800], 0, 523.7)).toEqual([520, 800]);
   });
 
-  it('clamps so nobody drops below one step', () => {
-    expect(moveDivider(1200, [400, 800], 0, 5000)).toEqual([790, 800]);
-    expect(moveDivider(1200, [400, 800], 1, -20)).toEqual([400, 410]);
-    expect(moveDivider(1200, [400, 800], 0, 0)).toEqual([10, 800]);
+  it('clamps between neighbours, so a share can be ₱0 but never negative', () => {
+    expect(moveDivider(1200, [400, 800], 0, 5000)).toEqual([800, 800]);
+    expect(moveDivider(1200, [400, 800], 1, -20)).toEqual([400, 400]);
+    expect(moveDivider(1200, [400, 800], 0, 0)).toEqual([0, 800]);
+    expect(sharesFromDividers(1200, [0, 1200])).toEqual([0, 1200, 0]);
   });
 
   it('returns a new array and ignores unknown indexes', () => {
@@ -113,7 +114,7 @@ describe('dividerBounds and moveDivider', () => {
       );
       const shares = sharesFromDividers(1200, dividers);
       expect(sum(shares)).toBe(1200);
-      expect(Math.min(...shares)).toBeGreaterThanOrEqual(SLICE_STEP);
+      expect(Math.min(...shares)).toBeGreaterThanOrEqual(0);
       expect(shares.every((s) => s % SLICE_STEP === 0)).toBe(true);
     }
   });
