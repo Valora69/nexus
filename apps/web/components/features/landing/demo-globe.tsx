@@ -3,9 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { MotionConfig, motion } from 'motion/react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-import type { GlobeNudge, GlobePing } from '@web/lib/landing/globe';
+import type { GlobePing } from '@web/lib/landing/globe';
 import {
   DEMO_CITIES,
   createDemoRng,
@@ -33,13 +32,10 @@ const GlobeCanvas = dynamic(
   { ssr: false, loading: () => <div className="aspect-square w-full" /> },
 );
 
-const SPIN_BUTTON =
-  'flex h-9 w-9 items-center justify-center rounded-full border border-border bg-[#141414] text-muted shadow-[0_3px_0_0_#000] outline-none transition-[transform,box-shadow,color] duration-75 hover:border-accent/50 hover:text-foreground focus-visible:ring-2 focus-visible:ring-accent active:translate-y-[2px] active:shadow-[0_1px_0_0_#000]';
-
 /**
  * "Splits around the world.": a neon globe with simulated pings, weighted to
- * the Philippines, and always labeled demo. Server-safe: the section, caption
- * and buttons render anywhere, and only the cobe canvas is client-only.
+ * the Philippines, and always labeled demo. Server-safe: the section and
+ * caption render anywhere, and only the cobe canvas is client-only.
  */
 export function DemoGlobe() {
   const reduced = usePrefersReducedMotion();
@@ -47,7 +43,6 @@ export function DemoGlobe() {
 
   const [city, setCity] = useState<DemoCity>(MANILA);
   const [ping, setPing] = useState<GlobePing | null>(null);
-  const [nudge, setNudge] = useState<GlobeNudge | null>(null);
   const [restart, setRestart] = useState(0);
   const [announcement, setAnnouncement] = useState('');
 
@@ -87,11 +82,6 @@ export function DemoGlobe() {
     }
   });
 
-  const spinBy = (direction: -1 | 1) => {
-    nextId.current += 1;
-    setNudge({ id: nextId.current, direction });
-  };
-
   return (
     <MotionConfig reducedMotion="user">
       <section
@@ -127,51 +117,26 @@ export function DemoGlobe() {
             aria-hidden
             className="pointer-events-none absolute inset-[10%] rounded-full bg-[radial-gradient(circle,rgb(0_255_65/0.16),transparent_70%)] blur-2xl"
           />
-          <GlobeCanvas
-            ping={ping}
-            nudge={nudge}
-            active={inView}
-            reduced={reduced}
-          />
+          <GlobeCanvas ping={ping} active={inView} reduced={reduced} />
 
-          <div className="mt-3 flex items-center justify-between gap-3">
-            <p
-              data-globe-caption
-              // Wraps rather than truncates: the city is the point on phones.
-              className="min-w-0 font-mono text-[13px] text-muted"
+          <p
+            data-globe-caption
+            // Wraps rather than truncates: the city is the point on phones.
+            className="mt-3 font-mono text-[13px] text-muted"
+          >
+            <span className="text-accent">Demo</span> · Splits happening in{' '}
+            {/* Enter-only: a new key mounts the next city, so the caption
+                never waits on an exit animation to finish. */}
+            <motion.span
+              key={ping?.id ?? 0}
+              initial={ping ? { opacity: 0, y: 6 } : false}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="inline-block text-foreground"
             >
-              <span className="text-accent">Demo</span> · Splits happening in{' '}
-              {/* Enter-only: a new key mounts the next city, so the caption
-                  never waits on an exit animation to finish. */}
-              <motion.span
-                key={ping?.id ?? 0}
-                initial={ping ? { opacity: 0, y: 6 } : false}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="inline-block text-foreground"
-              >
-                {city.name}
-              </motion.span>
-            </p>
-            <div className="flex shrink-0 gap-2">
-              <button
-                type="button"
-                aria-label="Spin the globe left"
-                onClick={() => spinBy(-1)}
-                className={SPIN_BUTTON}
-              >
-                <ChevronLeft aria-hidden className="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                aria-label="Spin the globe right"
-                onClick={() => spinBy(1)}
-                className={SPIN_BUTTON}
-              >
-                <ChevronRight aria-hidden className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
+              {city.name}
+            </motion.span>
+          </p>
 
           <p className="sr-only" role="status" aria-live="polite">
             {announcement}

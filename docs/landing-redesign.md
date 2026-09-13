@@ -15,7 +15,7 @@ test, which doesn't fit a money app.
 **User decisions (2026-09-13):**
 
 - Globe and counter use **simulated data, clearly labeled "demo"**: no backend,
-  database, or API.
+  database, or API. *(2026-09-14: the counter is now real, see below.)*
 - **Keep the local Stage 2 branch.** Reword its commit and rebuild the hero on
   top of it.
 - **Sound turns on after the visitor's first click**, with a mute pill in the
@@ -37,10 +37,10 @@ becomes a gesture people already know from money.
 | Typing test + keyboard | **Dropped.** In its place: the **Add Expense playground** with a **cash-register keypad** of chunky keycaps (0–9, 00, ⌫). You tap an amount, not type prose. Pick a scenario chip, tap the amount, pick members, press **Add Expense**. A confirm line matches the product ("You paid ₱1,200 for 'Pizza night'. This will be split among 3 members."), a **receipt prints** (paper-tear sound) and flies into the ledger. |
 | Tone pad | **"Slice the bill"**: a horizontal bill bar with draggable dividers between people (motion drag, snaps to ₱10). A live "Total assigned ₱X / ₱Y" check with "— amounts must match"; "Divide Equally" snaps the dividers back. Pizza-slice wedges resize in sync. |
 | Globe with live pings | **"Splits around the world" (demo)**: a `cobe` globe in neon dots on black, drag to spin. A ₱ coin marker pings simulated cities, weighted to the Philippines (Manila, Cebu, Davao, Quezon City, Singapore, Tokyo, Dubai, LA). The caption reads "Demo · Splits happening in Cebu". |
-| Live thock counter | **Nav pill "₱ 12,408,550 split · demo"**: a rolling @number-flow/react counter from a simulated base that ticks on a timer and jumps whenever the visitor adds an expense or sends a payment. The "demo" tag is always visible. |
+| Live thock counter | **Nav pill "1,204 quick adds"**: the real, shared number of Q keycap presses (click or the Q key) from every visitor, starting at zero. Stored by `/api/landing/quick-adds`; a press shows at once and is sent in batches. |
 | Feedback keycaps | **Not copied.** The toy cast is already full; the finale stays a CTA. |
 | Audio pill | **Sound pill.** Sound starts on the first click; the pill mutes and unmutes and the choice is remembered. |
-| Giant "Try it." finale | **"Split it. Settle it. Stay friends."** in giant type, a Get Started pill, and links on the right. |
+| Giant "Try it." finale | **Reverted (2026-09-14)** to the plain "No more guessing where money goes." CTA, followed by the normal footer. |
 
 **The track, left to right:**
 
@@ -78,6 +78,10 @@ becomes a gesture people already know from money.
 - **Sound** (`lib/landing/sound.ts` + `sound-provider.tsx`):
   - Synthesized with Web Audio, so there are no files or licenses: `tap`,
     `coin`, `tear`, `register`, `whoosh`, `thud`.
+  - `tap` is a mouse click, modeled on how getkeeby.com plays recorded
+    down/up samples: a sharp switch snap, then a quieter release ~70 ms later.
+    The Q keycap, keypad and chips all use it. Keeby's own recordings are not
+    copied; a CC0 recording could replace the synth later.
   - One `AudioContext` is created and resumed on the first `pointerdown` inside
     the landing root; after that, sound is on unless muted.
   - The mute state is stored in localStorage `moneyapp-landing-sound` (inside
@@ -96,7 +100,7 @@ becomes a gesture people already know from money.
     panels; motion `useScroll` + `useTransform` moves it. Track width is
     measured with ResizeObserver.
   - Otherwise, panels stack vertically with no Lenis.
-  - A bottom progress rail has panel dots that scroll to their panel.
+  - No bottom progress rail (removed 2026-09-14: it repeated the header nav).
   - `focusin` inside a panel scrolls the track to it;
     `#features`/`#how-it-works` map to panels.
 - **Libraries** (added to `apps/web/package.json`; all support React 18):
@@ -126,8 +130,10 @@ becomes a gesture people already know from money.
 - **Don't modify:** `globals.css`, `tailwind.config.js`, `app/layout.tsx`,
   `postcss.config.*`, `components/ui/*`, `app/api/*`, `apps/api/prisma/*`, the
   mobile app.
-- **No backend:** no API calls, no database access. The globe and counter are
-  simulated and always labeled "demo".
+- **No backend:** no API calls, no database access, with one exception: the
+  nav counter's `app/api/landing/quick-adds` route and `LandingCounter` table
+  (added 2026-09-14 at the user's request). The globe stays simulated and
+  labeled "demo".
 - **Rendering:** no `Math.random`/`Date.now` during render; timers, observers,
   rAF, AudioContext, Lenis and cobe are cleaned up on unmount; animations pause
   off-screen.
@@ -248,18 +254,17 @@ Added in Stage 6:
 |---|---|
 | `demo-globe.tsx` | `DemoGlobe`, `GLOBE_PING_MS`, `GLOBE_PING_REDUCED_MS` (tested in `apps/web/test/landing-globe.spec.tsx`) |
 | `globe-canvas.tsx` | `GlobeCanvas`, `GLOBE_PULSE_MS` (not in the barrel; tested in `apps/web/test/landing-globe-canvas.spec.tsx`) |
-| `nav-counter.tsx` | `NavCounter`, `COUNTER_TICK_MS` (tested in `apps/web/test/landing-nav-counter.spec.tsx`) |
-| `finale.tsx` | `Finale` |
+| `nav-counter.tsx` | `NavCounter`, `COUNTER_POLL_MS`, `COUNTER_FLUSH_MS` (tested in `apps/web/test/landing-nav-counter.spec.tsx`) |
 
 Stage 6 notes:
 
-- `DemoGlobe` is the server-safe wrapper: heading, "Demo" tag, caption, spin
-  buttons and the ping timer. Only `GlobeCanvas` (cobe, WebGL) is client-only,
+- `DemoGlobe` is the server-safe wrapper: heading, "Demo" tag, caption and
+  the ping timer. Only `GlobeCanvas` (cobe, WebGL) is client-only,
   loaded with `next/dynamic` (`ssr:false`). Specs mock `cobe`; the barrel
   doesn't re-export `GlobeCanvas`, so importing the barrel never pulls cobe in.
 - cobe 2 has no render loop of its own: `update()` draws a frame. The canvas
   runs one rAF loop only while the panel is in view, and with reduced motion
-  it draws only when something changed (drag, spin button, ping).
+  it draws only when something changed (drag, ping).
 - cobe wraps its canvas in a div and leaves it behind on `destroy()`, so the
   canvas is created imperatively inside a mount node React never renders into,
   and the cleanup empties that node.
@@ -269,13 +274,24 @@ Stage 6 notes:
 - A hidden city, or the visitor's own expense (`expenseAdded` pings Manila
   with `focus`), turns the globe towards it. With reduced motion the globe
   never turns on its own; a focused ping jumps into view instead.
-- Arrow buttons ("Spin the globe left/right") are the keyboard equivalent of
-  dragging.
-- `NavCounter` ticks only while `document.visibilityState` is visible and adds
-  the amount of each `expenseAdded` / `paymentSent`.
-- In track mode the finale shows the brand, Terms, Privacy and ©, and the page
-  hides `LandingFooter` with `group-data-[mode=track]/shell:hidden`. In
-  vertical mode the finale keeps only the CTA and the normal footer follows.
+
+Changes on 2026-09-14:
+
+- The globe's arrow buttons are gone; dragging spins it.
+- `NavCounter` shows the real Quick Add total. `CoinKey` emits a
+  `quickAdded` event per press; the pill adds it at once, batches presses
+  (≤ `QUICK_ADD_MAX_BATCH`) into `POST /api/landing/quick-adds`, and re-reads
+  `GET` every `COUNTER_POLL_MS` while the tab is visible. The route drops
+  presses past 600 per visitor per minute (in-memory, per instance). Needs
+  the `20260914000000_add_landing_counter` migration.
+- The finale is reverted to the plain `FinalCta` in `app/page.tsx`, and
+  `LandingFooter` always shows.
+- The Add Expense playground uses `PLAYGROUND_MEMBERS` (Sid, Ced, Glenn, Migs,
+  Job), caps the keypad at ₱99,999 (`AMOUNT_MAX_DIGITS = 5`), and custom
+  shares go through `sanitizeCustomShare` (two decimals, never above the
+  bill).
+- The bill slicer lets a share drop to ₱0 (`dividerBounds` stops at the
+  neighbours, not a step away).
 
 Pure demo logic lives in `apps/web/lib/landing/`:
 
@@ -285,10 +301,13 @@ Pure demo logic lives in `apps/web/lib/landing/`:
   and the partial `demoSplitStatus` case in `landing-settle.spec.tsx`)
 - `sound.ts`: `SOUND_NAMES`, `createAudioContext`, `playSound`, `randomPitch`
 - `simulated.ts`: `mulberry32`, `createDemoRng`, `DEMO_SCENARIOS`,
-  `randomDemoExpense`, `DEMO_CITIES`, `nextCity`, `COUNTER_BASE`,
-  `nextCounterStep` (tested in `apps/web/test/landing-simulated.spec.ts`;
-  `nextCity` takes an optional previous city and never repeats it)
-- `globe.ts`: `GlobePing`, `GlobeNudge`, `GLOBE_THETA`, `GLOBE_MAX_DPR`,
+  `randomDemoExpense`, `DEMO_CITIES`, `nextCity` (tested in
+  `apps/web/test/landing-simulated.spec.ts`; `nextCity` takes an optional
+  previous city and never repeats it)
+- `quick-adds.ts`: `QUICK_ADDS_ENDPOINT`, `QUICK_ADDS_KEY`,
+  `QUICK_ADD_MAX_BATCH`, `readQuickAddCount`, `createPressLimiter` (tested in
+  `apps/web/test/landing-quick-adds.spec.ts`)
+- `globe.ts`: `GlobePing`, `GLOBE_THETA`, `GLOBE_MAX_DPR`,
   `globeDevicePixelRatio`, `phiFacing`, `shortestTurn`, `projectLocation`
   (tested in `apps/web/test/landing-globe.spec.tsx`)
 

@@ -1,15 +1,18 @@
-import { act, render } from '@testing-library/react';
-import { afterEach, describe, expect, it, jest } from '@jest/globals';
+import { act, render, waitFor } from '@testing-library/react';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  jest,
+} from '@jest/globals';
 
 import {
   DemoActivityProvider,
   useDemoActivity,
 } from '../components/features/landing/demo-activity-provider';
-import {
-  COUNTER_BASE,
-  createDemoRng,
-  nextCounterStep,
-} from '../lib/landing/simulated';
+import { QUICK_ADDS_ENDPOINT } from '../lib/landing/quick-adds';
 
 // @number-flow/react pulls in ESM-only packages Jest can't load; render the
 // formatted value as plain text instead.
@@ -36,11 +39,28 @@ jest.mock('@number-flow/react', () => {
 
 // Required after the mock is registered: static imports would load first.
 /* eslint-disable @typescript-eslint/no-var-requires */
-const { COUNTER_TICK_MS, NavCounter } =
+const { NavCounter } =
   require('../components/features/landing/nav-counter') as typeof import('../components/features/landing/nav-counter');
 /* eslint-enable @typescript-eslint/no-var-requires */
 
-const peso = (n: number) => new Intl.NumberFormat('en-PH').format(n);
+/** A fake endpoint holding the shared total. */
+let shared = 0;
+const fetchMock = jest.fn(async (_url: string, init?: RequestInit) => {
+  if (init?.method === 'POST') {
+    shared += (JSON.parse(init.body as string) as { presses: number }).presses;
+  }
+  return { ok: true, json: async () => ({ count: shared }) };
+});
+
+beforeEach(() => {
+  shared = 0;
+  fetchMock.mockClear();
+  (window as unknown as { fetch: unknown }).fetch = fetchMock;
+});
+
+afterEach(() => {
+  delete (window as unknown as { fetch?: unknown }).fetch;
+});
 
 function renderCounter() {
   let activity: ReturnType<typeof useDemoActivity> | null = null;
@@ -60,59 +80,58 @@ function renderCounter() {
 const counterText = () =>
   document.querySelector<HTMLElement>('[data-nav-counter]')!.textContent;
 
-function setVisibility(state: DocumentVisibilityState) {
-  Object.defineProperty(document, 'visibilityState', {
-    configurable: true,
-    get: () => state,
-  });
-  document.dispatchEvent(new Event('visibilitychange'));
-}
-
-afterEach(() => {
-  jest.useRealTimers();
-  setVisibility('visible');
-});
-
 describe('NavCounter', () => {
-  it('starts at the base and is labeled demo', () => {
+  it('starts at zero, then shows the shared total with no demo label', async () => {
+    shared = 41;
     renderCounter();
-    expect(counterText()).toContain(`₱ ${peso(COUNTER_BASE)}split`);
-    expect(counterText()).toContain('demo');
+    expect(counterText()).toContain('0quick adds');
+
+    await waitFor(() => expect(counterText()).toContain('41quick adds'));
+    expect(fetchMock).toHaveBeenCalledWith(QUICK_ADDS_ENDPOINT, {
+      cache: 'no-store',
+    });
+    expect(counterText()).not.toMatch(/demo|split|₱/i);
   });
 
-  it('ticks on a timer while the tab is visible', () => {
-    jest.useFakeTimers();
-    renderCounter();
-    const rng = createDemoRng();
-    const first = COUNTER_BASE + nextCounterStep(rng);
-
-    act(() => {
-      jest.advanceTimersByTime(COUNTER_TICK_MS);
-    });
-    expect(counterText()).toContain(peso(first));
-
-    act(() => {
-      setVisibility('hidden');
-      jest.advanceTimersByTime(COUNTER_TICK_MS * 3);
-    });
-    expect(counterText()).toContain(peso(first));
-
-    act(() => {
-      setVisibility('visible');
-      jest.advanceTimersByTime(COUNTER_TICK_MS);
-    });
-    expect(counterText()).toContain(peso(first + nextCounterStep(rng)));
-  });
-
-  it('jumps when an expense is added or a payment is sent', () => {
+  it('counts each quick add right away and sends the presses in one batch', async () => {
+    shared = 41;
     const { activity } = renderCounter();
+    await waitFor(() => expect(counterText()).toContain('41quick adds'));
+
+    act(() => {
+      activity().quickAdded();
+      activity().quickAdded();
+      activity().quickAdded();
+    });
+    expect(counterText()).toContain('44quick adds');
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        QUICK_ADDS_ENDPOINT,
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({ presses: 3 }),
+        }),
+      ),
+    );
+    await waitFor(() => expect(shared).toBe(44));
+    expect(counterText()).toContain('44quick adds');
+  });
+
+  it('ignores expenses and payments, and says "quick add" for one', async () => {
+    const { activity } = renderCounter();
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+
     act(() => {
       activity().expenseAdded(1200);
-    });
-    expect(counterText()).toContain(peso(COUNTER_BASE + 1200));
-    act(() => {
       activity().paymentSent(400);
     });
-    expect(counterText()).toContain(peso(COUNTER_BASE + 1600));
+    expect(counterText()).toContain('0quick adds');
+
+    act(() => {
+      activity().quickAdded();
+    });
+    expect(counterText()).toContain('1quick add');
+    expect(counterText()).not.toContain('1quick adds');
   });
 });

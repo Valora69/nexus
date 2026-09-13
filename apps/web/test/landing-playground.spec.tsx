@@ -150,11 +150,27 @@ describe('AddExpensePlayground', () => {
     tapKeys('Delete');
     expect(amount().textContent).toBe('₱120.00');
 
-    // Leading zeros don't stick, and the amount stops at six digits.
+    // Leading zeros don't stick, and the amount stops at five digits.
     tapKeys('Delete', 'Delete', 'Delete', '0', '00', '9');
     expect(amount().textContent).toBe('₱9.00');
     tapKeys('9', '9', '9', '9', '9', '9');
-    expect(amount().textContent).toBe('₱999,999.00');
+    expect(amount().textContent).toBe('₱99,999.00');
+  });
+
+  it('limits custom shares to two decimals and the bill total', () => {
+    renderPlayground();
+    tapKeys('1', '2', '00');
+    fireEvent.click(screen.getByRole('button', { name: 'Custom Amounts' }));
+    const sid = () => screen.getByLabelText<HTMLInputElement>('Sid amount');
+
+    fireEvent.change(sid(), { target: { value: '450.5' } });
+    expect(sid().value).toBe('450.5');
+    fireEvent.change(sid(), { target: { value: '450.555' } });
+    fireEvent.change(sid(), { target: { value: '1200.01' } });
+    fireEvent.change(sid(), { target: { value: '12a' } });
+    expect(sid().value).toBe('450.5');
+    fireEvent.change(sid(), { target: { value: '1200' } });
+    expect(sid().value).toBe('1200');
   });
 
   it('takes typed digits and Backspace only while the keypad has focus', () => {
@@ -186,13 +202,13 @@ describe('AddExpensePlayground', () => {
     tapKeys('1', '2', '00');
     const preview = () => screen.getByText('Split Preview').parentElement!;
 
+    expect(within(preview()).getAllByText('₱240.00')).toHaveLength(5);
+
+    fireEvent.click(chip('Job'));
+
+    expect(chip('Job').getAttribute('aria-pressed')).toBe('false');
+    expect(within(preview()).queryAllByText('₱240.00')).toHaveLength(0);
     expect(within(preview()).getAllByText('₱300.00')).toHaveLength(4);
-
-    fireEvent.click(chip('Mara'));
-
-    expect(chip('Mara').getAttribute('aria-pressed')).toBe('false');
-    expect(within(preview()).queryAllByText('₱300.00')).toHaveLength(0);
-    expect(within(preview()).getAllByText('₱400.00')).toHaveLength(3);
   });
 
   it('disables Add Expense with the modal messages until the form is valid', () => {
@@ -203,15 +219,15 @@ describe('AddExpensePlayground', () => {
     tapKeys('1', '2', '00');
     expect(addButton().hasAttribute('disabled')).toBe(false);
 
-    for (const name of ['You', 'James', 'Mika', 'Mara'])
+    for (const name of ['Sid', 'Ced', 'Glenn', 'Migs', 'Job'])
       fireEvent.click(chip(name));
     expect(addButton().hasAttribute('disabled')).toBe(true);
     expect(
       screen.getAllByText('Select at least one member').length,
     ).toBeGreaterThan(0);
 
-    fireEvent.click(chip('You'));
-    fireEvent.click(chip('James'));
+    fireEvent.click(chip('Sid'));
+    fireEvent.click(chip('Ced'));
     fireEvent.click(screen.getByRole('button', { name: 'Custom Amounts' }));
 
     expect(
@@ -221,11 +237,11 @@ describe('AddExpensePlayground', () => {
     ).toBeTruthy();
     expect(addButton().hasAttribute('disabled')).toBe(true);
 
-    fireEvent.change(screen.getByLabelText('You amount'), {
+    fireEvent.change(screen.getByLabelText('Sid amount'), {
       target: { value: '700' },
     });
     expect(screen.getByText('1 member excluded (zero amount)')).toBeTruthy();
-    fireEvent.change(screen.getByLabelText('James amount'), {
+    fireEvent.change(screen.getByLabelText('Ced amount'), {
       target: { value: '500' },
     });
 
@@ -240,13 +256,13 @@ describe('AddExpensePlayground', () => {
     const events: DemoActivityEvent[] = [];
     renderPlayground((event) => events.push(event));
     tapKeys('1', '2', '00');
-    fireEvent.click(chip('Mara'));
+    fireEvent.click(chip('Job'));
 
     fireEvent.click(addButton());
 
     expect(
       screen.getByText(
-        'You paid ₱1,200.00 for "Pizza night". This will be split among 3 members.',
+        'You paid ₱1,200.00 for "Pizza night". This will be split among 4 members.',
       ),
     ).toBeTruthy();
     // Mid-print: nothing filed yet, and no double submits.
@@ -278,7 +294,8 @@ describe('AddExpensePlayground', () => {
   it('drops the "split among" sentence for a single member, like the modal', () => {
     renderPlayground();
     tapKeys('2', '4', '0');
-    for (const name of ['James', 'Mika', 'Mara']) fireEvent.click(chip(name));
+    for (const name of ['Ced', 'Glenn', 'Migs', 'Job'])
+      fireEvent.click(chip(name));
 
     fireEvent.click(addButton());
 

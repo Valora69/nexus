@@ -267,3 +267,11 @@ model Notification {
   @@index([recipientId, readAt])
   @@index([recipientId, dedupeKey])
 }
+
+/// Public counters shown on the landing page, e.g. "quick-adds" (every press
+/// of the hero's Q keycap, from every visitor). Not tied to any user.
+model LandingCounter {
+  key       String   @id
+  count     BigInt   @default(0)
+  updatedAt DateTime @updatedAt
+}

@@ -52,7 +52,7 @@ describe('GlobeCanvas', () => {
     const dpr = window.devicePixelRatio;
     window.devicePixelRatio = 3;
     const { container, unmount } = render(
-      <GlobeCanvas ping={null} nudge={null} active={false} reduced={false} />,
+      <GlobeCanvas ping={null} active={false} reduced={false} />,
     );
     window.devicePixelRatio = dpr;
 
@@ -72,16 +72,14 @@ describe('GlobeCanvas', () => {
   it('spins while active and stops when off-screen', () => {
     jest.useFakeTimers();
     const { rerender, unmount } = render(
-      <GlobeCanvas ping={null} nudge={null} active reduced={false} />,
+      <GlobeCanvas ping={null} active reduced={false} />,
     );
     frames(200);
     const phis = mockUpdate.mock.calls.map(([s]) => s.phi);
     expect(phis.length).toBeGreaterThan(3);
     expect(phis[phis.length - 1]).not.toBe(phis[0]);
 
-    rerender(
-      <GlobeCanvas ping={null} nudge={null} active={false} reduced={false} />,
-    );
+    rerender(<GlobeCanvas ping={null} active={false} reduced={false} />);
     mockUpdate.mockClear();
     frames(500);
     expect(mockUpdate).not.toHaveBeenCalled();
@@ -92,7 +90,7 @@ describe('GlobeCanvas', () => {
     jest.useFakeTimers();
     const ping: GlobePing = { id: 1, city: MANILA, focus: true };
     const { unmount } = render(
-      <GlobeCanvas ping={ping} nudge={null} active reduced={false} />,
+      <GlobeCanvas ping={ping} active reduced={false} />,
     );
     frames(400);
     const sizes = mockUpdate.mock.calls
@@ -107,10 +105,10 @@ describe('GlobeCanvas', () => {
     unmount();
   });
 
-  it('holds still with reduced motion until nudged', () => {
+  it('holds still with reduced motion until a ping arrives', () => {
     jest.useFakeTimers();
     const { rerender, unmount } = render(
-      <GlobeCanvas ping={null} nudge={null} active reduced />,
+      <GlobeCanvas ping={null} active reduced />,
     );
     // Past the warm-up, nothing moves on its own.
     frames(1000);
@@ -120,14 +118,13 @@ describe('GlobeCanvas', () => {
 
     rerender(
       <GlobeCanvas
-        ping={null}
-        nudge={{ id: 1, direction: 1 }}
+        ping={{ id: 1, city: MANILA, focus: true }}
         active
         reduced
       />,
     );
     frames(100);
-    expect(mockUpdate).toHaveBeenCalledTimes(1);
+    expect(mockUpdate).toHaveBeenCalled();
     unmount();
   });
 });

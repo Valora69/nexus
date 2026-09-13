@@ -108,7 +108,10 @@ describe('HeroStage', () => {
         `Added ${expected.name} ${formatPeso(expected.total).replace(/\.00$/, '')}`,
       ),
     ).toBeTruthy();
-    expect(events).toEqual([{ type: 'expenseAdded', amount: expected.total }]);
+    expect(events).toEqual([
+      { type: 'expenseAdded', amount: expected.total },
+      { type: 'quickAdded' },
+    ]);
   });
 
   it('keeps at most 5 ledger rows and 3 toasts', async () => {

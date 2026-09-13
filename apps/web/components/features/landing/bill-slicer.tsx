@@ -105,33 +105,51 @@ function Pizza({ shares }: { shares: number[] }) {
   return (
     <svg aria-hidden viewBox="0 0 200 200" className="h-full w-full">
       <circle cx={100} cy={100} r={94} fill="#1a1a1a" />
-      {wedges.map((w) => (
-        <g key={w.i}>
-          <path
-            d={wedgePath(w.start, w.end, 88)}
-            fill={colorAt(w.i).fill}
-            stroke="#000"
-            strokeWidth={3}
-            strokeLinejoin="round"
-          />
-          {/* A couple of toppings, only once the slice has room for them. */}
-          {w.sweep > 0.45 &&
-            [0.45, 0.72].map((radius, j) => (
+      {/* A ₱0 share has no wedge at all. */}
+      {wedges
+        .filter((w) => w.sweep > 0.001)
+        .map((w) => (
+          <g key={w.i}>
+            {/* One person with the whole bill: an arc can't draw a full
+              circle, so draw the circle itself. */}
+            {w.sweep >= Math.PI * 2 - 0.001 ? (
               <circle
-                key={radius}
-                cx={
-                  100 + 88 * radius * Math.cos(w.mid + (j === 0 ? -0.18 : 0.14))
-                }
-                cy={
-                  100 + 88 * radius * Math.sin(w.mid + (j === 0 ? -0.18 : 0.14))
-                }
-                r={6}
-                fill="#000"
-                opacity={0.22}
+                cx={100}
+                cy={100}
+                r={88}
+                fill={colorAt(w.i).fill}
+                stroke="#000"
+                strokeWidth={3}
               />
-            ))}
-        </g>
-      ))}
+            ) : (
+              <path
+                d={wedgePath(w.start, w.end, 88)}
+                fill={colorAt(w.i).fill}
+                stroke="#000"
+                strokeWidth={3}
+                strokeLinejoin="round"
+              />
+            )}
+            {/* A couple of toppings, only once the slice has room for them. */}
+            {w.sweep > 0.45 &&
+              [0.45, 0.72].map((radius, j) => (
+                <circle
+                  key={radius}
+                  cx={
+                    100 +
+                    88 * radius * Math.cos(w.mid + (j === 0 ? -0.18 : 0.14))
+                  }
+                  cy={
+                    100 +
+                    88 * radius * Math.sin(w.mid + (j === 0 ? -0.18 : 0.14))
+                  }
+                  r={6}
+                  fill="#000"
+                  opacity={0.22}
+                />
+              ))}
+          </g>
+        ))}
     </svg>
   );
 }
@@ -228,7 +246,14 @@ function DividerHandle({
         onRelease();
       }}
       onKeyDown={handleKeyDown}
-      style={{ x }}
+      // Two dividers can sit on the same spot once a share is ₱0. Stack the
+      // one that can still move on top: the lower index near the right end,
+      // the higher index anywhere else.
+      style={{
+        x,
+        zIndex:
+          TOTAL > 0 && value > TOTAL / 2 ? dividers.length - index : index + 1,
+      }}
       // drag="x" writes an inline touch-action: pan-y; !touch-none wins over
       // it, so a touch drag never scrolls the page instead.
       className="group/handle !touch-none absolute inset-y-[-10px] left-0 -ml-5 flex w-10 cursor-ew-resize items-center justify-center rounded-full outline-none"
@@ -245,7 +270,8 @@ function DividerHandle({
 /**
  * "Slice the bill.": the bill as a bar with a draggable divider between each
  * person (snapping to ₱10) and a pizza whose wedges follow. Shares come from
- * `sharesFromDividers`, so they always add up to the bill.
+ * `sharesFromDividers`, so they always add up to the bill; a share can be ₱0,
+ * which the app treats as excluded.
  */
 export function BillSlicer() {
   const { play } = useLandingSound();

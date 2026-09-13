@@ -5,13 +5,14 @@ import { AnimatePresence, MotionConfig, motion } from 'motion/react';
 import { Delete, Receipt, UserPlus } from 'lucide-react';
 
 import {
-  DEMO_MEMBERS,
   KEYPAD_BACKSPACE,
+  PLAYGROUND_MEMBERS,
   addExpenseConfirmation,
   applyKeypadKey,
   customValidity,
   equalShares,
   formatPeso,
+  sanitizeCustomShare,
 } from '@web/lib/landing/demo';
 import { DEMO_SCENARIOS } from '@web/lib/landing/simulated';
 import { cn } from '@web/lib/utils';
@@ -52,8 +53,8 @@ const SPRING = { type: 'spring', stiffness: 400, damping: 22 } as const;
 const EASE_OUT = [0.22, 1, 0.36, 1] as const;
 
 const SEED_ROWS: LedgerRow[] = [
-  { id: 'seed-grab', name: 'Grab home', total: 240, payer: 'Mika' },
-  { id: 'seed-milk-tea', name: 'Milk tea run', total: 390, payer: 'James' },
+  { id: 'seed-grab', name: 'Grab home', total: 240, payer: 'Ced' },
+  { id: 'seed-milk-tea', name: 'Milk tea run', total: 390, payer: 'Glenn' },
 ];
 
 // A cash register's layout: 1–9 in rows, then 00, 0 and delete.
@@ -204,7 +205,7 @@ export function AddExpensePlayground() {
   const [digits, setDigits] = useState('');
   const [pressedKey, setPressedKey] = useState<string | null>(null);
   const [selected, setSelected] = useState<string[]>(() =>
-    DEMO_MEMBERS.map((m) => m.userId),
+    PLAYGROUND_MEMBERS.map((m) => m.userId),
   );
   const [splitMode, setSplitMode] = useState<SplitMode>('equal');
   const [customSplits, setCustomSplits] = useState<Record<string, string>>({});
@@ -237,7 +238,7 @@ export function AddExpensePlayground() {
   };
 
   const amount = digits ? parseInt(digits, 10) : 0;
-  const selectedMembers = DEMO_MEMBERS.filter((m) =>
+  const selectedMembers = PLAYGROUND_MEMBERS.filter((m) =>
     selected.includes(m.userId),
   );
   const shares = equalShares(amount, selectedMembers.length);
@@ -471,7 +472,7 @@ export function AddExpensePlayground() {
                 aria-label="Split with Members"
                 className="flex flex-wrap gap-1.5"
               >
-                {DEMO_MEMBERS.map((m) => (
+                {PLAYGROUND_MEMBERS.map((m) => (
                   <Chip
                     key={m.userId}
                     on={selected.includes(m.userId)}
@@ -558,19 +559,24 @@ export function AddExpensePlayground() {
                           />
                         ) : (
                           <input
-                            type="number"
+                            // Text, not number: edits past the limits are
+                            // rejected outright instead of half-applied.
+                            type="text"
                             inputMode="decimal"
-                            min="0"
-                            step="0.01"
                             placeholder="0.00"
                             aria-label={`${m.name} amount`}
                             value={raw}
-                            onChange={(e) =>
+                            onChange={(e) => {
+                              const next = sanitizeCustomShare(
+                                e.target.value,
+                                amount,
+                              );
+                              if (next === null) return;
                               setCustomSplits((prev) => ({
                                 ...prev,
-                                [m.userId]: e.target.value,
-                              }))
-                            }
+                                [m.userId]: next,
+                              }));
+                            }}
                             className="h-7 w-24 rounded-lg border border-border bg-black px-2 text-right font-mono text-[12px] tabular-nums outline-none focus-visible:border-accent/60"
                           />
                         )}

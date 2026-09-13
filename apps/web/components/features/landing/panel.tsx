@@ -15,7 +15,7 @@ type PanelProps = {
 // The shell stamps data-mode="track" | "vertical" on its `group/shell` root,
 // so panels style themselves for either layout without being client code.
 const TRACK =
-  'group-data-[mode=track]/shell:flex group-data-[mode=track]/shell:h-full group-data-[mode=track]/shell:shrink-0 group-data-[mode=track]/shell:items-center group-data-[mode=track]/shell:pb-20 group-data-[mode=track]/shell:pt-24';
+  'group-data-[mode=track]/shell:flex group-data-[mode=track]/shell:h-full group-data-[mode=track]/shell:shrink-0 group-data-[mode=track]/shell:items-center group-data-[mode=track]/shell:pb-10 group-data-[mode=track]/shell:pt-24';
 
 const TRACK_WIDTH: Record<PanelWidth, string> = {
   screen: 'group-data-[mode=track]/shell:w-screen',

@@ -1,7 +1,7 @@
 /**
- * Simulated data for the landing page demos (coin key, globe, nav counter).
- * Everything shown from here is labeled "demo" on the page: there is no
- * backend, database or API behind it.
+ * Simulated data for the landing page demos (coin key, globe). Everything
+ * shown from here is labeled "demo" on the page: there is no backend,
+ * database or API behind it.
  *
  * All generators are pure: they take a seeded RNG, so tests are
  * deterministic. Create the RNG in an effect or ref, never during render.
@@ -97,16 +97,4 @@ export function nextCity(rng: Rng, previous?: DemoCity): DemoCity {
     if (roll < 0) return city;
   }
   return pool[pool.length - 1] ?? DEMO_CITIES[0];
-}
-
-/** Starting value of the "₱ … split · demo" nav counter. */
-export const COUNTER_BASE = 12408550;
-
-export const COUNTER_STEP_MIN = 120;
-export const COUNTER_STEP_MAX = 2400;
-
-/** One simulated tick of pesos split: a whole ₱10 amount in [min, max]. */
-export function nextCounterStep(rng: Rng): number {
-  const raw = COUNTER_STEP_MIN + rng() * (COUNTER_STEP_MAX - COUNTER_STEP_MIN);
-  return Math.round(raw / 10) * 10;
 }
