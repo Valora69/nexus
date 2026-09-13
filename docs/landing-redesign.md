@@ -214,11 +214,34 @@ Stage 4 notes:
 - `expenseAdded` fires when the receipt lands, not on click; the nav counter
   wires up in a later stage.
 
+Added in Stage 5:
+
+| Module | Export |
+|---|---|
+| `settle-slingshot.tsx` | `SettleSlingshot`, `SETTLE_FLIGHT_MS`, `SETTLE_TOAST_MS`, `SETTLE_CONFETTI_MS`, `SETTLE_MAX_PULL`, `SETTLE_MIN_AMOUNT` (tested in `apps/web/test/landing-settle.spec.tsx`) |
+
+Stage 5 notes:
+
+- The note is a motion drag with a zero-size constraint box and
+  `dragElastic`, so it rubber-bands. The charge comes from the raw pointer
+  offset through `pullAmount` (₱10 steps, capped at Mika's ₱400 share), and
+  releases under `SETTLE_MIN_AMOUNT` spring back.
+- The flight samples a quadratic arc into `x`/`y`/`rotate` keyframes. The
+  landing is driven by a timer (`SETTLE_FLIGHT_MS`), not the animation, so
+  Jest can advance it with fake timers.
+- Status always comes from `demoSplitStatus`, which now takes the amount sent:
+  a short pull shows **Partial**, as the real `splitStatus` would, and
+  verifying it doesn't confirm the split.
+- The panel watches `useInView`. Scrolling away clears its timers, stops the
+  flight (a note mid-air lands quietly) and drops the toast and confetti.
+- `paymentSent` fires on landing; the nav counter wires up in a later stage.
+
 Pure demo logic lives in `apps/web/lib/landing/`:
 
 - `demo.ts`: `DEMO_CURRENT_USER`, `DEMO_MEMBERS`, `DEMO_EXPENSE`,
-  `equalShares`, `customValidity`, `demoSplitStatus`, `formatPeso` (tested in
-  `apps/web/test/landing-demo.spec.ts`)
+  `equalShares`, `customValidity`, `demoSplitStatus`, `pullAmount`,
+  `formatPeso` (tested in `apps/web/test/landing-demo.spec.ts`; `pullAmount`
+  and the partial `demoSplitStatus` case in `landing-settle.spec.tsx`)
 - `sound.ts`: `SOUND_NAMES`, `createAudioContext`, `playSound`, `randomPitch`
 - `simulated.ts`: `mulberry32`, `createDemoRng`, `DEMO_SCENARIOS`,
   `randomDemoExpense`, `DEMO_CITIES`, `nextCity`, `COUNTER_BASE`,
