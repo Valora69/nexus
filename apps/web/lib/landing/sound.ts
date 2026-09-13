@@ -149,24 +149,50 @@ function noiseBurst(
 
 type Synth = (ctx: BaseAudioContext, t: number, pitch: number) => void;
 
+/**
+ * One microswitch snap: a very short, bright crack of noise, the plastic
+ * shell's ping, and a little low body. `level` scales the whole snap.
+ */
+function switchSnap(
+  ctx: BaseAudioContext,
+  t: number,
+  p: number,
+  level: number,
+) {
+  noiseBurst(ctx, {
+    start: t,
+    duration: 0.008,
+    attack: 0.0008,
+    peak: 0.55 * level,
+    filter: 'bandpass',
+    freqFrom: 3800 * p,
+    q: 1.8,
+  });
+  tone(ctx, {
+    type: 'sine',
+    from: 2300 * p,
+    to: 1700 * p,
+    start: t,
+    attack: 0.0008,
+    peak: 0.07 * level,
+    decay: 0.018,
+  });
+  noiseBurst(ctx, {
+    start: t,
+    duration: 0.022,
+    attack: 0.001,
+    peak: 0.2 * level,
+    filter: 'lowpass',
+    freqFrom: 650 * p,
+  });
+}
+
 const SYNTHS: Record<SoundName, Synth> = {
-  // Soft key click: a falling blip plus a tiny noise transient.
+  // Mouse click, modeled on recorded clicks: a sharp snap when the switch goes
+  // down, then a quieter, slightly higher one when it comes back up.
   tap: (ctx, t, p) => {
-    tone(ctx, {
-      type: 'triangle',
-      from: 900 * p,
-      to: 420 * p,
-      start: t,
-      peak: 0.18,
-      decay: 0.05,
-    });
-    noiseBurst(ctx, {
-      start: t,
-      duration: 0.02,
-      peak: 0.06,
-      filter: 'highpass',
-      freqFrom: 3000,
-    });
+    switchSnap(ctx, t, p, 1);
+    switchSnap(ctx, t + 0.07 + (p - 1) * 0.4, p * 1.08, 0.45);
   },
   // Coin clink: two bright partials a fifth apart with a short shimmer.
   coin: (ctx, t, p) => {
