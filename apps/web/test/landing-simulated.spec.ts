@@ -113,6 +113,19 @@ describe('nextCity', () => {
       picks.filter((c) => c.country === 'PH').length / picks.length;
     expect(phShare).toBeGreaterThan(0.6);
   });
+
+  it('never repeats the previous city when one is given', () => {
+    const rng = createDemoRng();
+    let previous = nextCity(rng);
+    const seen = new Set([previous.name]);
+    for (let i = 0; i < 1000; i++) {
+      const next = nextCity(rng, previous);
+      expect(next.name).not.toBe(previous.name);
+      seen.add(next.name);
+      previous = next;
+    }
+    expect(seen.size).toBe(DEMO_CITIES.length);
+  });
 });
 
 describe('nextCounterStep', () => {
