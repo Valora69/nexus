@@ -11,6 +11,7 @@ import { Hero } from '@web/components/features/landing/hero';
 import { LandingFooter } from '@web/components/features/landing/landing-footer';
 import { LandingHeader } from '@web/components/features/landing/landing-header';
 import { LandingShell } from '@web/components/features/landing/landing-shell';
+import { SettleSlingshot } from '@web/components/features/landing/settle-slingshot';
 import { SoundProvider } from '@web/components/features/landing/sound-provider';
 import { buttonClasses } from '@web/components/ui/button';
 
@@ -48,6 +49,11 @@ export default function LandingPage() {
                 key: 'slice',
                 label: 'Slice the bill',
                 content: <BillSlicer />,
+              },
+              {
+                key: 'settle',
+                label: 'Settle up',
+                content: <SettleSlingshot />,
               },
               // Placeholder until the finale lands in a later stage.
               {

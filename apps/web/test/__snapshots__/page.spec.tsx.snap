@@ -2631,6 +2631,243 @@ exports[`Root page should match the snapshot 1`] = `
               >
                 <div
                   class="relative w-full group-data-[mode=track]/shell:flex group-data-[mode=track]/shell:h-full group-data-[mode=track]/shell:shrink-0 group-data-[mode=track]/shell:items-center group-data-[mode=track]/shell:pb-20 group-data-[mode=track]/shell:pt-24 group-data-[mode=track]/shell:w-screen group-data-[mode=vertical]/shell:py-16 sm:group-data-[mode=vertical]/shell:py-24"
+                  data-landing-panel="Settle up"
+                >
+                  <div
+                    class="w-full"
+                  >
+                    <section
+                      aria-labelledby="settle-heading"
+                      class="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 sm:px-6 group-data-[mode=track]/shell:max-w-none group-data-[mode=track]/shell:flex-row group-data-[mode=track]/shell:items-center group-data-[mode=track]/shell:gap-14 group-data-[mode=track]/shell:px-[max(4rem,6vw)]"
+                    >
+                      <div
+                        class="max-w-md shrink-0 group-data-[mode=track]/shell:w-[20rem]"
+                      >
+                        <p
+                          class="font-mono text-[12px] uppercase tracking-[0.14em] text-accent"
+                        >
+                          Settle up
+                        </p>
+                        <h2
+                          class="mt-3 font-[family-name:var(--font-display)] text-[clamp(2.5rem,5vw,4rem)] font-extrabold leading-[0.95] tracking-[-0.04em]"
+                          id="settle-heading"
+                        >
+                          Settle with a flick.
+                        </h2>
+                        <p
+                          class="mt-5 text-base text-muted"
+                        >
+                          Mika
+                           sends their share by GCash or cash with proof, and it shows up on the split right away.
+                        </p>
+                        <p
+                          class="mt-3 text-base text-foreground"
+                        >
+                          Payments stay pending until the person who paid confirms.
+                        </p>
+                      </div>
+                      <div
+                        class="w-full rounded-3xl border border-border bg-[#0a0a0a] p-5 sm:p-7 group-data-[mode=track]/shell:w-[min(40rem,52vw)]"
+                      >
+                        <div
+                          class="flex items-baseline justify-between gap-4"
+                        >
+                          <p
+                            class="text-[15px] font-semibold tracking-[-0.02em]"
+                          >
+                            Pizza night
+                          </p>
+                          <span
+                            class="font-mono text-[13px] tabular-nums text-muted"
+                          >
+                            Paid by You · 
+                            ₱1,200.00
+                          </span>
+                        </div>
+                        <div
+                          class="relative mt-6 h-[260px] select-none sm:h-[280px]"
+                        >
+                          <div
+                            class="absolute right-0 top-1/2 flex w-[11.5rem] -translate-y-1/2 flex-col items-center gap-3 sm:w-[14rem]"
+                          >
+                            <div
+                              class="relative"
+                            >
+                              <div
+                                class="flex h-14 w-14 items-center justify-center rounded-full border-2 bg-[#1c1c1c] font-[family-name:var(--font-display)] text-xl font-extrabold transition-colors border-white/15 text-foreground"
+                                style="transform: none;"
+                              >
+                                M
+                              </div>
+                              <div
+                                aria-hidden="true"
+                                class="pointer-events-none absolute left-1/2 top-1/2"
+                              />
+                            </div>
+                            <div
+                              class="w-full rounded-2xl border border-border bg-black px-3 py-2.5"
+                            >
+                              <div
+                                class="flex items-center justify-between gap-2"
+                              >
+                                <p
+                                  class="text-[13px] font-medium"
+                                >
+                                  Mika
+                                   owes you
+                                </p>
+                                <span
+                                  class="rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.08em] transition-colors border-border text-muted"
+                                  data-status="unpaid"
+                                >
+                                  Unpaid
+                                </span>
+                              </div>
+                              <p
+                                class="mt-0.5 font-mono text-[15px] font-semibold tabular-nums"
+                              >
+                                ₱400.00
+                              </p>
+                              <p
+                                class="mt-0.5 truncate font-mono text-[10px] text-muted"
+                              >
+                                No payment yet
+                              </p>
+                            </div>
+                          </div>
+                          <div
+                            class="absolute left-[16%] top-[58%] h-11 w-[72px] -translate-x-1/2 -translate-y-1/2 sm:left-[20%]"
+                          >
+                            <div
+                              class="pointer-events-none flex w-max select-none gap-1 text-accent/70 flex-col items-end absolute -left-10 bottom-full mb-1 [&>span]:text-xl"
+                            >
+                              <span
+                                class="font-[family-name:var(--font-hand)] text-2xl font-semibold leading-none"
+                              >
+                                pull back & let go
+                              </span>
+                              <svg
+                                aria-hidden="true"
+                                class="h-10 w-10"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                viewBox="0 0 48 48"
+                              >
+                                <path
+                                  d="M8 6 C 10 18, 20 32, 40 38"
+                                  pathLength="1"
+                                  stroke-dasharray="0 1"
+                                  stroke-dashoffset="0"
+                                  style="opacity: 0;"
+                                />
+                                <path
+                                  d="M29 40 L40 38 L35 28"
+                                  pathLength="1"
+                                  stroke-dasharray="0 1"
+                                  stroke-dashoffset="0"
+                                  style="opacity: 0;"
+                                />
+                              </svg>
+                            </div>
+                            <div
+                              aria-hidden="true"
+                              class="!touch-none absolute inset-0 pointer-events-none"
+                              style="transform: none;"
+                            >
+                              <svg
+                                aria-hidden="true"
+                                class="h-11 w-[72px] drop-shadow-[0_8px_10px_rgb(0_0_0/0.7)]"
+                                viewBox="0 0 72 44"
+                              >
+                                <path
+                                  d="M2 22 L70 3 L28 26 Z"
+                                  fill="#d7f5d9"
+                                  stroke="#0b5d20"
+                                  stroke-linejoin="round"
+                                  stroke-width="1.5"
+                                />
+                                <path
+                                  d="M28 26 L70 3 L38 41 Z"
+                                  fill="#9fdca6"
+                                  stroke="#0b5d20"
+                                  stroke-linejoin="round"
+                                  stroke-width="1.5"
+                                />
+                                <path
+                                  d="M28 26 L70 3"
+                                  opacity="0.6"
+                                  stroke="#0b5d20"
+                                  stroke-width="1"
+                                />
+                                <text
+                                  fill="#0b5d20"
+                                  font-size="11"
+                                  font-weight="800"
+                                  transform="rotate(-15 30 19)"
+                                  x="30"
+                                  y="19"
+                                >
+                                  ₱
+                                </text>
+                              </svg>
+                            </div>
+                          </div>
+                          <div
+                            aria-hidden="true"
+                            class="pointer-events-none absolute inset-x-0 top-0 z-20 flex justify-center"
+                          />
+                        </div>
+                        <div
+                          class="mt-5 flex flex-wrap items-center gap-2"
+                        >
+                          <button
+                            class="h-10 rounded-full bg-accent px-4 text-[13px] font-semibold tracking-[-0.02em] text-black shadow-[0_3px_0_0_#00801f] outline-none transition-[transform,box-shadow,background-color] duration-75 focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a] enabled:active:translate-y-[2px] enabled:active:shadow-[0_1px_0_0_#00801f] disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-muted disabled:shadow-none"
+                            type="button"
+                          >
+                            Send 
+                            ₱400
+                             via GCash
+                          </button>
+                          <button
+                            class="h-10 rounded-full border border-border bg-[#141414] px-4 text-[13px] font-medium tracking-[-0.02em] shadow-[0_3px_0_0_#000] outline-none transition-[transform,box-shadow,color] duration-75 hover:border-accent/50 focus-visible:ring-2 focus-visible:ring-accent enabled:active:translate-y-[2px] enabled:active:shadow-[0_1px_0_0_#000] disabled:cursor-not-allowed disabled:text-muted disabled:shadow-none disabled:hover:border-border"
+                            disabled=""
+                            type="button"
+                          >
+                            Verify payment
+                          </button>
+                          <button
+                            class="h-10 rounded-full px-3 text-[13px] font-medium tracking-[-0.02em] text-muted outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-accent disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:text-muted"
+                            disabled=""
+                            type="button"
+                          >
+                            Reset
+                          </button>
+                        </div>
+                        <p
+                          class="mt-2 text-[12px] text-muted"
+                        >
+                          You paid for 
+                          Pizza night
+                          , so you're the one who verifies.
+                        </p>
+                        <p
+                          aria-live="polite"
+                          class="sr-only"
+                          role="status"
+                        />
+                      </div>
+                    </section>
+                  </div>
+                </div>
+              </div>
+              <div
+                class=""
+              >
+                <div
+                  class="relative w-full group-data-[mode=track]/shell:flex group-data-[mode=track]/shell:h-full group-data-[mode=track]/shell:shrink-0 group-data-[mode=track]/shell:items-center group-data-[mode=track]/shell:pb-20 group-data-[mode=track]/shell:pt-24 group-data-[mode=track]/shell:w-screen group-data-[mode=vertical]/shell:py-16 sm:group-data-[mode=vertical]/shell:py-24"
                   data-landing-panel="Get started"
                 >
                   <div
