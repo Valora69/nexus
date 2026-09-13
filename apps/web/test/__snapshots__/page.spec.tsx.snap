@@ -68,29 +68,22 @@ exports[`Root page should match the snapshot 1`] = `
                     aria-hidden="true"
                     class="font-mono tabular-nums text-foreground"
                   >
-                    ₱
-                     
                     <span>
-                      12,408,550
+                      0
                     </span>
                   </span>
                   <span
                     aria-hidden="true"
                   >
-                    split
-                  </span>
-                  <span
-                    aria-hidden="true"
-                    class="rounded-full border border-accent/40 bg-accent/10 px-1.5 py-0.5 font-mono text-[10px] uppercase leading-none tracking-[0.12em] text-accent"
-                  >
-                    demo
+                    quick adds
                   </span>
                   <span
                     class="sr-only"
                   >
-                    Demo counter, simulated: ₱
-                    12,408,550
-                     split
+                    0
+                     
+                    quick adds
+                     so far
                   </span>
                 </p>
                 <button
@@ -158,7 +151,7 @@ exports[`Root page should match the snapshot 1`] = `
                 class=""
               >
                 <div
-                  class="relative w-full group-data-[mode=track]/shell:flex group-data-[mode=track]/shell:h-full group-data-[mode=track]/shell:shrink-0 group-data-[mode=track]/shell:items-center group-data-[mode=track]/shell:pb-20 group-data-[mode=track]/shell:pt-24 group-data-[mode=track]/shell:w-screen"
+                  class="relative w-full group-data-[mode=track]/shell:flex group-data-[mode=track]/shell:h-full group-data-[mode=track]/shell:shrink-0 group-data-[mode=track]/shell:items-center group-data-[mode=track]/shell:pb-10 group-data-[mode=track]/shell:pt-24 group-data-[mode=track]/shell:w-screen"
                   data-landing-panel="Start"
                 >
                   <div
@@ -962,7 +955,7 @@ exports[`Root page should match the snapshot 1`] = `
                 class=""
               >
                 <div
-                  class="relative w-full group-data-[mode=track]/shell:flex group-data-[mode=track]/shell:h-full group-data-[mode=track]/shell:shrink-0 group-data-[mode=track]/shell:items-center group-data-[mode=track]/shell:pb-20 group-data-[mode=track]/shell:pt-24 group-data-[mode=track]/shell:w-max group-data-[mode=vertical]/shell:py-16 sm:group-data-[mode=vertical]/shell:py-24"
+                  class="relative w-full group-data-[mode=track]/shell:flex group-data-[mode=track]/shell:h-full group-data-[mode=track]/shell:shrink-0 group-data-[mode=track]/shell:items-center group-data-[mode=track]/shell:pb-10 group-data-[mode=track]/shell:pt-24 group-data-[mode=track]/shell:w-max group-data-[mode=vertical]/shell:py-16 sm:group-data-[mode=vertical]/shell:py-24"
                   data-landing-panel="Features"
                 >
                   <div
@@ -1667,7 +1660,7 @@ exports[`Root page should match the snapshot 1`] = `
                 class=""
               >
                 <div
-                  class="relative w-full group-data-[mode=track]/shell:flex group-data-[mode=track]/shell:h-full group-data-[mode=track]/shell:shrink-0 group-data-[mode=track]/shell:items-center group-data-[mode=track]/shell:pb-20 group-data-[mode=track]/shell:pt-24 group-data-[mode=track]/shell:w-max group-data-[mode=vertical]/shell:py-16 sm:group-data-[mode=vertical]/shell:py-24"
+                  class="relative w-full group-data-[mode=track]/shell:flex group-data-[mode=track]/shell:h-full group-data-[mode=track]/shell:shrink-0 group-data-[mode=track]/shell:items-center group-data-[mode=track]/shell:pb-10 group-data-[mode=track]/shell:pt-24 group-data-[mode=track]/shell:w-max group-data-[mode=vertical]/shell:py-16 sm:group-data-[mode=vertical]/shell:py-24"
                   data-landing-panel="How it works"
                 >
                   <div
@@ -2014,7 +2007,7 @@ exports[`Root page should match the snapshot 1`] = `
                                 tabindex="0"
                                 type="button"
                               >
-                                You
+                                Sid
                               </button>
                               <button
                                 aria-pressed="true"
@@ -2022,7 +2015,7 @@ exports[`Root page should match the snapshot 1`] = `
                                 tabindex="0"
                                 type="button"
                               >
-                                James
+                                Ced
                               </button>
                               <button
                                 aria-pressed="true"
@@ -2030,7 +2023,7 @@ exports[`Root page should match the snapshot 1`] = `
                                 tabindex="0"
                                 type="button"
                               >
-                                Mika
+                                Glenn
                               </button>
                               <button
                                 aria-pressed="true"
@@ -2038,7 +2031,15 @@ exports[`Root page should match the snapshot 1`] = `
                                 tabindex="0"
                                 type="button"
                               >
-                                Mara
+                                Migs
+                              </button>
+                              <button
+                                aria-pressed="true"
+                                class="h-8 rounded-full border px-3 text-[13px] font-medium tracking-[-0.02em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 border-accent bg-accent text-black"
+                                tabindex="0"
+                                type="button"
+                              >
+                                Job
                               </button>
                             </div>
                           </div>
@@ -2096,7 +2097,7 @@ exports[`Root page should match the snapshot 1`] = `
                                 <span
                                   class="flex items-center gap-1.5"
                                 >
-                                  You
+                                  Sid
                                 </span>
                                 <span
                                   class="font-mono tabular-nums text-accent"
@@ -2110,7 +2111,7 @@ exports[`Root page should match the snapshot 1`] = `
                                 <span
                                   class="flex items-center gap-1.5"
                                 >
-                                  James
+                                  Ced
                                 </span>
                                 <span
                                   class="font-mono tabular-nums text-accent"
@@ -2124,7 +2125,7 @@ exports[`Root page should match the snapshot 1`] = `
                                 <span
                                   class="flex items-center gap-1.5"
                                 >
-                                  Mika
+                                  Glenn
                                 </span>
                                 <span
                                   class="font-mono tabular-nums text-accent"
@@ -2138,7 +2139,21 @@ exports[`Root page should match the snapshot 1`] = `
                                 <span
                                   class="flex items-center gap-1.5"
                                 >
-                                  Mara
+                                  Migs
+                                </span>
+                                <span
+                                  class="font-mono tabular-nums text-accent"
+                                >
+                                  ₱0.00
+                                </span>
+                              </li>
+                              <li
+                                class="flex h-9 items-center justify-between gap-3 rounded-xl border border-border px-3 text-[13px]"
+                              >
+                                <span
+                                  class="flex items-center gap-1.5"
+                                >
+                                  Job
                                 </span>
                                 <span
                                   class="font-mono tabular-nums text-accent"
@@ -2230,7 +2245,7 @@ exports[`Root page should match the snapshot 1`] = `
                                     class="block font-mono text-[11px] text-muted"
                                   >
                                     Paid by 
-                                    Mika
+                                    Ced
                                   </span>
                                 </span>
                                 <span
@@ -2259,7 +2274,7 @@ exports[`Root page should match the snapshot 1`] = `
                                     class="block font-mono text-[11px] text-muted"
                                   >
                                     Paid by 
-                                    James
+                                    Glenn
                                   </span>
                                 </span>
                                 <span
@@ -2288,7 +2303,7 @@ exports[`Root page should match the snapshot 1`] = `
                 class=""
               >
                 <div
-                  class="relative w-full group-data-[mode=track]/shell:flex group-data-[mode=track]/shell:h-full group-data-[mode=track]/shell:shrink-0 group-data-[mode=track]/shell:items-center group-data-[mode=track]/shell:pb-20 group-data-[mode=track]/shell:pt-24 group-data-[mode=track]/shell:w-screen group-data-[mode=vertical]/shell:py-16 sm:group-data-[mode=vertical]/shell:py-24"
+                  class="relative w-full group-data-[mode=track]/shell:flex group-data-[mode=track]/shell:h-full group-data-[mode=track]/shell:shrink-0 group-data-[mode=track]/shell:items-center group-data-[mode=track]/shell:pb-10 group-data-[mode=track]/shell:pt-24 group-data-[mode=track]/shell:w-screen group-data-[mode=vertical]/shell:py-16 sm:group-data-[mode=vertical]/shell:py-24"
                   data-landing-panel="Slice the bill"
                 >
                   <div
@@ -2428,13 +2443,13 @@ exports[`Root page should match the snapshot 1`] = `
                             <div
                               aria-label="Divider between You and James"
                               aria-orientation="horizontal"
-                              aria-valuemax="790"
-                              aria-valuemin="10"
+                              aria-valuemax="800"
+                              aria-valuemin="0"
                               aria-valuenow="400"
                               aria-valuetext="You ₱400.00, James ₱400.00"
                               class="group/handle !touch-none absolute inset-y-[-10px] left-0 -ml-5 flex w-10 cursor-ew-resize items-center justify-center rounded-full outline-none"
                               role="slider"
-                              style="transform: none;"
+                              style="z-index: 1; transform: none;"
                               tabindex="0"
                             >
                               <span
@@ -2454,13 +2469,13 @@ exports[`Root page should match the snapshot 1`] = `
                             <div
                               aria-label="Divider between James and Mika"
                               aria-orientation="horizontal"
-                              aria-valuemax="1190"
-                              aria-valuemin="410"
+                              aria-valuemax="1200"
+                              aria-valuemin="400"
                               aria-valuenow="800"
                               aria-valuetext="James ₱400.00, Mika ₱400.00"
                               class="group/handle !touch-none absolute inset-y-[-10px] left-0 -ml-5 flex w-10 cursor-ew-resize items-center justify-center rounded-full outline-none"
                               role="slider"
-                              style="transform: none;"
+                              style="z-index: 1; transform: none;"
                               tabindex="0"
                             >
                               <span
@@ -2663,7 +2678,7 @@ exports[`Root page should match the snapshot 1`] = `
                 class=""
               >
                 <div
-                  class="relative w-full group-data-[mode=track]/shell:flex group-data-[mode=track]/shell:h-full group-data-[mode=track]/shell:shrink-0 group-data-[mode=track]/shell:items-center group-data-[mode=track]/shell:pb-20 group-data-[mode=track]/shell:pt-24 group-data-[mode=track]/shell:w-screen group-data-[mode=vertical]/shell:py-16 sm:group-data-[mode=vertical]/shell:py-24"
+                  class="relative w-full group-data-[mode=track]/shell:flex group-data-[mode=track]/shell:h-full group-data-[mode=track]/shell:shrink-0 group-data-[mode=track]/shell:items-center group-data-[mode=track]/shell:pb-10 group-data-[mode=track]/shell:pt-24 group-data-[mode=track]/shell:w-screen group-data-[mode=vertical]/shell:py-16 sm:group-data-[mode=vertical]/shell:py-24"
                   data-landing-panel="Settle up"
                 >
                   <div
@@ -2901,7 +2916,7 @@ exports[`Root page should match the snapshot 1`] = `
                 class=""
               >
                 <div
-                  class="relative w-full group-data-[mode=track]/shell:flex group-data-[mode=track]/shell:h-full group-data-[mode=track]/shell:shrink-0 group-data-[mode=track]/shell:items-center group-data-[mode=track]/shell:pb-20 group-data-[mode=track]/shell:pt-24 group-data-[mode=track]/shell:w-screen group-data-[mode=vertical]/shell:py-16 sm:group-data-[mode=vertical]/shell:py-24"
+                  class="relative w-full group-data-[mode=track]/shell:flex group-data-[mode=track]/shell:h-full group-data-[mode=track]/shell:shrink-0 group-data-[mode=track]/shell:items-center group-data-[mode=track]/shell:pb-10 group-data-[mode=track]/shell:pt-24 group-data-[mode=track]/shell:w-screen group-data-[mode=vertical]/shell:py-16 sm:group-data-[mode=vertical]/shell:py-24"
                   data-landing-panel="Globe"
                 >
                   <div
@@ -2969,78 +2984,24 @@ exports[`Root page should match the snapshot 1`] = `
                             ₱
                           </span>
                         </div>
-                        <div
-                          class="mt-3 flex items-center justify-between gap-3"
+                        <p
+                          class="mt-3 font-mono text-[13px] text-muted"
+                          data-globe-caption="true"
                         >
-                          <p
-                            class="min-w-0 font-mono text-[13px] text-muted"
-                            data-globe-caption="true"
+                          <span
+                            class="text-accent"
                           >
-                            <span
-                              class="text-accent"
-                            >
-                              Demo
-                            </span>
-                             · Splits happening in
-                             
-                            <span
-                              class="inline-block text-foreground"
-                              style="opacity: 1; transform: none;"
-                            >
-                              Manila
-                            </span>
-                          </p>
-                          <div
-                            class="flex shrink-0 gap-2"
+                            Demo
+                          </span>
+                           · Splits happening in
+                           
+                          <span
+                            class="inline-block text-foreground"
+                            style="opacity: 1; transform: none;"
                           >
-                            <button
-                              aria-label="Spin the globe left"
-                              class="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-[#141414] text-muted shadow-[0_3px_0_0_#000] outline-none transition-[transform,box-shadow,color] duration-75 hover:border-accent/50 hover:text-foreground focus-visible:ring-2 focus-visible:ring-accent active:translate-y-[2px] active:shadow-[0_1px_0_0_#000]"
-                              type="button"
-                            >
-                              <svg
-                                aria-hidden="true"
-                                class="lucide lucide-chevron-left h-4 w-4"
-                                fill="none"
-                                height="24"
-                                stroke="currentColor"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                viewBox="0 0 24 24"
-                                width="24"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="m15 18-6-6 6-6"
-                                />
-                              </svg>
-                            </button>
-                            <button
-                              aria-label="Spin the globe right"
-                              class="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-[#141414] text-muted shadow-[0_3px_0_0_#000] outline-none transition-[transform,box-shadow,color] duration-75 hover:border-accent/50 hover:text-foreground focus-visible:ring-2 focus-visible:ring-accent active:translate-y-[2px] active:shadow-[0_1px_0_0_#000]"
-                              type="button"
-                            >
-                              <svg
-                                aria-hidden="true"
-                                class="lucide lucide-chevron-right h-4 w-4"
-                                fill="none"
-                                height="24"
-                                stroke="currentColor"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                viewBox="0 0 24 24"
-                                width="24"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="m9 18 6-6-6-6"
-                                />
-                              </svg>
-                            </button>
-                          </div>
-                        </div>
+                            Manila
+                          </span>
+                        </p>
                         <p
                           aria-live="polite"
                           class="sr-only"
@@ -3055,105 +3016,30 @@ exports[`Root page should match the snapshot 1`] = `
                 class=""
               >
                 <div
-                  class="relative w-full group-data-[mode=track]/shell:flex group-data-[mode=track]/shell:h-full group-data-[mode=track]/shell:shrink-0 group-data-[mode=track]/shell:items-center group-data-[mode=track]/shell:pb-20 group-data-[mode=track]/shell:pt-24 group-data-[mode=track]/shell:w-screen group-data-[mode=vertical]/shell:py-16 sm:group-data-[mode=vertical]/shell:py-24"
+                  class="relative w-full group-data-[mode=track]/shell:flex group-data-[mode=track]/shell:h-full group-data-[mode=track]/shell:shrink-0 group-data-[mode=track]/shell:items-center group-data-[mode=track]/shell:pb-10 group-data-[mode=track]/shell:pt-24 group-data-[mode=track]/shell:w-screen group-data-[mode=vertical]/shell:py-16 sm:group-data-[mode=vertical]/shell:py-24"
                   data-landing-panel="Get started"
                 >
                   <div
                     class="w-full"
                   >
-                    <div
-                      aria-hidden="true"
-                      class="pointer-events-none absolute inset-0 overflow-hidden"
+                    <section
+                      class="px-4 sm:px-6"
                     >
                       <div
-                        class="absolute inset-0"
-                        style="background-size: 32px 32px; mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);"
-                      />
-                      <svg
-                        class="absolute inset-0 h-full w-full"
-                        fill="none"
-                        preserveAspectRatio="none"
-                        viewBox="0 0 600 400"
+                        class="mx-auto max-w-2xl text-center"
                       >
-                        <path
-                          d="M0 200 H240"
-                          stroke="#00ff41"
-                          stroke-linecap="round"
-                          stroke-opacity="0.55"
-                          stroke-width="1.5"
-                          style="filter: drop-shadow(0 0 4px rgb(0 255 65 / 0.6));"
-                          vector-effect="non-scaling-stroke"
-                        />
-                        <path
-                          d="M600 200 H360"
-                          stroke="#00ff41"
-                          stroke-linecap="round"
-                          stroke-opacity="0.55"
-                          stroke-width="1.5"
-                          style="filter: drop-shadow(0 0 4px rgb(0 255 65 / 0.6));"
-                          vector-effect="non-scaling-stroke"
-                        />
-                        <path
-                          d="M300 0 V120"
-                          stroke="#00ff41"
-                          stroke-linecap="round"
-                          stroke-opacity="0.55"
-                          stroke-width="1.5"
-                          style="filter: drop-shadow(0 0 4px rgb(0 255 65 / 0.6));"
-                          vector-effect="non-scaling-stroke"
-                        />
-                        <path
-                          d="M120 400 V330 L160 290 H260"
-                          stroke="#00ff41"
-                          stroke-linecap="round"
-                          stroke-opacity="0.55"
-                          stroke-width="1.5"
-                          style="filter: drop-shadow(0 0 4px rgb(0 255 65 / 0.6));"
-                          vector-effect="non-scaling-stroke"
-                        />
-                        <path
-                          d="M480 400 V330 L440 290 H340"
-                          stroke="#00ff41"
-                          stroke-linecap="round"
-                          stroke-opacity="0.55"
-                          stroke-width="1.5"
-                          style="filter: drop-shadow(0 0 4px rgb(0 255 65 / 0.6));"
-                          vector-effect="non-scaling-stroke"
-                        />
-                      </svg>
-                    </div>
-                    <section
-                      aria-labelledby="finale-heading"
-                      class="relative mx-auto flex w-full max-w-6xl flex-col gap-12 px-4 sm:px-6 group-data-[mode=track]/shell:max-w-none group-data-[mode=track]/shell:flex-row group-data-[mode=track]/shell:items-end group-data-[mode=track]/shell:justify-between group-data-[mode=track]/shell:px-[max(4rem,6vw)]"
-                      id="get-started"
-                    >
-                      <div>
                         <h2
-                          class="font-[family-name:var(--font-display)] text-[clamp(3.25rem,7vw,7.5rem)] font-extrabold leading-[0.9] tracking-[-0.05em]"
-                          id="finale-heading"
+                          class="text-3xl font-bold tracking-tight sm:text-4xl"
                         >
-                          <span
-                            class="block"
-                          >
-                            <span
-                              class="block sm:inline"
-                            >
-                              Split it. 
-                            </span>
-                            <span
-                              class="block sm:inline"
-                            >
-                              Settle it. 
-                            </span>
-                          </span>
-                          <span
-                            class="block text-accent"
-                          >
-                            Stay friends.
-                          </span>
+                          No more guessing where money goes.
                         </h2>
+                        <p
+                          class="mt-4 text-base text-muted"
+                        >
+                          Free, forever. Sign in once and you're set.
+                        </p>
                         <div
-                          class="mt-10 flex flex-wrap items-center gap-x-5 gap-y-3"
+                          class="mt-8 flex justify-center"
                         >
                           <a
                             class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold tracking-tight transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-accent text-background shadow-glow hover:shadow-lift h-12 px-6 text-base !shadow-none"
@@ -3161,60 +3047,7 @@ exports[`Root page should match the snapshot 1`] = `
                           >
                             Get Started
                           </a>
-                          <span
-                            class="font-mono text-[12px] uppercase tracking-[0.14em] text-muted"
-                          >
-                            Free · Web + iOS
-                          </span>
                         </div>
-                      </div>
-                      <div
-                        class="hidden shrink-0 flex-col items-end gap-4 pb-2 group-data-[mode=track]/shell:flex"
-                      >
-                        <a
-                          class="flex items-center gap-2 font-bold tracking-tight text-sm"
-                          href="/"
-                        >
-                          <img
-                            alt=""
-                            aria-hidden="true"
-                            class="h-7 w-7 shrink-0 select-none"
-                            draggable="false"
-                            height="28"
-                            src="/icon.svg"
-                            width="28"
-                          />
-                          Money
-                          <span
-                            class="text-accent"
-                          >
-                            App
-                          </span>
-                        </a>
-                        <nav
-                          aria-label="Legal"
-                          class="flex items-center gap-6 text-xs text-muted"
-                        >
-                          <a
-                            class="transition hover:text-foreground"
-                            href="/terms"
-                          >
-                            Terms
-                          </a>
-                          <a
-                            class="transition hover:text-foreground"
-                            href="/privacy"
-                          >
-                            Privacy
-                          </a>
-                        </nav>
-                        <p
-                          class="text-xs text-muted"
-                        >
-                          © 
-                          2026
-                           Money App
-                        </p>
                       </div>
                     </section>
                   </div>
@@ -3224,7 +3057,7 @@ exports[`Root page should match the snapshot 1`] = `
           </div>
         </main>
         <footer
-          class="relative z-10 mt-auto border-t border-border group-data-[mode=track]/shell:hidden"
+          class="relative z-10 mt-auto border-t border-border"
         >
           <div
             class="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-3 px-4 py-6 sm:flex-row sm:px-6"
