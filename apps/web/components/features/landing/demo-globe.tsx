@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { AnimatePresence, MotionConfig, motion } from 'motion/react';
+import { MotionConfig, motion } from 'motion/react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import type { GlobeNudge, GlobePing } from '@web/lib/landing/globe';
@@ -140,18 +140,17 @@ export function DemoGlobe() {
               className="min-w-0 truncate font-mono text-[13px] text-muted"
             >
               <span className="text-accent">Demo</span> · Splits happening in{' '}
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.span
-                  key={ping?.id ?? 0}
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.2 }}
-                  className="inline-block text-foreground"
-                >
-                  {city.name}
-                </motion.span>
-              </AnimatePresence>
+              {/* Enter-only: a new key mounts the next city, so the caption
+                  never waits on an exit animation to finish. */}
+              <motion.span
+                key={ping?.id ?? 0}
+                initial={ping ? { opacity: 0, y: 6 } : false}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="inline-block text-foreground"
+              >
+                {city.name}
+              </motion.span>
             </p>
             <div className="flex shrink-0 gap-2">
               <button
