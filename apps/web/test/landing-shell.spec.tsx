@@ -43,7 +43,14 @@ function stubMatchMedia(matches: boolean): MatchMediaStub {
 
 async function renderShell() {
   const result = render(
-    <LandingShell header={<header>Nav</header>} panels={PANELS}>
+    <LandingShell
+      header={
+        <header>
+          <a href="#features">Features link</a>
+        </header>
+      }
+      panels={PANELS}
+    >
       <footer>Footer</footer>
     </LandingShell>,
   );
@@ -66,9 +73,6 @@ describe('LandingShell', () => {
 
     expect(shellMode(container)).toBe('vertical');
     expect(
-      screen.queryByRole('navigation', { name: 'Page sections' }),
-    ).toBeNull();
-    expect(
       [...container.querySelectorAll('[data-landing-panel]')].map((el) =>
         el.getAttribute('data-landing-panel'),
       ),
@@ -90,23 +94,18 @@ describe('LandingShell', () => {
     expect(container.querySelector('main')?.getAttribute('style')).toBeNull();
   });
 
-  it('runs the sideways track with a labeled progress rail when the query matches', async () => {
+  it('runs the sideways track without a bottom rail when the query matches', async () => {
     stubMatchMedia(true);
     const scrollTo = jest.fn();
     window.scrollTo = scrollTo as unknown as typeof window.scrollTo;
     const { container } = await renderShell();
 
     expect(shellMode(container)).toBe('track');
-    const rail = screen.getByRole('navigation', { name: 'Page sections' });
-    const dots = rail.querySelectorAll('button');
-    expect([...dots].map((b) => b.textContent)).toEqual([
-      'Start',
-      'Features',
-      'How it works',
-    ]);
-    expect(dots[0]?.getAttribute('aria-current')).toBe('step');
+    // The header nav already links the sections.
+    expect(container.querySelectorAll('nav')).toHaveLength(0);
 
-    fireEvent.click(screen.getByRole('button', { name: 'How it works' }));
+    // In-page links scroll the track to their panel.
+    fireEvent.click(screen.getByRole('link', { name: 'Features link' }));
     expect(scrollTo).toHaveBeenCalledWith({ top: expect.any(Number) });
   });
 

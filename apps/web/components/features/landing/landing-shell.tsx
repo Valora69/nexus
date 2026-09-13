@@ -10,13 +10,7 @@ import {
 } from 'react';
 import dynamic from 'next/dynamic';
 import type Lenis from 'lenis';
-import {
-  motion,
-  useMotionValue,
-  useMotionValueEvent,
-  useScroll,
-  useTransform,
-} from 'motion/react';
+import { motion, useMotionValue, useScroll, useTransform } from 'motion/react';
 
 import { cn } from '@web/lib/utils';
 
@@ -30,7 +24,7 @@ const SmoothScroll = dynamic(
 
 export type LandingPanel = {
   key: string;
-  /** Rail label, and the panel's data-landing-panel value. */
+  /** The panel's data-landing-panel value. */
   label: string;
   width?: PanelWidth;
   padded?: boolean;
@@ -79,7 +73,6 @@ export function LandingShell({ header, panels, children }: LandingShellProps) {
   const track = useTrackMode();
   const [lenis, setLenis] = useState<Lenis | null>(null);
   const [distance, setDistance] = useState(0);
-  const [active, setActive] = useState(0);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
@@ -96,10 +89,6 @@ export function LandingShell({ header, panels, children }: LandingShellProps) {
     clamp(scrollY.get() - topMV.get(), 0, distanceMV.get()),
   );
   const x = useTransform(() => -travelled.get());
-  const progress = useTransform(() => {
-    const d = distanceMV.get();
-    return d > 0 ? travelled.get() / d : 0;
-  });
 
   // Measure how far the track travels; re-measure whenever it or the stage
   // changes size (fonts, images, window resizes).
@@ -135,17 +124,6 @@ export function LandingShell({ header, panels, children }: LandingShellProps) {
       observer?.disconnect();
     };
   }, [track, distanceMV]);
-
-  useMotionValueEvent(x, 'change', (latest) => {
-    const stageEl = stageRef.current;
-    if (!track || !stageEl) return;
-    const center = -latest + stageEl.clientWidth / 2;
-    let next = 0;
-    panelRefs.current.forEach((el, i) => {
-      if (el && el.offsetLeft <= center) next = i;
-    });
-    setActive((prev) => (prev === next ? prev : next));
-  });
 
   /** Scroll the page so the track shows track-space x at the left edge. */
   const scrollToTrackX = useCallback(
@@ -311,15 +289,6 @@ export function LandingShell({ header, panels, children }: LandingShellProps) {
               </div>
             ))}
           </motion.div>
-
-          {track && (
-            <ProgressRail
-              panels={panels}
-              active={active}
-              progress={progress}
-              onSelect={(i) => scrollToPanel(i)}
-            />
-          )}
         </div>
       </main>
 
@@ -327,57 +296,5 @@ export function LandingShell({ header, panels, children }: LandingShellProps) {
 
       {children}
     </div>
-  );
-}
-
-type ProgressRailProps = {
-  panels: LandingPanel[];
-  active: number;
-  progress: ReturnType<typeof useScroll>['scrollYProgress'];
-  onSelect: (index: number) => void;
-};
-
-function ProgressRail({
-  panels,
-  active,
-  progress,
-  onSelect,
-}: ProgressRailProps) {
-  return (
-    <nav
-      aria-label="Page sections"
-      className="absolute inset-x-0 bottom-6 z-30 flex justify-center"
-    >
-      <div className="relative flex items-center gap-1 rounded-full border border-border bg-black/70 px-2 py-1.5 backdrop-blur-xl">
-        <motion.span
-          aria-hidden
-          style={{ scaleX: progress }}
-          className="absolute inset-x-4 bottom-0 h-px origin-left bg-accent/70"
-        />
-        {panels.map((panel, i) => {
-          const current = i === active;
-          return (
-            <button
-              key={panel.key}
-              type="button"
-              aria-current={current ? 'step' : undefined}
-              onClick={() => onSelect(i)}
-              className="group/dot flex items-center gap-2 rounded-full px-2.5 py-1.5 text-[12px] font-medium tracking-[-0.02em] text-muted outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-accent aria-[current=step]:text-foreground"
-            >
-              <span
-                aria-hidden
-                className={cn(
-                  'h-2 w-2 rounded-full border transition-all duration-300',
-                  current
-                    ? 'scale-125 border-accent bg-accent shadow-[0_0_10px_rgb(0_255_65/0.7)]'
-                    : 'border-white/40 bg-transparent group-hover/dot:border-accent',
-                )}
-              />
-              {panel.label}
-            </button>
-          );
-        })}
-      </div>
-    </nav>
   );
 }

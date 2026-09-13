@@ -13,7 +13,6 @@ export {
 } from './demo-activity-provider';
 export { DemoGlobe } from './demo-globe';
 export { ExpenseCard, type ExpenseCardRow } from './expense-card';
-export { Finale } from './finale';
 export { displayFont, handFont, landingFontVariables } from './fonts';
 export { HandNote, type HandNoteDirection } from './hand-note';
 export { Hero } from './hero';
