@@ -1,81 +1,57 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { CheckCheck, Receipt, Send } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
+import { Receipt } from 'lucide-react';
 
 import { cn } from '@web/lib/utils';
 
 import { NotificationToast } from './notification-toast';
-import { usePrefersReducedMotion } from './use-prefers-reduced-motion';
-import { useInView } from './use-in-view';
 
-const START_DELAY_MS = 300;
-const STAGGER_MS = 600;
+export type HeroToast = { id: number; amount: number };
 
-// Positions sit on the ends of the `scatter` circuit traces. Below lg the
-// first two stack above the card so they never cover the share amounts.
-const TOASTS = [
-  {
-    title: 'New Expense Added',
-    amount: 1200,
-    icon: <Receipt aria-hidden className="h-4 w-4" />,
-    position: 'left-0 top-0 lg:top-[8%]',
-  },
-  {
-    title: 'Payment Sent',
-    amount: 400,
-    icon: <Send aria-hidden className="h-4 w-4" />,
-    position: 'right-0 top-[60px] lg:top-[74%]',
-  },
-  {
-    title: 'Split Confirmed',
-    icon: <CheckCheck aria-hidden className="h-4 w-4" />,
-    position: 'bottom-0 left-[4%] lg:bottom-[6%]',
-  },
-] as const;
+const EASE_OUT = [0.22, 1, 0.36, 1] as const;
 
 /**
- * Reveals the hero toasts one after another the first time the hero is in
- * view. Copy is server-rendered; only visibility changes after mount.
+ * "New Expense Added" toasts fired by the coin key. The newest sits nearest
+ * the key and older ones rise away. Hidden from assistive tech: the hero
+ * announces each expense through its own aria-live region.
  */
-export function HeroToasts() {
-  const { ref, inView } = useInView<HTMLDivElement>({
-    once: true,
-    threshold: 0.3,
-  });
-  const reduced = usePrefersReducedMotion();
-  const [shown, setShown] = useState(0);
-
-  useEffect(() => {
-    if (!inView) return;
-    if (reduced) {
-      setShown(TOASTS.length);
-      return;
-    }
-    const timers = TOASTS.map((_, i) =>
-      window.setTimeout(
-        () => setShown((n) => Math.max(n, i + 1)),
-        START_DELAY_MS + i * STAGGER_MS,
-      ),
-    );
-    return () => timers.forEach((t) => window.clearTimeout(t));
-  }, [inView, reduced]);
-
+export function HeroToasts({
+  toasts,
+  className,
+}: {
+  toasts: HeroToast[];
+  className?: string;
+}) {
   return (
-    <div ref={ref} className="pointer-events-none absolute inset-0 z-20">
-      {TOASTS.map((toast, i) => (
-        <NotificationToast
-          key={toast.title}
-          icon={toast.icon}
-          title={toast.title}
-          amount={'amount' in toast ? toast.amount : undefined}
-          className={cn(
-            'absolute w-max max-w-[calc(100%-1rem)] transition-[opacity,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
-            toast.position,
-            i < shown ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0',
-          )}
-        />
-      ))}
+    // Fixed height for three toasts, bottom-anchored: the box never moves, and
+    // dismissing the oldest (top) toast leaves the others in place, so
+    // auto-dismissal causes no layout shift.
+    <div
+      aria-hidden
+      className={cn(
+        'pointer-events-none flex h-[190px] w-[240px] flex-col items-end justify-end gap-2',
+        className,
+      )}
+    >
+      <AnimatePresence initial={false}>
+        {toasts.map((toast) => (
+          <motion.div
+            key={toast.id}
+            layout
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8, scale: 0.96 }}
+            transition={{ duration: 0.45, ease: EASE_OUT }}
+          >
+            <NotificationToast
+              icon={<Receipt aria-hidden className="h-4 w-4" />}
+              title="New Expense Added"
+              amount={toast.amount}
+            />
+          </motion.div>
+        ))}
+      </AnimatePresence>
     </div>
   );
 }
