@@ -98,8 +98,8 @@ describe('SettleSlingshot', () => {
       ),
     ).toBeTruthy();
     expect(badge().textContent).toBe('Unpaid');
-    expect(verifyButton().hasAttribute('disabled')).toBe(true);
-    expect(resetButton().hasAttribute('disabled')).toBe(true);
+    expect(verifyButton().getAttribute('aria-disabled')).toBe('true');
+    expect(resetButton().getAttribute('aria-disabled')).toBe('true');
   });
 
   it('sends, verifies and resets through the buttons', async () => {
@@ -111,8 +111,8 @@ describe('SettleSlingshot', () => {
 
     // Mid-flight: nothing lands yet and nothing can be pressed twice.
     expect(badge().textContent).toBe('Unpaid');
-    expect(sendButton().hasAttribute('disabled')).toBe(true);
-    expect(verifyButton().hasAttribute('disabled')).toBe(true);
+    expect(sendButton().getAttribute('aria-disabled')).toBe('true');
+    expect(verifyButton().getAttribute('aria-disabled')).toBe('true');
     expect(live().textContent).toBe('Sending ₱400.00 to Mika…');
     expect(events).toEqual([]);
 
@@ -127,8 +127,8 @@ describe('SettleSlingshot', () => {
       'Payment sent: ₱400.00 from Mika via GCash. Status: Pending, waiting for you to verify.',
     );
     expect(events).toEqual([{ type: 'paymentSent', amount: 400 }]);
-    expect(sendButton().hasAttribute('disabled')).toBe(true);
-    expect(verifyButton().hasAttribute('disabled')).toBe(false);
+    expect(sendButton().getAttribute('aria-disabled')).toBe('true');
+    expect(verifyButton().getAttribute('aria-disabled')).toBe('false');
 
     fireEvent.click(verifyButton());
 
@@ -139,7 +139,7 @@ describe('SettleSlingshot', () => {
     expect(live().textContent).toBe(
       'Payment verified. Split confirmed: Mika paid ₱400.00. Status: Paid.',
     );
-    expect(verifyButton().hasAttribute('disabled')).toBe(true);
+    expect(verifyButton().getAttribute('aria-disabled')).toBe('true');
 
     act(() => {
       jest.advanceTimersByTime(SETTLE_TOAST_MS);
@@ -154,8 +154,8 @@ describe('SettleSlingshot', () => {
     expect(live().textContent).toBe(
       'Reset. Mika owes you ₱400.00. Status: Unpaid.',
     );
-    expect(sendButton().hasAttribute('disabled')).toBe(false);
-    expect(resetButton().hasAttribute('disabled')).toBe(true);
+    expect(sendButton().getAttribute('aria-disabled')).toBe('false');
+    expect(resetButton().getAttribute('aria-disabled')).toBe('true');
     expect(events).toHaveLength(1);
   });
 

@@ -2707,14 +2707,19 @@ exports[`Root page should match the snapshot 1`] = `
                             <div
                               class="w-full rounded-2xl border border-border bg-black px-3 py-2.5"
                             >
+                              <p
+                                class="text-[13px] font-medium"
+                              >
+                                Mika
+                                 owes you
+                              </p>
                               <div
-                                class="flex items-center justify-between gap-2"
+                                class="mt-0.5 flex items-center justify-between gap-2"
                               >
                                 <p
-                                  class="text-[13px] font-medium"
+                                  class="font-mono text-[15px] font-semibold tabular-nums"
                                 >
-                                  Mika
-                                   owes you
+                                  ₱400.00
                                 </p>
                                 <span
                                   class="rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.08em] transition-colors border-border text-muted"
@@ -2724,12 +2729,7 @@ exports[`Root page should match the snapshot 1`] = `
                                 </span>
                               </div>
                               <p
-                                class="mt-0.5 font-mono text-[15px] font-semibold tabular-nums"
-                              >
-                                ₱400.00
-                              </p>
-                              <p
-                                class="mt-0.5 truncate font-mono text-[10px] text-muted"
+                                class="mt-0.5 font-mono text-[10px] leading-snug text-muted"
                               >
                                 No payment yet
                               </p>
@@ -2739,7 +2739,7 @@ exports[`Root page should match the snapshot 1`] = `
                             class="absolute left-[16%] top-[58%] h-11 w-[72px] -translate-x-1/2 -translate-y-1/2 sm:left-[20%]"
                           >
                             <div
-                              class="pointer-events-none flex w-max select-none gap-1 text-accent/70 flex-col items-end absolute -left-10 bottom-full mb-1 [&>span]:text-xl"
+                              class="pointer-events-none flex w-max select-none gap-1 text-accent/70 flex-col items-end absolute -left-2 bottom-full mb-1 sm:-left-10 [&>span]:text-xl"
                             >
                               <span
                                 class="font-[family-name:var(--font-hand)] text-2xl font-semibold leading-none"
@@ -2824,7 +2824,8 @@ exports[`Root page should match the snapshot 1`] = `
                           class="mt-5 flex flex-wrap items-center gap-2"
                         >
                           <button
-                            class="h-10 rounded-full bg-accent px-4 text-[13px] font-semibold tracking-[-0.02em] text-black shadow-[0_3px_0_0_#00801f] outline-none transition-[transform,box-shadow,background-color] duration-75 focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a] enabled:active:translate-y-[2px] enabled:active:shadow-[0_1px_0_0_#00801f] disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-muted disabled:shadow-none"
+                            aria-disabled="false"
+                            class="h-10 rounded-full bg-accent px-4 text-[13px] font-semibold tracking-[-0.02em] text-black shadow-[0_3px_0_0_#00801f] outline-none transition-[transform,box-shadow,background-color] duration-75 focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a] aria-[disabled=false]:active:translate-y-[2px] aria-[disabled=false]:active:shadow-[0_1px_0_0_#00801f] aria-disabled:cursor-not-allowed aria-disabled:bg-white/10 aria-disabled:text-muted aria-disabled:shadow-none"
                             type="button"
                           >
                             Send 
@@ -2832,15 +2833,15 @@ exports[`Root page should match the snapshot 1`] = `
                              via GCash
                           </button>
                           <button
-                            class="h-10 rounded-full border border-border bg-[#141414] px-4 text-[13px] font-medium tracking-[-0.02em] shadow-[0_3px_0_0_#000] outline-none transition-[transform,box-shadow,color] duration-75 hover:border-accent/50 focus-visible:ring-2 focus-visible:ring-accent enabled:active:translate-y-[2px] enabled:active:shadow-[0_1px_0_0_#000] disabled:cursor-not-allowed disabled:text-muted disabled:shadow-none disabled:hover:border-border"
-                            disabled=""
+                            aria-disabled="true"
+                            class="h-10 rounded-full border border-border bg-[#141414] px-4 text-[13px] font-medium tracking-[-0.02em] shadow-[0_3px_0_0_#000] outline-none transition-[transform,box-shadow,color] duration-75 hover:border-accent/50 focus-visible:ring-2 focus-visible:ring-accent aria-[disabled=false]:active:translate-y-[2px] aria-[disabled=false]:active:shadow-[0_1px_0_0_#000] aria-disabled:cursor-not-allowed aria-disabled:text-muted aria-disabled:shadow-none aria-disabled:hover:border-border"
                             type="button"
                           >
                             Verify payment
                           </button>
                           <button
-                            class="h-10 rounded-full px-3 text-[13px] font-medium tracking-[-0.02em] text-muted outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-accent disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:text-muted"
-                            disabled=""
+                            aria-disabled="true"
+                            class="h-10 rounded-full px-3 text-[13px] font-medium tracking-[-0.02em] text-muted outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-accent aria-disabled:cursor-not-allowed aria-disabled:opacity-40 aria-disabled:hover:text-muted"
                             type="button"
                           >
                             Reset

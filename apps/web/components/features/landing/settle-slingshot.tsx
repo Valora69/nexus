@@ -390,29 +390,44 @@ export function SettleSlingshot() {
 
   const canPull = stage === 'unpaid' && !flying && geo !== null;
 
+  // Charge and note position straight from the pan offset. Beyond a zero-size
+  // constraint box motion places the note at offset × elastic.
+  const readPull = (info: PanInfo): Pull => ({
+    amount: pullAmount(-info.offset.x, SETTLE_MAX_PULL, SHARE),
+    offset: {
+      x: info.offset.x * PULL_ELASTIC,
+      y: info.offset.y * PULL_ELASTIC,
+    },
+  });
+
   const handleDrag = (_: unknown, info: PanInfo) => {
-    const amount = pullAmount(-info.offset.x, SETTLE_MAX_PULL, SHARE);
-    lastOffset.current = { x: x.get(), y: y.get() };
+    const next = readPull(info);
     // A soft tick every ₱100 of charge.
-    if (amount !== pullAmountRef.current && amount % 100 === 0 && amount > 0) {
+    if (
+      next.amount !== pullAmountRef.current &&
+      next.amount % 100 === 0 &&
+      next.amount > 0
+    ) {
       const now = performance.now();
       if (now - lastTick.current > 40) {
         lastTick.current = now;
         play('tap');
       }
     }
-    pullAmountRef.current = amount;
-    setPull({ amount, offset: lastOffset.current });
+    pullAmountRef.current = next.amount;
+    setPull(next);
   };
 
-  const handleDragEnd = () => {
-    const amount = pullAmountRef.current;
+  // onDrag runs once per frame, so a quick flick can release before the last
+  // move reaches it; the end event carries the final offset.
+  const handleDragEnd = (_: unknown, info: PanInfo) => {
+    const { amount, offset } = readPull(info);
     pullAmountRef.current = 0;
     if (amount < SETTLE_MIN_AMOUNT) {
       setPull(null);
       return; // drag constraints spring the note home.
     }
-    launch(amount, lastOffset.current);
+    launch(amount, offset);
   };
 
   const noteHidden = stage !== 'unpaid' && !flying;
@@ -551,9 +566,12 @@ export function SettleSlingshot() {
               </div>
 
               <div className="w-full rounded-2xl border border-border bg-black px-3 py-2.5">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-[13px] font-medium">
-                    {DEBTOR.name} owes you
+                <p className="text-[13px] font-medium">
+                  {DEBTOR.name} owes you
+                </p>
+                <div className="mt-0.5 flex items-center justify-between gap-2">
+                  <p className="font-mono text-[15px] font-semibold tabular-nums">
+                    {formatPeso(SHARE)}
                   </p>
                   <span
                     data-status={status}
@@ -565,10 +583,7 @@ export function SettleSlingshot() {
                     {statusLabel}
                   </span>
                 </div>
-                <p className="mt-0.5 font-mono text-[15px] font-semibold tabular-nums">
-                  {formatPeso(SHARE)}
-                </p>
-                <p className="mt-0.5 truncate font-mono text-[10px] text-muted">
+                <p className="mt-0.5 font-mono text-[10px] leading-snug text-muted">
                   {subline}
                 </p>
               </div>
@@ -581,7 +596,7 @@ export function SettleSlingshot() {
             >
               <HandNote
                 direction="down-right"
-                className="absolute -left-10 bottom-full mb-1 [&>span]:text-xl"
+                className="absolute -left-2 bottom-full mb-1 sm:-left-10 [&>span]:text-xl"
               >
                 pull back &amp; let go
               </HandNote>
@@ -656,24 +671,30 @@ export function SettleSlingshot() {
             <button
               type="button"
               onClick={() => launch(SHARE, { x: 0, y: 0 })}
-              disabled={stage !== 'unpaid' || flying}
-              className="h-10 rounded-full bg-accent px-4 text-[13px] font-semibold tracking-[-0.02em] text-black shadow-[0_3px_0_0_#00801f] outline-none transition-[transform,box-shadow,background-color] duration-75 focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a] enabled:active:translate-y-[2px] enabled:active:shadow-[0_1px_0_0_#00801f] disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-muted disabled:shadow-none"
+              // aria-disabled, not disabled: the pressed button keeps keyboard
+              // focus while the flight runs; the handlers ignore it meanwhile.
+              aria-disabled={stage !== 'unpaid' || flying}
+              className="h-10 rounded-full bg-accent px-4 text-[13px] font-semibold tracking-[-0.02em] text-black shadow-[0_3px_0_0_#00801f] outline-none transition-[transform,box-shadow,background-color] duration-75 focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a] aria-[disabled=false]:active:translate-y-[2px] aria-[disabled=false]:active:shadow-[0_1px_0_0_#00801f] aria-disabled:cursor-not-allowed aria-disabled:bg-white/10 aria-disabled:text-muted aria-disabled:shadow-none"
             >
               Send {formatPesoShort(SHARE)} via GCash
             </button>
             <button
               type="button"
               onClick={verify}
-              disabled={stage !== 'pending' || flying}
-              className="h-10 rounded-full border border-border bg-[#141414] px-4 text-[13px] font-medium tracking-[-0.02em] shadow-[0_3px_0_0_#000] outline-none transition-[transform,box-shadow,color] duration-75 hover:border-accent/50 focus-visible:ring-2 focus-visible:ring-accent enabled:active:translate-y-[2px] enabled:active:shadow-[0_1px_0_0_#000] disabled:cursor-not-allowed disabled:text-muted disabled:shadow-none disabled:hover:border-border"
+              // aria-disabled, not disabled: the pressed button keeps keyboard
+              // focus while the flight runs; the handlers ignore it meanwhile.
+              aria-disabled={stage !== 'pending' || flying}
+              className="h-10 rounded-full border border-border bg-[#141414] px-4 text-[13px] font-medium tracking-[-0.02em] shadow-[0_3px_0_0_#000] outline-none transition-[transform,box-shadow,color] duration-75 hover:border-accent/50 focus-visible:ring-2 focus-visible:ring-accent aria-[disabled=false]:active:translate-y-[2px] aria-[disabled=false]:active:shadow-[0_1px_0_0_#000] aria-disabled:cursor-not-allowed aria-disabled:text-muted aria-disabled:shadow-none aria-disabled:hover:border-border"
             >
               Verify payment
             </button>
             <button
               type="button"
               onClick={reset}
-              disabled={stage === 'unpaid' || flying}
-              className="h-10 rounded-full px-3 text-[13px] font-medium tracking-[-0.02em] text-muted outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-accent disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:text-muted"
+              // aria-disabled, not disabled: the pressed button keeps keyboard
+              // focus while the flight runs; the handlers ignore it meanwhile.
+              aria-disabled={stage === 'unpaid' || flying}
+              className="h-10 rounded-full px-3 text-[13px] font-medium tracking-[-0.02em] text-muted outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-accent aria-disabled:cursor-not-allowed aria-disabled:opacity-40 aria-disabled:hover:text-muted"
             >
               Reset
             </button>
