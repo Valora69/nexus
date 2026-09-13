@@ -242,6 +242,41 @@ Stage 5 notes:
   flight (a note mid-air lands quietly) and drops the toast and confetti.
 - `paymentSent` fires on landing; the nav counter wires up in a later stage.
 
+Added in Stage 6:
+
+| Module | Export |
+|---|---|
+| `demo-globe.tsx` | `DemoGlobe`, `GLOBE_PING_MS`, `GLOBE_PING_REDUCED_MS` (tested in `apps/web/test/landing-globe.spec.tsx`) |
+| `globe-canvas.tsx` | `GlobeCanvas`, `GLOBE_PULSE_MS` (not in the barrel; tested in `apps/web/test/landing-globe-canvas.spec.tsx`) |
+| `nav-counter.tsx` | `NavCounter`, `COUNTER_TICK_MS` (tested in `apps/web/test/landing-nav-counter.spec.tsx`) |
+| `finale.tsx` | `Finale` |
+
+Stage 6 notes:
+
+- `DemoGlobe` is the server-safe wrapper: heading, "Demo" tag, caption, spin
+  buttons and the ping timer. Only `GlobeCanvas` (cobe, WebGL) is client-only,
+  loaded with `next/dynamic` (`ssr:false`). Specs mock `cobe`; the barrel
+  doesn't re-export `GlobeCanvas`, so importing the barrel never pulls cobe in.
+- cobe 2 has no render loop of its own: `update()` draws a frame. The canvas
+  runs one rAF loop only while the panel is in view, and with reduced motion
+  it draws only when something changed (drag, spin button, ping).
+- cobe wraps its canvas in a div and leaves it behind on `destroy()`, so the
+  canvas is created imperatively inside a mount node React never renders into,
+  and the cleanup empties that node.
+- The ₱ ping coin is plain HTML positioned with `projectLocation`
+  (`lib/landing/globe.ts`), which mirrors cobe's marker projection. That keeps
+  it working without CSS anchor positioning.
+- A hidden city, or the visitor's own expense (`expenseAdded` pings Manila
+  with `focus`), turns the globe towards it. With reduced motion the globe
+  never turns on its own; a focused ping jumps into view instead.
+- Arrow buttons ("Spin the globe left/right") are the keyboard equivalent of
+  dragging.
+- `NavCounter` ticks only while `document.visibilityState` is visible and adds
+  the amount of each `expenseAdded` / `paymentSent`.
+- In track mode the finale shows the brand, Terms, Privacy and ©, and the page
+  hides `LandingFooter` with `group-data-[mode=track]/shell:hidden`. In
+  vertical mode the finale keeps only the CTA and the normal footer follows.
+
 Pure demo logic lives in `apps/web/lib/landing/`:
 
 - `demo.ts`: `DEMO_CURRENT_USER`, `DEMO_MEMBERS`, `DEMO_EXPENSE`,
@@ -251,7 +286,11 @@ Pure demo logic lives in `apps/web/lib/landing/`:
 - `sound.ts`: `SOUND_NAMES`, `createAudioContext`, `playSound`, `randomPitch`
 - `simulated.ts`: `mulberry32`, `createDemoRng`, `DEMO_SCENARIOS`,
   `randomDemoExpense`, `DEMO_CITIES`, `nextCity`, `COUNTER_BASE`,
-  `nextCounterStep` (tested in `apps/web/test/landing-simulated.spec.ts`)
+  `nextCounterStep` (tested in `apps/web/test/landing-simulated.spec.ts`;
+  `nextCity` takes an optional previous city and never repeats it)
+- `globe.ts`: `GlobePing`, `GlobeNudge`, `GLOBE_THETA`, `GLOBE_MAX_DPR`,
+  `globeDevicePixelRatio`, `phiFacing`, `shortestTurn`, `projectLocation`
+  (tested in `apps/web/test/landing-globe.spec.tsx`)
 
 Later stages add kebab-case modules in the same folder, for example
 `laptop-mock.tsx`, `coin-key.tsx`, `landing-shell.tsx`, `panel.tsx`,
