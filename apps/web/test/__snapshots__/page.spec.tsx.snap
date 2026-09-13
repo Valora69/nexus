@@ -258,17 +258,22 @@ exports[`Root page should match the snapshot 1`] = `
                                       <span
                                         class="flex h-5 w-5 items-center justify-center rounded-full border border-[#050505] bg-[#1c1c1c] text-[9px] font-semibold text-muted"
                                       >
+                                        C
+                                      </span>
+                                      <span
+                                        class="flex h-5 w-5 items-center justify-center rounded-full border border-[#050505] bg-[#1c1c1c] text-[9px] font-semibold text-muted"
+                                      >
+                                        G
+                                      </span>
+                                      <span
+                                        class="flex h-5 w-5 items-center justify-center rounded-full border border-[#050505] bg-[#1c1c1c] text-[9px] font-semibold text-muted"
+                                      >
+                                        M
+                                      </span>
+                                      <span
+                                        class="flex h-5 w-5 items-center justify-center rounded-full border border-[#050505] bg-[#1c1c1c] text-[9px] font-semibold text-muted"
+                                      >
                                         J
-                                      </span>
-                                      <span
-                                        class="flex h-5 w-5 items-center justify-center rounded-full border border-[#050505] bg-[#1c1c1c] text-[9px] font-semibold text-muted"
-                                      >
-                                        M
-                                      </span>
-                                      <span
-                                        class="flex h-5 w-5 items-center justify-center rounded-full border border-[#050505] bg-[#1c1c1c] text-[9px] font-semibold text-muted"
-                                      >
-                                        M
                                       </span>
                                     </span>
                                   </div>
@@ -362,7 +367,7 @@ exports[`Root page should match the snapshot 1`] = `
                                               class="block font-mono text-[10px] text-muted"
                                             >
                                               Paid by 
-                                              Mika
+                                              Migs
                                             </span>
                                           </span>
                                           <span
@@ -391,7 +396,7 @@ exports[`Root page should match the snapshot 1`] = `
                                               class="block font-mono text-[10px] text-muted"
                                             >
                                               Paid by 
-                                              James
+                                              Job
                                             </span>
                                           </span>
                                           <span
@@ -494,7 +499,7 @@ exports[`Root page should match the snapshot 1`] = `
                                             tabindex="0"
                                             type="button"
                                           >
-                                            Sam
+                                            Sid
                                              (You)
                                           </button>
                                           <button
@@ -503,7 +508,7 @@ exports[`Root page should match the snapshot 1`] = `
                                             tabindex="0"
                                             type="button"
                                           >
-                                            James
+                                            Ced
                                           </button>
                                           <button
                                             aria-pressed="true"
@@ -511,7 +516,7 @@ exports[`Root page should match the snapshot 1`] = `
                                             tabindex="0"
                                             type="button"
                                           >
-                                            Mika
+                                            Glenn
                                           </button>
                                           <button
                                             aria-pressed="true"
@@ -519,7 +524,15 @@ exports[`Root page should match the snapshot 1`] = `
                                             tabindex="0"
                                             type="button"
                                           >
-                                            Mara
+                                            Migs
+                                          </button>
+                                          <button
+                                            aria-pressed="true"
+                                            class="h-7 rounded-full border px-2.5 text-[11px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 border-accent bg-accent text-black"
+                                            tabindex="0"
+                                            type="button"
+                                          >
+                                            Job
                                           </button>
                                         </div>
                                       </div>
@@ -579,7 +592,7 @@ exports[`Root page should match the snapshot 1`] = `
                                             <span
                                               class="flex items-center gap-1.5 font-medium text-accent"
                                             >
-                                              Sam
+                                              Sid
                                               <span
                                                 class="rounded-full border px-1.5 py-px font-mono text-[8px] uppercase tracking-[0.08em] border-accent text-accent"
                                               >
@@ -589,7 +602,7 @@ exports[`Root page should match the snapshot 1`] = `
                                             <span
                                               class="font-mono tabular-nums text-accent"
                                             >
-                                              ₱300.00
+                                              ₱240.00
                                             </span>
                                           </li>
                                           <li
@@ -598,12 +611,12 @@ exports[`Root page should match the snapshot 1`] = `
                                             <span
                                               class="flex items-center gap-1.5"
                                             >
-                                              James
+                                              Ced
                                             </span>
                                             <span
                                               class="font-mono tabular-nums text-accent"
                                             >
-                                              ₱300.00
+                                              ₱240.00
                                             </span>
                                           </li>
                                           <li
@@ -612,12 +625,12 @@ exports[`Root page should match the snapshot 1`] = `
                                             <span
                                               class="flex items-center gap-1.5"
                                             >
-                                              Mika
+                                              Glenn
                                             </span>
                                             <span
                                               class="font-mono tabular-nums text-accent"
                                             >
-                                              ₱300.00
+                                              ₱240.00
                                             </span>
                                           </li>
                                           <li
@@ -626,12 +639,26 @@ exports[`Root page should match the snapshot 1`] = `
                                             <span
                                               class="flex items-center gap-1.5"
                                             >
-                                              Mara
+                                              Migs
                                             </span>
                                             <span
                                               class="font-mono tabular-nums text-accent"
                                             >
-                                              ₱300.00
+                                              ₱240.00
+                                            </span>
+                                          </li>
+                                          <li
+                                            class="flex h-[26px] items-center justify-between rounded-lg border border-border px-2.5 text-[11px]"
+                                          >
+                                            <span
+                                              class="flex items-center gap-1.5"
+                                            >
+                                              Job
+                                            </span>
+                                            <span
+                                              class="font-mono tabular-nums text-accent"
+                                            >
+                                              ₱240.00
                                             </span>
                                           </li>
                                         </ul>
@@ -728,6 +755,7 @@ exports[`Root page should match the snapshot 1`] = `
                                 aria-keyshortcuts="Q"
                                 aria-label="Add a demo expense"
                                 class="relative h-[93px] w-[96px] shrink-0 origin-bottom touch-manipulation select-none rounded-[22px] outline-none transition-transform duration-100 active:scale-95 data-[pressed=true]:scale-95 focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-4 focus-visible:ring-offset-black"
+                                data-landing-no-click="true"
                                 data-pressed="false"
                                 type="button"
                               >
@@ -1660,7 +1688,7 @@ exports[`Root page should match the snapshot 1`] = `
                 class=""
               >
                 <div
-                  class="relative w-full group-data-[mode=track]/shell:flex group-data-[mode=track]/shell:h-full group-data-[mode=track]/shell:shrink-0 group-data-[mode=track]/shell:items-center group-data-[mode=track]/shell:pb-10 group-data-[mode=track]/shell:pt-24 group-data-[mode=track]/shell:w-max group-data-[mode=vertical]/shell:py-16 sm:group-data-[mode=vertical]/shell:py-24"
+                  class="relative w-full group-data-[mode=track]/shell:flex group-data-[mode=track]/shell:h-full group-data-[mode=track]/shell:shrink-0 group-data-[mode=track]/shell:items-center group-data-[mode=track]/shell:pb-10 group-data-[mode=track]/shell:pt-24 group-data-[mode=track]/shell:w-max group-data-[mode=track]/shell:min-w-[150vw] group-data-[mode=track]/shell:justify-center group-data-[mode=track]/shell:px-[25vw] group-data-[mode=vertical]/shell:py-16 sm:group-data-[mode=vertical]/shell:py-24"
                   data-landing-panel="How it works"
                 >
                   <div
@@ -2303,7 +2331,7 @@ exports[`Root page should match the snapshot 1`] = `
                 class=""
               >
                 <div
-                  class="relative w-full group-data-[mode=track]/shell:flex group-data-[mode=track]/shell:h-full group-data-[mode=track]/shell:shrink-0 group-data-[mode=track]/shell:items-center group-data-[mode=track]/shell:pb-10 group-data-[mode=track]/shell:pt-24 group-data-[mode=track]/shell:w-screen group-data-[mode=vertical]/shell:py-16 sm:group-data-[mode=vertical]/shell:py-24"
+                  class="relative w-full group-data-[mode=track]/shell:flex group-data-[mode=track]/shell:h-full group-data-[mode=track]/shell:shrink-0 group-data-[mode=track]/shell:items-center group-data-[mode=track]/shell:pb-10 group-data-[mode=track]/shell:pt-24 group-data-[mode=track]/shell:w-max group-data-[mode=track]/shell:min-w-[150vw] group-data-[mode=track]/shell:justify-center group-data-[mode=track]/shell:px-[25vw] group-data-[mode=vertical]/shell:py-16 sm:group-data-[mode=vertical]/shell:py-24"
                   data-landing-panel="Slice the bill"
                 >
                   <div
@@ -2416,7 +2444,7 @@ exports[`Root page should match the snapshot 1`] = `
                                 <span
                                   class="truncate text-[12px] font-semibold transition-opacity"
                                 >
-                                  James
+                                  Ced
                                 </span>
                                 <span
                                   class="font-mono tabular-nums text-[13px] font-semibold transition-opacity sm:text-[15px]"
@@ -2431,7 +2459,7 @@ exports[`Root page should match the snapshot 1`] = `
                                 <span
                                   class="truncate text-[12px] font-semibold transition-opacity"
                                 >
-                                  Mika
+                                  Glenn
                                 </span>
                                 <span
                                   class="font-mono tabular-nums text-[13px] font-semibold transition-opacity sm:text-[15px]"
@@ -2441,13 +2469,14 @@ exports[`Root page should match the snapshot 1`] = `
                               </div>
                             </div>
                             <div
-                              aria-label="Divider between You and James"
+                              aria-label="Divider between You and Ced"
                               aria-orientation="horizontal"
                               aria-valuemax="800"
                               aria-valuemin="0"
                               aria-valuenow="400"
-                              aria-valuetext="You ₱400.00, James ₱400.00"
+                              aria-valuetext="You ₱400.00, Ced ₱400.00"
                               class="group/handle !touch-none absolute inset-y-[-10px] left-0 -ml-5 flex w-10 cursor-ew-resize items-center justify-center rounded-full outline-none"
+                              data-landing-no-click="true"
                               role="slider"
                               style="z-index: 1; transform: none;"
                               tabindex="0"
@@ -2467,13 +2496,14 @@ exports[`Root page should match the snapshot 1`] = `
                               </span>
                             </div>
                             <div
-                              aria-label="Divider between James and Mika"
+                              aria-label="Divider between Ced and Glenn"
                               aria-orientation="horizontal"
                               aria-valuemax="1200"
                               aria-valuemin="400"
                               aria-valuenow="800"
-                              aria-valuetext="James ₱400.00, Mika ₱400.00"
+                              aria-valuetext="Ced ₱400.00, Glenn ₱400.00"
                               class="group/handle !touch-none absolute inset-y-[-10px] left-0 -ml-5 flex w-10 cursor-ew-resize items-center justify-center rounded-full outline-none"
+                              data-landing-no-click="true"
                               role="slider"
                               style="z-index: 1; transform: none;"
                               tabindex="0"
@@ -2616,7 +2646,7 @@ exports[`Root page should match the snapshot 1`] = `
                                     class="h-2.5 w-2.5 rounded-full"
                                     style="background-color: rgb(0, 168, 43);"
                                   />
-                                  James
+                                  Ced
                                 </span>
                                 <span
                                   class="font-mono tabular-nums"
@@ -2635,7 +2665,7 @@ exports[`Root page should match the snapshot 1`] = `
                                     class="h-2.5 w-2.5 rounded-full"
                                     style="background-color: rgb(11, 93, 32);"
                                   />
-                                  Mika
+                                  Glenn
                                 </span>
                                 <span
                                   class="font-mono tabular-nums"
@@ -2705,7 +2735,7 @@ exports[`Root page should match the snapshot 1`] = `
                         <p
                           class="mt-5 text-base text-muted"
                         >
-                          Mika
+                          Ced
                            sends their share by GCash or cash with proof, and it shows up on the split right away.
                         </p>
                         <p
@@ -2745,7 +2775,7 @@ exports[`Root page should match the snapshot 1`] = `
                                 class="flex h-14 w-14 items-center justify-center rounded-full border-2 bg-[#1c1c1c] font-[family-name:var(--font-display)] text-xl font-extrabold transition-colors border-white/15 text-foreground"
                                 style="transform: none;"
                               >
-                                M
+                                C
                               </div>
                               <div
                                 aria-hidden="true"
@@ -2758,7 +2788,7 @@ exports[`Root page should match the snapshot 1`] = `
                               <p
                                 class="text-[13px] font-medium"
                               >
-                                Mika
+                                Ced
                                  owes you
                               </p>
                               <div
@@ -2930,14 +2960,9 @@ exports[`Root page should match the snapshot 1`] = `
                         class="max-w-md shrink-0 group-data-[mode=track]/shell:w-[20rem]"
                       >
                         <p
-                          class="flex items-center gap-2 font-mono text-[12px] uppercase tracking-[0.14em] text-accent"
+                          class="font-mono text-[12px] uppercase tracking-[0.14em] text-accent"
                         >
                           Around the world
-                          <span
-                            class="rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 text-[10px] leading-none tracking-[0.12em]"
-                          >
-                            Demo
-                          </span>
                         </p>
                         <h2
                           class="mt-3 font-[family-name:var(--font-display)] text-[clamp(2.5rem,5vw,4rem)] font-extrabold leading-[0.95] tracking-[-0.04em]"
@@ -2953,7 +2978,7 @@ exports[`Root page should match the snapshot 1`] = `
                         <p
                           class="mt-3 text-[13px] text-muted"
                         >
-                          This globe is a demo: the pings are simulated on this page, not real activity.
+                          The pings are simulated on this page, not real activity.
                         </p>
                       </div>
                       <div
@@ -2988,12 +3013,7 @@ exports[`Root page should match the snapshot 1`] = `
                           class="mt-3 font-mono text-[13px] text-muted"
                           data-globe-caption="true"
                         >
-                          <span
-                            class="text-accent"
-                          >
-                            Demo
-                          </span>
-                           · Splits happening in
+                          Splits happening in
                            
                           <span
                             class="inline-block text-foreground"
