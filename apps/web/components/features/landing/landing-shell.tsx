@@ -28,6 +28,7 @@ export type LandingPanel = {
   label: string;
   width?: PanelWidth;
   padded?: boolean;
+  spaced?: boolean;
   content: ReactNode;
 };
 
@@ -283,6 +284,7 @@ export function LandingShell({ header, panels, children }: LandingShellProps) {
                   label={panel.label}
                   width={panel.width}
                   padded={panel.padded}
+                  spaced={panel.spaced}
                 >
                   {panel.content}
                 </Panel>

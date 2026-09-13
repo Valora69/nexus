@@ -20,9 +20,10 @@ export const DEMO_CURRENT_USER: GroupCaptureMember = {
  * the parser excludes them itself, like the real modal). */
 export const DEMO_MEMBERS: GroupCaptureMember[] = [
   DEMO_CURRENT_USER,
-  { userId: 'james', name: 'James' },
-  { userId: 'mika', name: 'Mika' },
-  { userId: 'mara', name: 'Mara' },
+  { userId: 'ced', name: 'Ced' },
+  { userId: 'glenn', name: 'Glenn' },
+  { userId: 'migs', name: 'Migs' },
+  { userId: 'job', name: 'Job' },
 ];
 
 /** The Add Expense playground's barkada. */
@@ -45,7 +46,7 @@ export const DEMO_EXPENSE: DemoExpense = {
   name: 'Pizza night',
   total: 1200,
   payerId: DEMO_CURRENT_USER.userId,
-  participantIds: [DEMO_CURRENT_USER.userId, 'james', 'mika'],
+  participantIds: [DEMO_CURRENT_USER.userId, 'ced', 'glenn'],
 };
 
 /**

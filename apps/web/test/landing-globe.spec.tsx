@@ -111,15 +111,13 @@ const caption = () =>
   document.querySelector<HTMLElement>('[data-globe-caption]')!;
 
 describe('DemoGlobe', () => {
-  it('is labeled demo and starts in Manila', async () => {
+  it('says the pings are simulated and starts in Manila', async () => {
     renderGlobe();
     expect(
       screen.getByRole('heading', { name: 'Splits around the world.' }),
     ).toBeTruthy();
-    expect(
-      screen.getByText('Demo', { selector: 'span.rounded-full' }),
-    ).toBeTruthy();
-    expect(caption().textContent).toBe('Demo · Splits happening in Manila');
+    expect(screen.getByText(/pings are simulated/)).toBeTruthy();
+    expect(caption().textContent).toBe('Splits happening in Manila');
     // The lazily loaded canvas settles.
     await act(async () => {});
   });
@@ -134,13 +132,13 @@ describe('DemoGlobe', () => {
     });
     await waitFor(() =>
       expect(caption().textContent).not.toBe(
-        'Demo · Splits happening in Manila',
+        'Splits happening in Manila',
       ),
     );
     const ping = mockCanvasProps.current?.ping;
     expect(ping?.focus).toBe(false);
     expect(caption().textContent).toBe(
-      `Demo · Splits happening in ${ping?.city.name}`,
+      `Splits happening in ${ping?.city.name}`,
     );
   });
 
@@ -156,14 +154,14 @@ describe('DemoGlobe', () => {
       activity().expenseAdded(1200);
     });
     await waitFor(() =>
-      expect(caption().textContent).toBe('Demo · Splits happening in Manila'),
+      expect(caption().textContent).toBe('Splits happening in Manila'),
     );
     expect(mockCanvasProps.current?.ping).toMatchObject({
       city: { name: 'Manila' },
       focus: true,
     });
     expect(screen.getByRole('status').textContent).toBe(
-      'Demo: your expense just showed up in Manila.',
+      'Your expense just showed up in Manila.',
     );
   });
 

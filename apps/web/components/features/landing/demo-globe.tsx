@@ -34,7 +34,7 @@ const GlobeCanvas = dynamic(
 
 /**
  * "Splits around the world.": a neon globe with simulated pings, weighted to
- * the Philippines, and always labeled demo. Server-safe: the section and
+ * the Philippines, and noted as simulated. Server-safe: the section and
  * caption render anywhere, and only the cobe canvas is client-only.
  */
 export function DemoGlobe() {
@@ -78,7 +78,7 @@ export function DemoGlobe() {
     pingCity(MANILA, true);
     setRestart((r) => r + 1);
     if (inView) {
-      setAnnouncement(`Demo: your expense just showed up in ${MANILA.name}.`);
+      setAnnouncement(`Your expense just showed up in ${MANILA.name}.`);
     }
   });
 
@@ -90,11 +90,8 @@ export function DemoGlobe() {
         className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 sm:px-6 group-data-[mode=track]/shell:max-w-none group-data-[mode=track]/shell:flex-row group-data-[mode=track]/shell:items-center group-data-[mode=track]/shell:gap-14 group-data-[mode=track]/shell:px-[max(4rem,6vw)]"
       >
         <div className="max-w-md shrink-0 group-data-[mode=track]/shell:w-[20rem]">
-          <p className="flex items-center gap-2 font-mono text-[12px] uppercase tracking-[0.14em] text-accent">
+          <p className="font-mono text-[12px] uppercase tracking-[0.14em] text-accent">
             Around the world
-            <span className="rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 text-[10px] leading-none tracking-[0.12em]">
-              Demo
-            </span>
           </p>
           <h2
             id="globe-heading"
@@ -107,8 +104,7 @@ export function DemoGlobe() {
             spin it.
           </p>
           <p className="mt-3 text-[13px] text-muted">
-            This globe is a demo: the pings are simulated on this page, not real
-            activity.
+            The pings are simulated on this page, not real activity.
           </p>
         </div>
 
@@ -124,7 +120,7 @@ export function DemoGlobe() {
             // Wraps rather than truncates: the city is the point on phones.
             className="mt-3 font-mono text-[13px] text-muted"
           >
-            <span className="text-accent">Demo</span> · Splits happening in{' '}
+            Splits happening in{' '}
             {/* Enter-only: a new key mounts the next city, so the caption
                 never waits on an exit animation to finish. */}
             <motion.span

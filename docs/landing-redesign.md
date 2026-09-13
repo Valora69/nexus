@@ -32,11 +32,11 @@ becomes a gesture people already know from money.
 |---|---|
 | Keycap toy ("hey! click me") | **Q keycap**, a sculpted keycap drawn like Keeby's (dished top face, flared body) in green with a black "Q" legend (the app's Quick Add key), only faint highlights and no glow, with the green handwritten "hey! tap to add" note whose arrow points at it. Clicking it or pressing Q on the page drops a random expense (Grab ₱240, Pizza night ₱1,200, Milk tea ₱390, Groceries ₱3,450) into the laptop's group ledger with a spring. A toast reads "New Expense Added", and a coin clink plays. |
 | Laptop + menu-bar menu with switch rows | **Laptop showing the real MoneyApp group screen with the Add Expense modal.** Tapping "Split with Members" chips toggles people; "Divide Equally / Custom Amounts" flips the preview. Handwritten note: "pick who's in ↖". Labels mirror `create-expense-modal.tsx`. |
-| Paper airplane slingshot | **Peso-note slingshot** (a folded ₱ bill as a paper plane) in the Settle panel. Pull back to charge (the amount grows with the pull, capped at the share) and release to send to Mika. It flies, lands on her avatar, and her row turns amber **Pending**; a "Payment Sent" toast fires. |
+| Paper airplane slingshot | **Peso-note slingshot** (a folded ₱ bill as a paper plane) in the Settle panel. Pull back to charge (the amount grows with the pull, capped at the share) and release to send to Ced. It flies, lands on their avatar, and their row turns amber **Pending**; a "Payment Sent" toast fires. |
 | Bento with hover-lit illustrations | **Bento of 8 real features**, each with a tiny illustration that lights neon on hover: Groups · Quick Capture (Q key) · Divide equally or custom · GCash or cash with proof · Two-sided verification · Notifications · Monthly dashboard · Offline capture on iOS. |
 | Typing test + keyboard | **Dropped.** In its place: the **Add Expense playground** with a **cash-register keypad** of chunky keycaps (0–9, 00, ⌫). You tap an amount, not type prose. Pick a scenario chip, tap the amount, pick members, press **Add Expense**. A confirm line matches the product ("You paid ₱1,200 for 'Pizza night'. This will be split among 3 members."), a **receipt prints** (paper-tear sound) and flies into the ledger. |
 | Tone pad | **"Slice the bill"**: a horizontal bill bar with draggable dividers between people (motion drag, snaps to ₱10). A live "Total assigned ₱X / ₱Y" check with "— amounts must match"; "Divide Equally" snaps the dividers back. Pizza-slice wedges resize in sync. |
-| Globe with live pings | **"Splits around the world" (demo)**: a `cobe` globe in neon dots on black, drag to spin. A ₱ coin marker pings simulated cities, weighted to the Philippines (Manila, Cebu, Davao, Quezon City, Singapore, Tokyo, Dubai, LA). The caption reads "Demo · Splits happening in Cebu". |
+| Globe with live pings | **"Splits around the world"**: a `cobe` globe in neon dots on black, drag to spin. A ₱ coin marker pings simulated cities, weighted to the Philippines (Manila, Cebu, Davao, Quezon City, Singapore, Tokyo, Dubai, LA). The caption reads "Splits happening in Cebu". |
 | Live thock counter | **Nav pill "1,204 quick adds"**: the real, shared number of Q keycap presses (click or the Q key) from every visitor, starting at zero. Stored by `/api/landing/quick-adds`; a press shows at once and is sent in batches. |
 | Feedback keycaps | **Not copied.** The toy cast is already full; the finale stays a CTA. |
 | Audio pill | **Sound pill.** Sound starts on the first click; the pill mutes and unmutes and the choice is remembered. |
@@ -230,7 +230,7 @@ Stage 5 notes:
 
 - The note is a motion drag with a zero-size constraint box and
   `dragElastic`, so it rubber-bands. The charge comes from the raw pointer
-  offset through `pullAmount` (₱10 steps, capped at Mika's ₱400 share), and
+  offset through `pullAmount` (₱10 steps, capped at Ced's ₱400 share), and
   releases under `SETTLE_MIN_AMOUNT` spring back.
 - Release reads the charge from `onDragEnd`'s final `info.offset`, not from
   the last `onDrag`. Motion calls `onDrag` once per frame, so a quick flick
@@ -258,7 +258,7 @@ Added in Stage 6:
 
 Stage 6 notes:
 
-- `DemoGlobe` is the server-safe wrapper: heading, "Demo" tag, caption and
+- `DemoGlobe` is the server-safe wrapper: heading, simulated-pings note, caption and
   the ping timer. Only `GlobeCanvas` (cobe, WebGL) is client-only,
   loaded with `next/dynamic` (`ssr:false`). Specs mock `cobe`; the barrel
   doesn't re-export `GlobeCanvas`, so importing the barrel never pulls cobe in.

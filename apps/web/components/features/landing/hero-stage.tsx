@@ -16,8 +16,8 @@ export const HERO_TOAST_MS = 3200;
 
 const SEED_ROWS: LedgerRow[] = [
   { id: 'seed-pizza', name: 'Pizza night', total: 1200, payer: 'You' },
-  { id: 'seed-grab', name: 'Grab home', total: 240, payer: 'Mika' },
-  { id: 'seed-milk-tea', name: 'Milk tea run', total: 390, payer: 'James' },
+  { id: 'seed-grab', name: 'Grab home', total: 240, payer: 'Migs' },
+  { id: 'seed-milk-tea', name: 'Milk tea run', total: 390, payer: 'Job' },
 ];
 
 /** ₱1,200 rather than ₱1,200.00, for announcements. */

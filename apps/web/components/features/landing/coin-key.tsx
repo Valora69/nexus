@@ -49,11 +49,15 @@ export function CoinKey({ onAdd, className }: CoinKeyProps) {
     rng.current = createDemoRng();
   }, []);
 
+  // A pointer press sounds on the way down, not on click (the release).
+  const pointerSounded = useRef(false);
+
   const press = () => {
     rng.current ??= createDemoRng();
     const expense = randomDemoExpense(rng.current, previous.current);
     previous.current = expense;
-    play('tap');
+    if (!pointerSounded.current) play('key');
+    pointerSounded.current = false;
     onAdd(expense);
     expenseAdded(expense.total);
     quickAdded();
@@ -110,6 +114,13 @@ export function CoinKey({ onAdd, className }: CoinKeyProps) {
         aria-label="Add a demo expense"
         aria-keyshortcuts="Q"
         data-pressed={keyDown}
+        // The keycap has its own recorded key sound, not the page-wide click.
+        data-landing-no-click
+        onPointerDown={(e) => {
+          if (e.button !== 0) return;
+          pointerSounded.current = true;
+          play('key');
+        }}
         onClick={press}
         // :active covers pointer presses; mirror it for Enter/Space.
         onKeyDown={(e) => {

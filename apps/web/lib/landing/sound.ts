@@ -14,9 +14,58 @@ export const SOUND_NAMES = [
   'register',
   'whoosh',
   'thud',
+  'notch',
 ] as const;
 
 export type SoundName = (typeof SOUND_NAMES)[number];
+
+/**
+ * Recorded sounds, fetched and decoded once audio is unlocked. Until a sample
+ * is ready, its fallback synth plays instead.
+ */
+export const SAMPLE_SOUNDS = {
+  // One real mechanical key press and release, for the Q keycap.
+  key: { url: '/sounds/quick-add-key.wav', fallback: 'tap' },
+} as const satisfies Record<string, { url: string; fallback: SoundName }>;
+
+export type SampleName = keyof typeof SAMPLE_SOUNDS;
+
+export type LandingSoundName = SoundName | SampleName;
+
+export function isSampleName(name: LandingSoundName): name is SampleName {
+  return Object.hasOwn(SAMPLE_SOUNDS, name);
+}
+
+/** Fetches and decodes a sample, or `null` if that fails. */
+export async function loadSample(
+  ctx: BaseAudioContext,
+  url: string,
+): Promise<AudioBuffer | null> {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) return null;
+    return await ctx.decodeAudioData(await response.arrayBuffer());
+  } catch {
+    return null;
+  }
+}
+
+/** Plays a decoded sample now, pitched like the synths. Never throws. */
+export function playBuffer(
+  ctx: BaseAudioContext,
+  buffer: AudioBuffer,
+  pitch = 1,
+) {
+  try {
+    const src = ctx.createBufferSource();
+    src.buffer = buffer;
+    src.playbackRate.value = pitch;
+    src.connect(masterGain(ctx));
+    src.start(ctx.currentTime + 0.005);
+  } catch {
+    // Audio is decoration; a failed node must not break the interaction.
+  }
+}
 
 export const PITCH_VARIANCE = 0.04;
 
@@ -301,6 +350,28 @@ const SYNTHS: Record<SoundName, Synth> = {
       peak: 0.22,
       filter: 'lowpass',
       freqFrom: 300,
+    });
+  },
+  // Detent tick, like a ratchet or a dial clicking past a stop: a soft,
+  // woody knock with a muted rattle, much gentler than the mouse click.
+  notch: (ctx, t, p) => {
+    tone(ctx, {
+      type: 'triangle',
+      from: 620 * p,
+      to: 420 * p,
+      start: t,
+      attack: 0.001,
+      peak: 0.16,
+      decay: 0.035,
+    });
+    noiseBurst(ctx, {
+      start: t,
+      duration: 0.018,
+      attack: 0.001,
+      peak: 0.12,
+      filter: 'bandpass',
+      freqFrom: 1400 * p,
+      q: 3,
     });
   },
 };

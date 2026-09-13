@@ -224,6 +224,8 @@ function DividerHandle({
     <motion.div
       role="slider"
       tabIndex={0}
+      // Dragging has its own notch sound, not the page-wide click.
+      data-landing-no-click
       aria-label={`Divider between ${leftName} and ${rightName}`}
       aria-orientation="horizontal"
       aria-valuemin={min}
@@ -312,7 +314,7 @@ export function BillSlicer() {
       const now = performance.now();
       if (now - lastTick.current >= TICK_COOLDOWN_MS) {
         lastTick.current = now;
-        play('tap');
+        play('notch');
       }
       return next;
     });

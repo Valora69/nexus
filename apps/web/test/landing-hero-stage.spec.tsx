@@ -83,7 +83,7 @@ describe('HeroStage', () => {
     ]) {
       expect(within(panel()).getByText(label)).toBeTruthy();
     }
-    expect(chip('Sam (You)').getAttribute('aria-pressed')).toBe('true');
+    expect(chip('Sid (You)').getAttribute('aria-pressed')).toBe('true');
     expect(
       within(panel())
         .getByRole('button', { name: 'Divide Equally' })
@@ -138,14 +138,14 @@ describe('HeroStage', () => {
 
   it('toggles member chips and recomputes the equal split preview', () => {
     renderStage();
-    // Pizza night ₱1,200 across all four members.
+    // Pizza night ₱1,200 across all five members.
+    expect(within(panel()).getAllByText('₱240.00')).toHaveLength(5);
+
+    fireEvent.click(chip('Job'));
+
+    expect(chip('Job').getAttribute('aria-pressed')).toBe('false');
+    expect(within(panel()).queryAllByText('₱240.00')).toHaveLength(0);
     expect(within(panel()).getAllByText('₱300.00')).toHaveLength(4);
-
-    fireEvent.click(chip('Mara'));
-
-    expect(chip('Mara').getAttribute('aria-pressed')).toBe('false');
-    expect(within(panel()).queryAllByText('₱300.00')).toHaveLength(0);
-    expect(within(panel()).getAllByText('₱400.00')).toHaveLength(3);
   });
 
   it('shows the modal custom-split checks under Custom Amounts', () => {
@@ -163,7 +163,7 @@ describe('HeroStage', () => {
       within(panel()).getByText('1 member excluded (zero amount)'),
     ).toBeTruthy();
 
-    fireEvent.click(chip('James'));
+    fireEvent.click(chip('Ced'));
 
     expect(
       within(panel()).getByText(/Total assigned: .* — amounts must match/),
@@ -173,7 +173,7 @@ describe('HeroStage', () => {
   it('asks for at least one member when every chip is off', () => {
     renderStage();
 
-    for (const name of ['Sam (You)', 'James', 'Mika', 'Mara']) {
+    for (const name of ['Sid (You)', 'Ced', 'Glenn', 'Migs', 'Job']) {
       fireEvent.click(chip(name));
     }
 
