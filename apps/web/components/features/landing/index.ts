@@ -1,5 +1,6 @@
 export { BrandMark } from './brand-mark';
 export { CircuitGrid } from './circuit-grid';
+export { CoinKey } from './coin-key';
 export {
   DemoActivityProvider,
   useDemoActivity,
@@ -11,7 +12,8 @@ export { ExpenseCard, type ExpenseCardRow } from './expense-card';
 export { displayFont, handFont, landingFontVariables } from './fonts';
 export { HandNote, type HandNoteDirection } from './hand-note';
 export { Hero } from './hero';
-export { HeroToasts } from './hero-toasts';
+export { HeroStage } from './hero-stage';
+export { HeroToasts, type HeroToast } from './hero-toasts';
 export { LandingFooter } from './landing-footer';
 export { LandingHeader } from './landing-header';
 export { NotificationToast } from './notification-toast';
