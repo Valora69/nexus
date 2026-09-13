@@ -55,6 +55,19 @@ describe('randomDemoExpense', () => {
     expect([...seen].sort()).toEqual(DEMO_SCENARIOS.map((s) => s.name).sort());
   });
 
+  it('never repeats the previous scenario when one is given', () => {
+    const rng = createDemoRng();
+    let previous = randomDemoExpense(rng);
+    const seen = new Set([previous.name]);
+    for (let i = 0; i < 500; i++) {
+      const next = randomDemoExpense(rng, previous);
+      expect(next.name).not.toBe(previous.name);
+      seen.add(next.name);
+      previous = next;
+    }
+    expect(seen.size).toBe(DEMO_SCENARIOS.length);
+  });
+
   it('keeps the scenario totals from the spec', () => {
     expect(DEMO_SCENARIOS).toEqual([
       { name: 'Pizza night', total: 1200 },
@@ -93,7 +106,7 @@ describe('nextCity', () => {
     );
     expect(picks.map((c) => c.name)).toEqual(again.map((c) => c.name));
 
-    const names = new Set(DEMO_CITIES.map((c) => c.name));
+    const names = new Set<string>(DEMO_CITIES.map((c) => c.name));
     expect(picks.every((c) => names.has(c.name))).toBe(true);
 
     const phShare =

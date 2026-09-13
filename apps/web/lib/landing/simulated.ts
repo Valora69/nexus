@@ -41,10 +41,18 @@ export const DEMO_SCENARIOS = [
   { name: 'Groceries', total: 3450 },
 ] as const satisfies readonly DemoScenario[];
 
-export function randomDemoExpense(rng: Rng): DemoScenario {
-  return (
-    DEMO_SCENARIOS[pickIndex(rng, DEMO_SCENARIOS.length)] ?? DEMO_SCENARIOS[0]
-  );
+/**
+ * A random demo scenario. Pass the previous one to never repeat it back to
+ * back, so consecutive taps always visibly change (and re-announce).
+ */
+export function randomDemoExpense(
+  rng: Rng,
+  previous?: DemoScenario,
+): DemoScenario {
+  const pool = previous
+    ? DEMO_SCENARIOS.filter((s) => s.name !== previous.name)
+    : DEMO_SCENARIOS;
+  return pool[pickIndex(rng, pool.length)] ?? DEMO_SCENARIOS[0];
 }
 
 export type DemoCity = {
