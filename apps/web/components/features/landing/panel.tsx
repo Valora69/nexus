@@ -1,6 +1,7 @@
 import { cn } from '@web/lib/utils';
 
 export type PanelWidth = 'screen' | 'content';
+export type PanelSpacing = 'before' | 'after';
 
 type PanelProps = {
   label: string;
@@ -8,9 +9,10 @@ type PanelProps = {
   width?: PanelWidth;
   /** Vertical-mode padding. Off for sections that bring their own. */
   padded?: boolean;
-  /** Track mode: at least a viewport wide plus empty track on both sides,
-   *  so the section fills the screen alone for a stretch of scrolling. */
-  spaced?: boolean;
+  /** Track mode: at least a viewport wide plus empty track before or after,
+   *  so the section fills the screen alone for a stretch of scrolling.
+   *  One side only, so two spaced neighbours keep a normal gap between them. */
+  spaced?: PanelSpacing;
   className?: string;
   children: React.ReactNode;
 };
@@ -25,8 +27,13 @@ const TRACK_WIDTH: Record<PanelWidth, string> = {
   content: 'group-data-[mode=track]/shell:w-max',
 };
 
-const TRACK_SPACED =
-  'group-data-[mode=track]/shell:w-max group-data-[mode=track]/shell:min-w-[150vw] group-data-[mode=track]/shell:justify-center group-data-[mode=track]/shell:px-[25vw]';
+const TRACK_SPACED_BASE =
+  'group-data-[mode=track]/shell:w-max group-data-[mode=track]/shell:min-w-[125vw] group-data-[mode=track]/shell:justify-center';
+
+const TRACK_SPACED: Record<PanelSpacing, string> = {
+  before: `${TRACK_SPACED_BASE} group-data-[mode=track]/shell:pl-[25vw]`,
+  after: `${TRACK_SPACED_BASE} group-data-[mode=track]/shell:pr-[25vw]`,
+};
 
 const VERTICAL_PADDING =
   'group-data-[mode=vertical]/shell:py-16 sm:group-data-[mode=vertical]/shell:py-24';
@@ -37,7 +44,7 @@ export function Panel({
   label,
   width = 'screen',
   padded = true,
-  spaced = false,
+  spaced,
   className,
   children,
 }: PanelProps) {
@@ -47,7 +54,7 @@ export function Panel({
       className={cn(
         'relative w-full',
         TRACK,
-        spaced ? TRACK_SPACED : TRACK_WIDTH[width],
+        spaced ? TRACK_SPACED[spaced] : TRACK_WIDTH[width],
         padded && VERTICAL_PADDING,
         className,
       )}

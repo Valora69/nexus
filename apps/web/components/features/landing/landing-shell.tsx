@@ -14,7 +14,7 @@ import { motion, useMotionValue, useScroll, useTransform } from 'motion/react';
 
 import { cn } from '@web/lib/utils';
 
-import { Panel, type PanelWidth } from './panel';
+import { Panel, type PanelSpacing, type PanelWidth } from './panel';
 
 // Lenis is ESM-only and browser-only: load it on demand, in track mode only.
 const SmoothScroll = dynamic(
@@ -28,7 +28,7 @@ export type LandingPanel = {
   label: string;
   width?: PanelWidth;
   padded?: boolean;
-  spaced?: boolean;
+  spaced?: PanelSpacing;
   content: ReactNode;
 };
 

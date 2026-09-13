@@ -43,13 +43,13 @@ export default function LandingPage() {
               {
                 key: 'how-it-works',
                 label: 'How it works',
-                spaced: true,
+                spaced: 'before',
                 content: <AddExpensePlayground />,
               },
               {
                 key: 'slice',
                 label: 'Slice the bill',
-                spaced: true,
+                spaced: 'after',
                 content: <BillSlicer />,
               },
               {
