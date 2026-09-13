@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { buttonClasses } from '@web/components/ui/button';
 
 import { BrandMark } from './brand-mark';
+import { NavCounter } from './nav-counter';
 import { SoundPill } from './sound-pill';
 
 export function LandingHeader() {
@@ -18,6 +19,7 @@ export function LandingHeader() {
         </a>
       </nav>
       <div className="flex items-center gap-2">
+        <NavCounter />
         <SoundPill />
         {/* Hidden on phones to make room for the Sound pill; Get Started
             goes to the same /login page. */}
