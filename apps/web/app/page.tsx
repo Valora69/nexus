@@ -1,61 +1,29 @@
 import Link from 'next/link';
 
-import PixelTrail from '@web/components/effects/PixelTrail';
-import { LandingFooter, LandingHeader } from '@web/components/features/landing';
+import {
+  Hero,
+  LandingFooter,
+  LandingHeader,
+} from '@web/components/features/landing';
 import { buttonClasses } from '@web/components/ui/button';
 
 export default function LandingPage() {
   return (
     <div className="relative isolate flex min-h-screen flex-col overflow-hidden bg-black">
-      <PixelTrail
-        gridSize={100}
-        trailSize={0.05}
-        maxAge={750}
-        interpolate={0.5}
-        color="#00ff41"
-        gooeyFilter={{ id: 'custom-goo-filter', strength: 2 }}
-      />
-
       <LandingHeader />
 
-      <main className="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6">
+      <main className="relative z-10 w-full">
         <Hero />
-        <ProblemPanel />
-        <Features />
-        <HowItWorks />
-        <FinalCta />
+        <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
+          <ProblemPanel />
+          <Features />
+          <HowItWorks />
+          <FinalCta />
+        </div>
       </main>
 
       <LandingFooter />
     </div>
-  );
-}
-
-function Hero() {
-  return (
-    <section className="mx-auto mt-16 max-w-3xl text-center sm:mt-24">
-      <h1 className="mt-6 text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl md:text-6xl">
-        Shared and missing expenses? We got you.
-      </h1>
-      <p className="mx-auto mt-6 max-w-xl text-lg text-muted">
-        Track who paid for what, split fairly, and settle up in seconds.
-        Designed for people who share money, not spreadsheets.
-      </p>
-      <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-        <Link
-          href="/login"
-          className={buttonClasses({ variant: 'primary', size: 'lg' })}
-        >
-          Get Started
-        </Link>
-        <a
-          href="#features"
-          className={buttonClasses({ variant: 'secondary', size: 'lg' })}
-        >
-          See Features
-        </a>
-      </div>
-    </section>
   );
 }
 

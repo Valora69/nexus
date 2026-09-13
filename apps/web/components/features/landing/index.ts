@@ -1,6 +1,8 @@
 export { BrandMark } from './brand-mark';
 export { CircuitGrid } from './circuit-grid';
 export { ExpenseCard, type ExpenseCardRow } from './expense-card';
+export { Hero } from './hero';
+export { HeroToasts } from './hero-toasts';
 export { LandingFooter } from './landing-footer';
 export { LandingHeader } from './landing-header';
 export { NotificationToast } from './notification-toast';
