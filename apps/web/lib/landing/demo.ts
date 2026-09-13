@@ -82,6 +82,121 @@ export function customValidity(
   };
 }
 
+/** The playground keypad's delete key. */
+export const KEYPAD_BACKSPACE = 'backspace';
+
+/** Keypad amounts are whole pesos, up to ₱999,999. */
+export const AMOUNT_MAX_DIGITS = 6;
+
+/**
+ * One cash-register keypad press: digits (and "00") append, backspace drops
+ * the last digit. Leading zeros never stick, and presses past the digit limit
+ * are ignored.
+ */
+export function applyKeypadKey(
+  digits: string,
+  key: string,
+  maxDigits: number = AMOUNT_MAX_DIGITS,
+): string {
+  if (key === KEYPAD_BACKSPACE) return digits.slice(0, -1);
+  if (!/^\d+$/.test(key)) return digits;
+  const next = `${digits}${key}`.replace(/^0+/, '');
+  return next.length > maxDigits ? digits : next;
+}
+
+/**
+ * The create-expense modal's confirmation line, in pesos. Like the modal, the
+ * "split among" sentence only appears when more than one member is selected.
+ */
+export function addExpenseConfirmation(
+  amount: number,
+  name: string,
+  memberCount: number,
+): string {
+  const paid = `You paid ${formatPeso(amount)} for "${name}".`;
+  return memberCount > 1
+    ? `${paid} This will be split among ${memberCount} members.`
+    : paid;
+}
+
+/** The bill slicer's grid: dividers land on whole ₱10 amounts. */
+export const SLICE_STEP = 10;
+
+/** Round to the nearest multiple of `step` (₱10 by default). */
+export function snapToStep(value: number, step: number = SLICE_STEP): number {
+  if (step <= 0) return value;
+  return Math.round(value / step) * step;
+}
+
+/**
+ * Shares from the bill slicer's dividers. `dividers` are cumulative peso
+ * positions along the bill (n - 1 of them for n people); each share is the gap
+ * between neighbours. Positions are clamped into [0, total] and kept in order,
+ * so the shares are never negative and always add up to exactly `total`.
+ */
+export function sharesFromDividers(
+  total: number,
+  dividers: number[],
+): number[] {
+  const safeTotal = Math.max(0, total);
+  const shares: number[] = [];
+  let previous = 0;
+  for (const divider of dividers) {
+    const position = Math.min(Math.max(divider, previous), safeTotal);
+    shares.push(position - previous);
+    previous = position;
+  }
+  shares.push(safeTotal - previous);
+  return shares;
+}
+
+/**
+ * Divider positions for an equal split, snapped to the step. Snapping can
+ * leave the last person a step more or less (₱1,000 / 3 → 330, 340, 330).
+ */
+export function equalDividers(
+  total: number,
+  n: number,
+  step: number = SLICE_STEP,
+): number[] {
+  if (n <= 1) return [];
+  return Array.from({ length: n - 1 }, (_, i) =>
+    snapToStep((total * (i + 1)) / n, step),
+  );
+}
+
+/** How far one divider may move: at least a step from each neighbour. */
+export function dividerBounds(
+  total: number,
+  dividers: number[],
+  index: number,
+  step: number = SLICE_STEP,
+): { min: number; max: number } {
+  const min = (index > 0 ? (dividers[index - 1] ?? 0) : 0) + step;
+  const max =
+    (index < dividers.length - 1 ? (dividers[index + 1] ?? total) : total) -
+    step;
+  return { min, max: Math.max(min, max) };
+}
+
+/**
+ * Move one divider to `value`, snapped to the step and clamped so every
+ * person keeps at least one step. Returns a new array.
+ */
+export function moveDivider(
+  total: number,
+  dividers: number[],
+  index: number,
+  value: number,
+  step: number = SLICE_STEP,
+): number[] {
+  if (index < 0 || index >= dividers.length) return dividers;
+  const { min, max } = dividerBounds(total, dividers, index, step);
+  const next = [...dividers];
+  next[index] = Math.min(Math.max(snapToStep(value, step), min), max);
+  return next;
+}
+
 export type DemoSettleStage = 'unpaid' | 'pending' | 'paid';
 
 // Fixed timestamp keeps fixtures deterministic (no Date.now during render).
