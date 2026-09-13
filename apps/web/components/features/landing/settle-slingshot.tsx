@@ -31,7 +31,7 @@ import { useLandingSound } from './sound-provider';
 import { useInView } from './use-in-view';
 import { usePrefersReducedMotion } from './use-prefers-reduced-motion';
 
-/** How long the note flies from release to landing on Mika. */
+/** How long the note flies from release to landing on Ced. */
 export const SETTLE_FLIGHT_MS = 850;
 export const SETTLE_TOAST_MS = 3200;
 export const SETTLE_CONFETTI_MS = 1100;
@@ -40,7 +40,7 @@ export const SETTLE_MAX_PULL = 160;
 /** Releases charged below this spring back instead of launching. */
 export const SETTLE_MIN_AMOUNT = 50;
 
-const DEBTOR_ID = 'mika';
+const DEBTOR_ID = 'ced';
 const DEBTOR =
   DEMO_MEMBERS.find((m) => m.userId === DEBTOR_ID) ?? DEMO_MEMBERS[0]!;
 const SHARE =
@@ -78,7 +78,7 @@ const STATUS_CLASS: Record<SplitStatus, string> = {
 const formatPesoShort = (amount: number) =>
   formatPeso(amount).replace(/\.00$/, '');
 
-/** A quadratic arc from the note (at `start`, relative to home) to Mika. */
+/** A quadratic arc from the note (at `start`, relative to home) to Ced. */
 function arc(start: Point, geo: Geometry) {
   const end = { x: geo.to.x - geo.from.x, y: geo.to.y - geo.from.y };
   const lift = Math.min(Math.max(Math.abs(end.x - start.x) * 0.35, 60), 150);
@@ -153,7 +153,7 @@ function PaperPlaneNote() {
 
 /**
  * "Settle with a flick.": pull a ₱ note folded into a paper plane back like a
- * slingshot and let go. It flies to Mika, whose share turns Pending until you
+ * slingshot and let go. It flies to Ced, whose share turns Pending until you
  * (the person who paid) verify it. A GCash button runs the same flight for
  * keyboard and screen-reader visitors.
  */
@@ -215,7 +215,7 @@ export function SettleSlingshot() {
     [],
   );
 
-  // Where the note sits and where Mika's avatar is, in scene pixels.
+  // Where the note sits and where Ced's avatar is, in scene pixels.
   useEffect(() => {
     const scene = sceneRef.current;
     const home = homeRef.current;
@@ -508,7 +508,7 @@ export function SettleSlingshot() {
               </svg>
             )}
 
-            {/* Mika: avatar + the ledger row. */}
+            {/* Ced: avatar + the ledger row. */}
             <div className="absolute right-0 top-1/2 flex w-[11.5rem] -translate-y-1/2 flex-col items-center gap-3 sm:w-[14rem]">
               {/* The ref sits on the wrapper: the avatar remounts to bounce. */}
               <div ref={avatarRef} className="relative">

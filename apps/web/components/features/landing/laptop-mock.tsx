@@ -31,7 +31,7 @@ type SplitMode = 'equal' | 'custom';
 const SPRING = { type: 'spring', stiffness: 400, damping: 22 } as const;
 
 /** How the signed-in demo account is labeled, like a real profile name. */
-const CURRENT_USER_NAME = 'Sam';
+const CURRENT_USER_NAME = 'Sid';
 
 const isCurrentUser = (userId: string) => userId === DEMO_CURRENT_USER.userId;
 
@@ -39,13 +39,14 @@ function memberName(userId: string, name: string) {
   return isCurrentUser(userId) ? CURRENT_USER_NAME : name;
 }
 
-// Custom split preset: friends get ₱10-rounded shares (Mara gets nothing, so
+// Custom split preset: friends get ₱10-rounded shares (Job gets nothing, so
 // "Excluded" shows up) and the payer takes the rest, so the whole group always
 // adds up to the total.
 const CUSTOM_WEIGHTS: Record<string, number> = {
-  james: 0.35,
-  mika: 0.25,
-  mara: 0,
+  ced: 0.3,
+  glenn: 0.2,
+  migs: 0.15,
+  job: 0,
 };
 
 function customPreset(total: number): Record<string, number> {

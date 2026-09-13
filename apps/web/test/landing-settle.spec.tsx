@@ -89,7 +89,7 @@ describe('SettleSlingshot', () => {
     expect(
       screen.getByRole('heading', { name: 'Settle with a flick.' }),
     ).toBeTruthy();
-    expect(screen.getByText('Mika owes you')).toBeTruthy();
+    expect(screen.getByText('Ced owes you')).toBeTruthy();
     expect(screen.getByText('₱400.00')).toBeTruthy();
     expect(screen.getByText('pull back & let go')).toBeTruthy();
     expect(
@@ -113,7 +113,7 @@ describe('SettleSlingshot', () => {
     expect(badge().textContent).toBe('Unpaid');
     expect(sendButton().getAttribute('aria-disabled')).toBe('true');
     expect(verifyButton().getAttribute('aria-disabled')).toBe('true');
-    expect(live().textContent).toBe('Sending ₱400.00 to Mika…');
+    expect(live().textContent).toBe('Sending ₱400.00 to Ced…');
     expect(events).toEqual([]);
 
     act(() => {
@@ -124,7 +124,7 @@ describe('SettleSlingshot', () => {
     expect(badge().dataset.status).toBe('pending');
     expect(screen.getByText('Payment Sent')).toBeTruthy();
     expect(live().textContent).toBe(
-      'Payment sent: ₱400.00 from Mika via GCash. Status: Pending, waiting for you to verify.',
+      'Payment sent: ₱400.00 from Ced via GCash. Status: Pending, waiting for you to verify.',
     );
     expect(events).toEqual([{ type: 'paymentSent', amount: 400 }]);
     expect(sendButton().getAttribute('aria-disabled')).toBe('true');
@@ -137,7 +137,7 @@ describe('SettleSlingshot', () => {
     expect(screen.getByText('Split Confirmed')).toBeTruthy();
     await waitFor(() => expect(screen.queryByText('Payment Sent')).toBeNull());
     expect(live().textContent).toBe(
-      'Payment verified. Split confirmed: Mika paid ₱400.00. Status: Paid.',
+      'Payment verified. Split confirmed: Ced paid ₱400.00. Status: Paid.',
     );
     expect(verifyButton().getAttribute('aria-disabled')).toBe('true');
 
@@ -152,7 +152,7 @@ describe('SettleSlingshot', () => {
 
     expect(badge().textContent).toBe('Unpaid');
     expect(live().textContent).toBe(
-      'Reset. Mika owes you ₱400.00. Status: Unpaid.',
+      'Reset. Ced owes you ₱400.00. Status: Unpaid.',
     );
     expect(sendButton().getAttribute('aria-disabled')).toBe('false');
     expect(resetButton().getAttribute('aria-disabled')).toBe('true');

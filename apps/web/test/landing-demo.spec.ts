@@ -96,18 +96,22 @@ describe('demo members', () => {
     const parse = (raw: string) =>
       parseGroupCapture(raw, DEMO_MEMBERS, DEMO_CURRENT_USER.userId);
 
-    expect(parse('450 dinner mika')).toMatchObject({
+    expect(parse('450 dinner ced')).toMatchObject({
       ok: true,
-      data: { direction: 'paid', amount: 450, memberName: 'Mika' },
+      data: { direction: 'paid', amount: 450, memberName: 'Ced' },
     });
-    expect(parse('-450 dinner mika')).toMatchObject({
+    expect(parse('-450 dinner ced')).toMatchObject({
       ok: true,
-      data: { direction: 'owes', memberName: 'Mika' },
+      data: { direction: 'owes', memberName: 'Ced' },
     });
-    // First-name prefix match: "m" hits both Mika and Mara ("ma" is only Mara).
-    expect(parse('450 dinner m')).toMatchObject({
+    // First-name prefix match: "gl" is Glenn; nobody is called Zed.
+    expect(parse('450 dinner gl')).toMatchObject({
+      ok: true,
+      data: { memberName: 'Glenn' },
+    });
+    expect(parse('450 dinner zed')).toMatchObject({
       ok: false,
-      error: { kind: 'AMBIGUOUS_MATCH', candidates: ['Mika', 'Mara'] },
+      error: { kind: 'NO_MATCH', token: 'zed' },
     });
   });
 
