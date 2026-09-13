@@ -9,7 +9,6 @@ import {
   phiFacing,
   projectLocation,
   shortestTurn,
-  type GlobeNudge,
   type GlobePing,
 } from '@web/lib/landing/globe';
 import { DEMO_CITIES } from '@web/lib/landing/simulated';
@@ -20,7 +19,6 @@ export const GLOBE_PULSE_MS = 2000;
 
 type GlobeCanvasProps = {
   ping: GlobePing | null;
-  nudge: GlobeNudge | null;
   /** The render loop only runs while the globe is on screen. */
   active: boolean;
   reduced: boolean;
@@ -37,9 +35,6 @@ const MAX_SPIN = 0.2;
 const INERTIA = 0.95;
 /** A drag that rests this long before release doesn't fling. */
 const FLING_WINDOW_MS = 80;
-/** Spin buttons: a kick with motion, a fixed step without. */
-const NUDGE_SPIN = 0.08;
-const NUDGE_STEP = 0.4;
 /** A focused city lands a little left of center; the spin carries it over. */
 const FOCUS_LEAD = 0.25;
 /** Keep drawing this long after the loop starts, while cobe's map loads. */
@@ -66,7 +61,6 @@ function markersFor(pinged: string | null, swell: number): Marker[] {
  */
 export function GlobeCanvas({
   ping,
-  nudge,
   active,
   reduced,
   className,
@@ -256,15 +250,6 @@ export function GlobeCanvas({
     );
     if (ping.focus || !visible) s.target = facing;
   }, [ping]);
-
-  useEffect(() => {
-    if (!nudge) return;
-    const s = spin.current;
-    s.target = null;
-    if (reducedRef.current) s.phi += nudge.direction * NUDGE_STEP;
-    else s.velocity = nudge.direction * NUDGE_SPIN;
-    s.dirty = true;
-  }, [nudge]);
 
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
     if (event.pointerType === 'mouse' && event.button !== 0) return;

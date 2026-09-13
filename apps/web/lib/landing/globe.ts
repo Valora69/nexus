@@ -9,9 +9,6 @@ import type { DemoCity } from './simulated';
 /** A simulated ping. `focus` turns the globe to face the city. */
 export type GlobePing = { id: number; city: DemoCity; focus: boolean };
 
-/** A press of a spin button: each new id kicks the globe one way. */
-export type GlobeNudge = { id: number; direction: -1 | 1 };
-
 /** Radius of cobe's sphere in its clip space. */
 const GLOBE_RADIUS = 0.8;
 /** cobe's default marker lift above the surface. */
