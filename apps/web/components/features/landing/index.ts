@@ -23,6 +23,7 @@ export { LandingShell, type LandingPanel } from './landing-shell';
 export { NotificationToast } from './notification-toast';
 export { Panel, type PanelWidth } from './panel';
 export { PesoFlow } from './peso-flow';
+export { SettleSlingshot } from './settle-slingshot';
 export { SoundPill } from './sound-pill';
 export {
   SOUND_STORAGE_KEY,
