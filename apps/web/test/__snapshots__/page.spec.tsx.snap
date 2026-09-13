@@ -103,7 +103,7 @@ exports[`Root page should match the snapshot 1`] = `
                   Sign In
                 </a>
                 <a
-                  class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold tracking-tight transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-accent text-background shadow-glow hover:shadow-lift h-9 px-4 text-sm"
+                  class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold tracking-tight transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-accent text-background shadow-glow hover:shadow-lift h-9 px-4 text-sm !shadow-none"
                   href="/login"
                 >
                   Get Started
@@ -168,7 +168,7 @@ exports[`Root page should match the snapshot 1`] = `
                             class="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3"
                           >
                             <a
-                              class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold tracking-tight transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-accent text-background shadow-glow hover:shadow-lift h-12 px-6 text-base"
+                              class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold tracking-tight transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-accent text-background shadow-glow hover:shadow-lift h-12 px-6 text-base !shadow-none"
                               href="/login"
                             >
                               Get Started
@@ -183,58 +183,6 @@ exports[`Root page should match the snapshot 1`] = `
                         <div
                           class="relative lg:order-1"
                         >
-                          <div
-                            aria-hidden="true"
-                            class="pointer-events-none absolute overflow-hidden -inset-10 sm:-inset-16"
-                          >
-                            <div
-                              class="absolute inset-0"
-                              style="background-size: 32px 32px; mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);"
-                            />
-                            <svg
-                              class="absolute inset-0 h-full w-full"
-                              fill="none"
-                              preserveAspectRatio="none"
-                              viewBox="0 0 600 400"
-                            >
-                              <path
-                                d="M0 120 H180 L210 150 H330"
-                                stroke="#00ff41"
-                                stroke-linecap="round"
-                                stroke-opacity="0.55"
-                                stroke-width="1.5"
-                                style="filter: drop-shadow(0 0 4px rgb(0 255 65 / 0.6));"
-                                vector-effect="non-scaling-stroke"
-                              />
-                              <path
-                                d="M600 90 H470 L440 120 H380"
-                                stroke="#00ff41"
-                                stroke-linecap="round"
-                                stroke-opacity="0.55"
-                                stroke-width="1.5"
-                                style="filter: drop-shadow(0 0 4px rgb(0 255 65 / 0.6));"
-                                vector-effect="non-scaling-stroke"
-                              />
-                              <path
-                                d="M60 400 V320 L90 290 H200"
-                                stroke="#00ff41"
-                                stroke-linecap="round"
-                                stroke-opacity="0.55"
-                                stroke-width="1.5"
-                                style="filter: drop-shadow(0 0 4px rgb(0 255 65 / 0.6));"
-                                vector-effect="non-scaling-stroke"
-                              />
-                              <path
-                                d="M600 330 H500 L470 300 V240"
-                                stroke="#00ff41"
-                                stroke-linecap="round"
-                                stroke-opacity="0.55"
-                                stroke-width="1.5"
-                                style="filter: drop-shadow(0 0 4px rgb(0 255 65 / 0.6));"
-                                vector-effect="non-scaling-stroke"
-                              />
-                            </svg>
-                          </div>
                           <div
                             class="relative mx-auto mb-28 h-[219px] w-[338px] sm:mb-16 sm:h-[350px] sm:w-[540px] lg:mx-0 lg:-ml-[56px] lg:h-[364px] lg:w-[562px] xl:-ml-[min(calc((100vw-72rem)/2+1.5rem+40px),260px)] xl:h-[420px] xl:w-[648px]"
                           >
@@ -751,25 +699,219 @@ exports[`Root page should match the snapshot 1`] = `
                                 </svg>
                               </div>
                               <button
+                                aria-keyshortcuts="Q"
                                 aria-label="Add a demo expense"
-                                class="group relative h-[92px] w-[88px] shrink-0 touch-manipulation rounded-[24px] outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-4 focus-visible:ring-offset-black"
+                                class="relative h-[93px] w-[96px] shrink-0 origin-bottom touch-manipulation select-none rounded-[22px] outline-none transition-transform duration-100 active:scale-95 data-[pressed=true]:scale-95 focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-4 focus-visible:ring-offset-black"
                                 data-pressed="false"
                                 type="button"
                               >
-                                <span
+                                <svg
                                   aria-hidden="true"
-                                  class="absolute inset-x-0 bottom-0 h-[80px] rounded-[24px] bg-[#0a5a1e] shadow-[0_18px_30px_-12px_rgb(0_255_65/0.45)] transition-shadow duration-100 group-active:shadow-[0_8px_16px_-10px_rgb(0_255_65/0.5)] group-data-[pressed=true]:shadow-[0_8px_16px_-10px_rgb(0_255_65/0.5)]"
-                                />
-                                <span
-                                  aria-hidden="true"
-                                  class="absolute inset-x-0 top-0 flex h-[80px] items-center justify-center rounded-[24px] border border-white/30 bg-[linear-gradient(160deg,#7dff9a_0%,#00ff41_45%,#00c932_100%)] shadow-[inset_0_2px_0_rgb(255_255_255/0.55),inset_0_-6px_12px_rgb(0_80_20/0.35)] transition-transform duration-100 ease-out group-active:translate-y-[10px] group-data-[pressed=true]:translate-y-[10px]"
+                                  class="h-full w-full overflow-visible drop-shadow-[0_10px_12px_rgb(0_0_0/0.8)]"
+                                  viewBox="0 0 120 116"
                                 >
-                                  <span
-                                    class="font-[family-name:var(--font-display)] text-[44px] font-extrabold leading-none text-black/85"
+                                  <defs>
+                                    <lineargradient
+                                      id="r9-body"
+                                      x1="0"
+                                      x2="0"
+                                      y1="0"
+                                      y2="1"
+                                    >
+                                      <stop
+                                        offset="0"
+                                        stop-color="#00d136"
+                                      />
+                                      <stop
+                                        offset="0.55"
+                                        stop-color="#00a82b"
+                                      />
+                                      <stop
+                                        offset="1"
+                                        stop-color="#005f18"
+                                      />
+                                    </lineargradient>
+                                    <lineargradient
+                                      id="r9-sides"
+                                      x1="0"
+                                      x2="1"
+                                      y1="0"
+                                      y2="0"
+                                    >
+                                      <stop
+                                        offset="0"
+                                        stop-color="#00280a"
+                                        stop-opacity="0.35"
+                                      />
+                                      <stop
+                                        offset="0.16"
+                                        stop-color="#00280a"
+                                        stop-opacity="0"
+                                      />
+                                      <stop
+                                        offset="0.84"
+                                        stop-color="#00280a"
+                                        stop-opacity="0"
+                                      />
+                                      <stop
+                                        offset="1"
+                                        stop-color="#00280a"
+                                        stop-opacity="0.35"
+                                      />
+                                    </lineargradient>
+                                    <lineargradient
+                                      id="r9-skirt"
+                                      x1="0"
+                                      x2="0"
+                                      y1="0"
+                                      y2="1"
+                                    >
+                                      <stop
+                                        offset="0"
+                                        stop-color="#00b52e"
+                                      />
+                                      <stop
+                                        offset="1"
+                                        stop-color="#004d13"
+                                      />
+                                    </lineargradient>
+                                    <radialgradient
+                                      cx="0.32"
+                                      cy="0.18"
+                                      id="r9-face"
+                                      r="0.95"
+                                    >
+                                      <stop
+                                        offset="0"
+                                        stop-color="#4ef57a"
+                                      />
+                                      <stop
+                                        offset="0.35"
+                                        stop-color="#1ee552"
+                                      />
+                                      <stop
+                                        offset="0.7"
+                                        stop-color="#00d136"
+                                      />
+                                      <stop
+                                        offset="1"
+                                        stop-color="#00b52e"
+                                      />
+                                    </radialgradient>
+                                    <radialgradient
+                                      cx="0.5"
+                                      cy="0.62"
+                                      id="r9-dish"
+                                      r="0.6"
+                                    >
+                                      <stop
+                                        offset="0"
+                                        stop-color="#005014"
+                                        stop-opacity="0.2"
+                                      />
+                                      <stop
+                                        offset="1"
+                                        stop-color="#005014"
+                                        stop-opacity="0"
+                                      />
+                                    </radialgradient>
+                                    <filter
+                                      height="200%"
+                                      id="r9-blur"
+                                      width="200%"
+                                      x="-50%"
+                                      y="-50%"
+                                    >
+                                      <fegaussianblur
+                                        stdDeviation="2.5"
+                                      />
+                                    </filter>
+                                  </defs>
+                                  <path
+                                    d="M24 4 H96 C106 4 111 9 112 19 L116 90 C117 106 110 112 98 112 H22 C10 112 3 106 4 90 L8 19 C9 9 14 4 24 4 Z"
+                                    fill="url(#r9-body)"
+                                  />
+                                  <path
+                                    d="M24 4 H96 C106 4 111 9 112 19 L116 90 C117 106 110 112 98 112 H22 C10 112 3 106 4 90 L8 19 C9 9 14 4 24 4 Z"
+                                    fill="url(#r9-sides)"
+                                  />
+                                  <path
+                                    d="M11 26 L7 88"
+                                    filter="url(#r9-blur)"
+                                    stroke="#ffffff"
+                                    stroke-linecap="round"
+                                    stroke-opacity="0.1"
+                                    stroke-width="2"
+                                  />
+                                  <path
+                                    d="M109 26 L113 88"
+                                    filter="url(#r9-blur)"
+                                    stroke="#ffffff"
+                                    stroke-linecap="round"
+                                    stroke-opacity="0.06"
+                                    stroke-width="2"
+                                  />
+                                  <path
+                                    d="M21 72 H99 L113 94 C114 107 108 112 98 112 H22 C12 112 6 107 7 94 Z"
+                                    fill="url(#r9-skirt)"
+                                    opacity="0.9"
+                                  />
+                                  <ellipse
+                                    cx="60"
+                                    cy="102"
+                                    fill="#ffffff"
+                                    filter="url(#r9-blur)"
+                                    opacity="0.06"
+                                    rx="30"
+                                    ry="3.5"
+                                  />
+                                  <rect
+                                    fill="url(#r9-face)"
+                                    height="68"
+                                    rx="17"
+                                    width="84"
+                                    x="18"
+                                    y="7"
+                                  />
+                                  <rect
+                                    fill="url(#r9-dish)"
+                                    height="68"
+                                    rx="17"
+                                    width="84"
+                                    x="18"
+                                    y="7"
+                                  />
+                                  <rect
+                                    fill="none"
+                                    height="67"
+                                    rx="16.5"
+                                    stroke="#ffffff"
+                                    stroke-opacity="0.15"
+                                    width="83"
+                                    x="18.5"
+                                    y="7.5"
+                                  />
+                                  <ellipse
+                                    cx="42"
+                                    cy="18"
+                                    fill="#ffffff"
+                                    filter="url(#r9-blur)"
+                                    opacity="0.1"
+                                    rx="18"
+                                    ry="5"
+                                  />
+                                  <text
+                                    fill="#04200c"
+                                    font-size="34"
+                                    font-weight="800"
+                                    style="font-family: var(--font-display);"
+                                    text-anchor="middle"
+                                    x="60"
+                                    y="53"
                                   >
-                                    ₱
-                                  </span>
-                                </span>
+                                    Q
+                                  </text>
+                                </svg>
                               </button>
                             </div>
                             <p
@@ -856,7 +998,7 @@ exports[`Root page should match the snapshot 1`] = `
                         class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 group-data-[mode=track]/shell:grid-cols-[repeat(4,16.5rem)] group-data-[mode=track]/shell:auto-rows-[clamp(13rem,calc((100dvh-12rem)/2),18rem)]"
                       >
                         <article
-                          aria-labelledby=":r9:"
+                          aria-labelledby=":ra:"
                           class="group/card flex min-h-[15rem] flex-col rounded-3xl border border-border bg-[#0a0a0a] p-5 outline-none transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-black data-[active=true]:border-accent/40 group-data-[mode=track]/shell:min-h-0"
                           data-active="false"
                           tabindex="0"
@@ -926,7 +1068,7 @@ exports[`Root page should match the snapshot 1`] = `
                           </div>
                           <h3
                             class="mt-3 font-[family-name:var(--font-display)] text-base font-bold tracking-[-0.02em]"
-                            id=":r9:"
+                            id=":ra:"
                           >
                             Groups
                           </h3>
@@ -937,7 +1079,7 @@ exports[`Root page should match the snapshot 1`] = `
                           </p>
                         </article>
                         <article
-                          aria-labelledby=":ra:"
+                          aria-labelledby=":rb:"
                           class="group/card flex min-h-[15rem] flex-col rounded-3xl border border-border bg-[#0a0a0a] p-5 outline-none transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-black data-[active=true]:border-accent/40 group-data-[mode=track]/shell:min-h-0"
                           data-active="false"
                           tabindex="0"
@@ -1005,7 +1147,7 @@ exports[`Root page should match the snapshot 1`] = `
                           </div>
                           <h3
                             class="mt-3 font-[family-name:var(--font-display)] text-base font-bold tracking-[-0.02em]"
-                            id=":ra:"
+                            id=":rb:"
                           >
                             Quick Capture
                           </h3>
@@ -1016,7 +1158,7 @@ exports[`Root page should match the snapshot 1`] = `
                           </p>
                         </article>
                         <article
-                          aria-labelledby=":rb:"
+                          aria-labelledby=":rc:"
                           class="group/card flex min-h-[15rem] flex-col rounded-3xl border border-border bg-[#0a0a0a] p-5 outline-none transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-black data-[active=true]:border-accent/40 group-data-[mode=track]/shell:min-h-0"
                           data-active="false"
                           tabindex="0"
@@ -1083,7 +1225,7 @@ exports[`Root page should match the snapshot 1`] = `
                           </div>
                           <h3
                             class="mt-3 font-[family-name:var(--font-display)] text-base font-bold tracking-[-0.02em]"
-                            id=":rb:"
+                            id=":rc:"
                           >
                             Divide equally or custom
                           </h3>
@@ -1094,7 +1236,7 @@ exports[`Root page should match the snapshot 1`] = `
                           </p>
                         </article>
                         <article
-                          aria-labelledby=":rc:"
+                          aria-labelledby=":rd:"
                           class="group/card flex min-h-[15rem] flex-col rounded-3xl border border-border bg-[#0a0a0a] p-5 outline-none transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-black data-[active=true]:border-accent/40 group-data-[mode=track]/shell:min-h-0"
                           data-active="false"
                           tabindex="0"
@@ -1178,7 +1320,7 @@ exports[`Root page should match the snapshot 1`] = `
                           </div>
                           <h3
                             class="mt-3 font-[family-name:var(--font-display)] text-base font-bold tracking-[-0.02em]"
-                            id=":rc:"
+                            id=":rd:"
                           >
                             GCash or cash with proof
                           </h3>
@@ -1189,7 +1331,7 @@ exports[`Root page should match the snapshot 1`] = `
                           </p>
                         </article>
                         <article
-                          aria-labelledby=":rd:"
+                          aria-labelledby=":re:"
                           class="group/card flex min-h-[15rem] flex-col rounded-3xl border border-border bg-[#0a0a0a] p-5 outline-none transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-black data-[active=true]:border-accent/40 group-data-[mode=track]/shell:min-h-0"
                           data-active="false"
                           tabindex="0"
@@ -1244,7 +1386,7 @@ exports[`Root page should match the snapshot 1`] = `
                           </div>
                           <h3
                             class="mt-3 font-[family-name:var(--font-display)] text-base font-bold tracking-[-0.02em]"
-                            id=":rd:"
+                            id=":re:"
                           >
                             Two-sided verification
                           </h3>
@@ -1255,7 +1397,7 @@ exports[`Root page should match the snapshot 1`] = `
                           </p>
                         </article>
                         <article
-                          aria-labelledby=":re:"
+                          aria-labelledby=":rf:"
                           class="group/card flex min-h-[15rem] flex-col rounded-3xl border border-border bg-[#0a0a0a] p-5 outline-none transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-black data-[active=true]:border-accent/40 group-data-[mode=track]/shell:min-h-0"
                           data-active="false"
                           tabindex="0"
@@ -1302,7 +1444,7 @@ exports[`Root page should match the snapshot 1`] = `
                           </div>
                           <h3
                             class="mt-3 font-[family-name:var(--font-display)] text-base font-bold tracking-[-0.02em]"
-                            id=":re:"
+                            id=":rf:"
                           >
                             Notifications
                           </h3>
@@ -1313,7 +1455,7 @@ exports[`Root page should match the snapshot 1`] = `
                           </p>
                         </article>
                         <article
-                          aria-labelledby=":rf:"
+                          aria-labelledby=":rg:"
                           class="group/card flex min-h-[15rem] flex-col rounded-3xl border border-border bg-[#0a0a0a] p-5 outline-none transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-black data-[active=true]:border-accent/40 group-data-[mode=track]/shell:min-h-0"
                           data-active="false"
                           tabindex="0"
@@ -1393,7 +1535,7 @@ exports[`Root page should match the snapshot 1`] = `
                           </div>
                           <h3
                             class="mt-3 font-[family-name:var(--font-display)] text-base font-bold tracking-[-0.02em]"
-                            id=":rf:"
+                            id=":rg:"
                           >
                             Monthly dashboard
                           </h3>
@@ -1404,7 +1546,7 @@ exports[`Root page should match the snapshot 1`] = `
                           </p>
                         </article>
                         <article
-                          aria-labelledby=":rg:"
+                          aria-labelledby=":rh:"
                           class="group/card flex min-h-[15rem] flex-col rounded-3xl border border-border bg-[#0a0a0a] p-5 outline-none transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-black data-[active=true]:border-accent/40 group-data-[mode=track]/shell:min-h-0"
                           data-active="false"
                           tabindex="0"
@@ -1473,7 +1615,7 @@ exports[`Root page should match the snapshot 1`] = `
                           </div>
                           <h3
                             class="mt-3 font-[family-name:var(--font-display)] text-base font-bold tracking-[-0.02em]"
-                            id=":rg:"
+                            id=":rh:"
                           >
                             Offline capture on iOS
                           </h3>
@@ -1650,7 +1792,7 @@ exports[`Root page should match the snapshot 1`] = `
                           class="mt-8 flex justify-center"
                         >
                           <a
-                            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold tracking-tight transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-accent text-background shadow-glow hover:shadow-lift h-12 px-6 text-base"
+                            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold tracking-tight transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-accent text-background shadow-glow hover:shadow-lift h-12 px-6 text-base !shadow-none"
                             href="/login"
                           >
                             Get Started
