@@ -43,23 +43,28 @@ export default function LandingPage() {
               {
                 key: 'how-it-works',
                 label: 'How it works',
-                spaced: 'before',
+                width: 'content',
+                spaced: true,
                 content: <AddExpensePlayground />,
               },
               {
                 key: 'slice',
                 label: 'Slice the bill',
-                spaced: 'after',
+                width: 'content',
+                spaced: true,
                 content: <BillSlicer />,
               },
               {
                 key: 'settle',
                 label: 'Settle up',
+                width: 'content',
+                spaced: true,
                 content: <SettleSlingshot />,
               },
               {
                 key: 'globe',
                 label: 'Globe',
+                spaced: true,
                 content: <DemoGlobe />,
               },
               {
