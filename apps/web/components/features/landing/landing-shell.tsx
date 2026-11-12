@@ -91,6 +91,20 @@ export function LandingShell({ header, panels, children }: LandingShellProps) {
   );
   const x = useTransform(() => -travelled.get());
 
+  // A refresh starts at the top. The browser restores the scroll before the
+  // track is measured, while the page is still one screen plus the footer
+  // tall, so it could only scroll the footer's height and left the page
+  // there. Set for this page only; leaving it hands back the browser default.
+  useEffect(() => {
+    if (!track) return;
+    const { history } = window;
+    const previous = history.scrollRestoration;
+    history.scrollRestoration = 'manual';
+    return () => {
+      history.scrollRestoration = previous;
+    };
+  }, [track]);
+
   // Measure how far the track travels; re-measure whenever it or the stage
   // changes size (fonts, images, window resizes).
   useEffect(() => {

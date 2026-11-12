@@ -94,6 +94,22 @@ describe('LandingShell', () => {
     expect(container.querySelector('main')?.getAttribute('style')).toBeNull();
   });
 
+  it('starts a refresh of the track at the top, and hands scroll restoration back on leaving', async () => {
+    window.history.scrollRestoration = 'auto';
+    stubMatchMedia(false);
+    const vertical = await renderShell();
+    // Stacked panels keep the browser's own restoration.
+    expect(window.history.scrollRestoration).toBe('auto');
+    vertical.unmount();
+
+    stubMatchMedia(true);
+    const track = await renderShell();
+    expect(window.history.scrollRestoration).toBe('manual');
+
+    track.unmount();
+    expect(window.history.scrollRestoration).toBe('auto');
+  });
+
   it('runs the sideways track without a bottom rail when the query matches', async () => {
     stubMatchMedia(true);
     const scrollTo = jest.fn();
