@@ -1,7 +1,6 @@
 import { cn } from '@web/lib/utils';
 
 export type PanelWidth = 'screen' | 'content';
-export type PanelSpacing = 'before' | 'after';
 
 type PanelProps = {
   label: string;
@@ -9,10 +8,10 @@ type PanelProps = {
   width?: PanelWidth;
   /** Vertical-mode padding. Off for sections that bring their own. */
   padded?: boolean;
-  /** Track mode: at least a viewport wide plus empty track before or after,
-   *  so the section fills the screen alone for a stretch of scrolling.
-   *  One side only, so two spaced neighbours keep a normal gap between them. */
-  spaced?: PanelSpacing;
+  /** Track mode: empty track before the panel, so the gap from the previous
+   *  section to this one matches the gap after the hero. The previous panel
+   *  must end where its content does (the hero, or a `content` panel). */
+  spaced?: boolean;
   className?: string;
   children: React.ReactNode;
 };
@@ -27,13 +26,13 @@ const TRACK_WIDTH: Record<PanelWidth, string> = {
   content: 'group-data-[mode=track]/shell:w-max',
 };
 
-const TRACK_SPACED_BASE =
-  'group-data-[mode=track]/shell:w-max group-data-[mode=track]/shell:min-w-[125vw] group-data-[mode=track]/shell:justify-center';
-
-const TRACK_SPACED: Record<PanelSpacing, string> = {
-  before: `${TRACK_SPACED_BASE} group-data-[mode=track]/shell:pl-[25vw]`,
-  after: `${TRACK_SPACED_BASE} group-data-[mode=track]/shell:pr-[25vw]`,
-};
+// The gap after the hero is the empty space right of its headline plus the
+// next section's left padding, max(4rem,6vw). The headline column starts at
+// 50vw+12px and "Stay friends." is 5.775 times the headline's font size wide,
+// so that space is 50vw-12px-5.775*font. Two sections side by side already
+// have a padding each, so this margin is that space minus one padding.
+const TRACK_SPACED =
+  'group-data-[mode=track]/shell:ml-[max(0px,calc(50vw-12px-5.775*clamp(2.75rem,6vw,5rem)-max(4rem,6vw)))]';
 
 const VERTICAL_PADDING =
   'group-data-[mode=vertical]/shell:py-16 sm:group-data-[mode=vertical]/shell:py-24';
@@ -54,7 +53,8 @@ export function Panel({
       className={cn(
         'relative w-full',
         TRACK,
-        spaced ? TRACK_SPACED[spaced] : TRACK_WIDTH[width],
+        TRACK_WIDTH[width],
+        spaced && TRACK_SPACED,
         padded && VERTICAL_PADDING,
         className,
       )}

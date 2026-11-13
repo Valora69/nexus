@@ -293,6 +293,101 @@ Changes on 2026-09-14:
 - The bill slicer lets a share drop to ₱0 (`dividerBounds` stops at the
   neighbours, not a step away).
 
+Added in Stage 7:
+
+| Module | Export |
+|---|---|
+| `laptop-screen.tsx` | `LaptopScreen`, `LaptopScreenProps`, `LedgerRow`, `SplitMode` (the laptop's screen, shared by both laptops) |
+| `laptop-3d.tsx` | default `Laptop3D`, `Laptop3DProps` (not in the barrel; loaded with `next/dynamic`) |
+| `laptop-model.tsx` | `LaptopModel`, `APPLY_POSE_PRIORITY` (not in the barrel) |
+| `use-media-query.ts` | `useMediaQuery` |
+| `use-inert.ts` | `useInert` |
+
+`hero-stage.tsx` also exports `useLaptop3d`. The swap and the pure helpers
+are tested in `apps/web/test/landing-laptop-3d.spec.tsx`.
+
+Stage 7 notes:
+
+- The 3D laptop is desktop only: the sideways track's media query (`lg`+,
+  fine pointer, motion allowed), then `canUseWebGL`, a one-off probe that
+  refuses software renderers. Phones, tablets, reduced-motion visitors and
+  jsdom never download three.js.
+- The CSS laptop always renders first. The 3D one mounts transparent and
+  inert, front-on (`FRONT_POSE`), with its screen exactly over the CSS
+  laptop's. Two drawn frames later it reports ready; the two cross-fade
+  (`LAPTOP_FADE_MS`), the CSS laptop unmounts and the 3D one moves from
+  there into `REST_POSE` (`LAPTOP_SETTLE_MS`). An error boundary and
+  `webglcontextlost` both hand back to the CSS laptop.
+- The CSS laptop is the model drawn straight on (`FRONT_VIEW`, 723.4×519.7
+  px): the lid with its rim, black glass and hinge strip, the 698×454 screen
+  (`SCREEN_PX`, the model's glass) and the base's front face with its thumb
+  scoop, at the model's sizes and rendered colours. The 3D laptop's first
+  frame is the same drawing: its camera starts with an almost flat lens
+  (`FRONT_FOV`, 0.5°, far away), because at 20° the base, nearer the camera
+  than the lid, looked ~20% wider. While it settles the lens widens to
+  `CAMERA_FOV` and the camera moves in to match (`cameraDistance`), so the
+  screen keeps its size. The canvas's right-edge fade grows in only as it
+  settles, so the first frame's right edge is as sharp as the CSS laptop's.
+  Measured at the swap, the two differ by 1–3 levels of colour.
+- The scene is drawn `WORLD_SCALE` (100) times larger than the units in
+  `laptop-3d.ts`. drei's `Html transform` magnifies sub-pixel rounding by
+  the px drawn per scene unit; at ~90 px per unit Chrome drew the screen
+  ~12px right of its glass, so the cross-fade showed two offset screens. At
+  ~1 px per unit the error stays under a pixel. The ledger and the member and split choices live
+  in `HeroStage`, so a swap either way keeps what the visitor picked.
+- The screen is real HTML. drei `Html transform` lays `LaptopScreen` on the
+  lid, portalled into an overlay above the canvas, so its buttons work,
+  screen readers read it, and pressing them never starts a drag. `Html`
+  renders in its own React root, so the screen re-applies
+  `MotionConfig reducedMotion="user"` and gets its own `LayoutGroup`.
+- Frame order: the pose is driven at `useFrame` priority -2, applied at -1,
+  and `Html` reads it at 0, so the screen never lags the lid. Rendering stops
+  (`frameloop="never"`) while the hero is off-screen, and each frame's step
+  is capped (`MAX_FRAME_STEP`), so motion resumes where it stopped.
+- One world unit is 100 CSS px of the CSS laptop. The canvas reaches past
+  the reserved box above, left and below (`CANVAS_BLEED`), never right,
+  where the headline is; both side edges fade over 24px.
+- The model is `public/models/hero-laptop.glb` (about 1.4 MB), from the
+  Sketchfab model "MacBook Pro 14-inch M5" (Free Standard licence),
+  processed with gltf-transform: parts renamed `Base`, `Lid` and `Screen`;
+  the logo and the engraved name removed; the screen wallpaper removed;
+  textures resized to 512px WebP; meshopt compression, decoded locally, so
+  nothing is fetched from a CDN. The licence asks the site's terms to forbid
+  extracting the model for reuse; that line isn't in the terms yet.
+- The cursor tilts the laptop (read from `window`); dragging its body turns
+  it, and both spring back. Drags start on invisible hit boxes (12
+  triangles) rather than the model's ~160k. Turning right is capped at 3°
+  (`TILT_LIMITS`, `DRAG_LIMITS`), since further swings the base's corner
+  toward the headline; drei `PresentationControls` can't set uneven limits,
+  so this is hand-written.
+- Pressing the Q keycap lights the model's own Q key (`MODEL_Q_KEY`,
+  `keyGlow`). The model's keys are one merged mesh, so the key glows instead
+  of sinking. A drag reaching a limit plays `notch` (`reachesDragLimit`).
+- On windows wider than 1544px the hero box no longer bleeds off the left
+  edge, and its left margin shrinks from 260px to 180px as the window
+  widens, so the laptop sits closer to the headline.
+
+Changes on 2026-11-11:
+
+- Even gaps on the track: from the hero through the globe, the gap between
+  sections matches the gap after the hero's headline at every width. The
+  playground, slicer and slingshot panels are `width: 'content'`, and
+  `spaced` (now a boolean) adds a left margin: the space right of the
+  headline minus one panel padding. The globe keeps its full-screen panel,
+  so its gap to the finale is unchanged. The formula in `panel.tsx` assumes
+  "Stay friends." is 5.775 times the headline's font size wide; update it if
+  the headline changes.
+- A refresh of the sideways track starts at the top. The browser restored
+  the scroll before the shell had measured the track, while the page was
+  one screen plus the footer tall, so the page was left 77px down (the
+  footer's height). In track mode the shell sets
+  `history.scrollRestoration = 'manual'` and puts it back when it unmounts.
+
+Changes on 2026-11-12:
+
+- The hero's line under the headline uses a full stop instead of an em dash:
+  "Shared expenses for friends. Add, split, and settle with proof."
+
 Pure demo logic lives in `apps/web/lib/landing/`:
 
 - `demo.ts`: `DEMO_CURRENT_USER`, `DEMO_MEMBERS`, `DEMO_EXPENSE`,
@@ -310,6 +405,15 @@ Pure demo logic lives in `apps/web/lib/landing/`:
 - `globe.ts`: `GlobePing`, `GLOBE_THETA`, `GLOBE_MAX_DPR`,
   `globeDevicePixelRatio`, `phiFacing`, `shortestTurn`, `projectLocation`
   (tested in `apps/web/test/landing-globe.spec.tsx`)
+- `laptop-3d.ts`: the model's measurements (`MODEL`, `LAPTOP_SIZE`, `SCREEN`,
+  `SCREEN_PX`, `SCREEN_DISTANCE_FACTOR`, `MODEL_Q_KEY`, `FRONT_VIEW`), camera
+  framing (`CAMERA_FOV`, `FRONT_FOV`, `cameraDistance`, `CAMERA_TARGET`,
+  `CANVAS_BLEED`, `WORLD_SCALE`), poses and timing (`FRONT_POSE`,
+  `REST_POSE`, `LAPTOP_FADE_MS`, `LAPTOP_SETTLE_MS`, `KEY_GLOW_MS`), and
+  `easeReveal`, `lerpPose`, `pointerOffset`, `cursorTilt`, `dragTilt`,
+  `reachesDragLimit`, `keyGlow`
+  (tested in `apps/web/test/landing-laptop-3d.spec.tsx`)
+- `webgl.ts`: `canUseWebGL`, `isSoftwareRenderer` (same spec)
 
 Later stages add kebab-case modules in the same folder, for example
 `laptop-mock.tsx`, `coin-key.tsx`, `landing-shell.tsx`, `panel.tsx`,

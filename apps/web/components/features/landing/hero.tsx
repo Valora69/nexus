@@ -30,7 +30,7 @@ export function Hero() {
             <span className="block">Stay friends.</span>
           </h1>
           <p className="mt-6 max-w-md text-base text-muted sm:text-lg">
-            Shared expenses for friends — add, split, and settle with proof.
+            Shared expenses for friends. Add, split, and settle with proof.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3">
             <Link
